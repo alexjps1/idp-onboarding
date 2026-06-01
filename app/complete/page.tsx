@@ -42,7 +42,7 @@ export default function CompletePage() {
 
           <div className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container-high px-6 py-2 shadow-sm">
             <span className="mr-3 label-caps text-secondary">
-              Participant ID:
+              Probanden-ID:
             </span>
             <span className="data-mono text-on-surface">
               {participantId ?? "PB-8821"}
@@ -66,7 +66,7 @@ export default function CompletePage() {
           <div className="mt-4 flex items-center gap-2 text-on-surface-variant/60">
             <Info className="size-4" />
             <span className="label-caps text-[12px]">
-              Modus A: Scientific Validation Core
+              Modus A: Wissenschaftlicher Validierungskern
             </span>
           </div>
         </div>

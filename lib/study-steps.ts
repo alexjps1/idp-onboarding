@@ -12,7 +12,16 @@ export type StudyStep = {
 export const STUDY_STEPS: StudyStep[] = [
   { slug: "consent", path: "/consent", title: "Einwilligung & Datenschutz" },
   { slug: "mode", path: "/mode", title: "Studienmodus-Auswahl" },
-  { slug: "self-assessment", path: "/self-assessment", title: "Selbsteinschätzung" },
+  {
+    slug: "self-assessment-theory",
+    path: "/self-assessment/theory",
+    title: "Theoretisches Wissen",
+  },
+  {
+    slug: "self-assessment-practice",
+    path: "/self-assessment/practice",
+    title: "Praktische Erfahrung",
+  },
   { slug: "knowledge", path: "/knowledge", title: "Wissensfragen" },
   { slug: "guide", path: "/guide", title: "Onboarding-Guide" },
   { slug: "drive", path: "/drive", title: "Fahrtansicht" },

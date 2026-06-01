@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Brain } from "lucide-react"
+import { RadioGroup as RadioGroupPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { getStepProgress, getAdjacentSteps } from "@/lib/study-steps"
@@ -19,7 +20,6 @@ const OPTIONS = [
 ]
 
 const TOTAL_MODULES = 6
-const CURRENT_MODULE = 4
 
 export default function KnowledgePage() {
   const [selected, setSelected] = React.useState<string | null>(null)
@@ -27,37 +27,19 @@ export default function KnowledgePage() {
 
   return (
     <StudyShell
-      topBarLabel="Adaptive Quiz"
+      topBarLabel="Adaptives Quiz"
       progress={getStepProgress("knowledge")}
-      mainClassName="flex flex-col items-center"
+      mainClassName="items-center"
       footer={
         <StudyFooter
           prevHref={previous?.path}
           nextHref={next?.path}
           nextDisabled={selected === null}
-          nextAdornment={
-            <div className="hidden flex-col items-center gap-1 md:flex">
-              <div className="flex gap-1">
-                {Array.from({ length: TOTAL_MODULES }, (_, i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      "size-2 rounded-full",
-                      i < CURRENT_MODULE ? "bg-primary" : "bg-outline-variant"
-                    )}
-                  />
-                ))}
-              </div>
-              <span className="data-mono text-[10px] text-on-surface-variant">
-                Module {CURRENT_MODULE}/{TOTAL_MODULES}
-              </span>
-            </div>
-          }
         />
       }
     >
       {/* Adaptive badge */}
-      <div className="mb-8 flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-highest px-4 py-1.5">
+      <div className="mb-5 flex items-center gap-2 self-center rounded-full border border-outline-variant bg-surface-container-highest px-4 py-1.5">
         <Brain className="size-[18px] text-primary" />
         <span className="label-caps text-[12px] text-primary">
           Auf dich zugeschnitten
@@ -65,26 +47,30 @@ export default function KnowledgePage() {
       </div>
 
       {/* Question */}
-      <div className="mb-12 w-full max-w-3xl text-center">
-        <span className="mb-4 block data-mono text-sm text-on-surface-variant">
+      <div className="mb-6 w-full max-w-3xl self-center text-center">
+        <span className="mb-3 block data-mono text-sm text-on-surface-variant">
           Frage 1 von {TOTAL_MODULES}
         </span>
-        <h1 className="text-[32px] leading-tight font-bold tracking-tight text-on-surface">
+        <h1 className="text-2xl font-bold tracking-tight text-on-surface">
           {QUESTION}
         </h1>
       </div>
 
       {/* Answers */}
-      <div className="grid w-full max-w-4xl grid-cols-1 gap-6 px-gutter md:grid-cols-2">
+      <RadioGroupPrimitive.Root
+        value={selected ?? undefined}
+        onValueChange={setSelected}
+        aria-label="Antwortmöglichkeiten"
+        className="grid w-full max-w-4xl grid-cols-1 gap-4 self-center md:grid-cols-2"
+      >
         {OPTIONS.map((option) => {
           const isSelected = selected === option.id
           return (
-            <button
+            <RadioGroupPrimitive.Item
               key={option.id}
-              type="button"
-              onClick={() => setSelected(option.id)}
+              value={option.id}
               className={cn(
-                "group flex items-start gap-5 rounded-xl border p-6 text-left transition-all duration-300 active:scale-[0.98]",
+                "group flex items-start gap-5 rounded-xl border p-5 text-left transition-all duration-300 outline-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/50",
                 isSelected
                   ? "border-primary bg-surface-container-lowest shadow-[0_0_20px_rgba(0,107,95,0.1)]"
                   : "border-outline bg-surface-container hover:border-primary/50"
@@ -109,14 +95,14 @@ export default function KnowledgePage() {
                 <span className="mb-1 label-caps text-[12px] text-primary">
                   Option {option.id}
                 </span>
-                <span className="text-lg leading-snug text-on-surface">
+                <span className="text-base leading-snug text-on-surface">
                   {option.text}
                 </span>
               </span>
-            </button>
+            </RadioGroupPrimitive.Item>
           )
         })}
-      </div>
+      </RadioGroupPrimitive.Root>
     </StudyShell>
   )
 }

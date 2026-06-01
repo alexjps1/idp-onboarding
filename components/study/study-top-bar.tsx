@@ -28,7 +28,7 @@ export function StudyTopBar({
     >
       <div className="flex items-center gap-4">
         <span className="label-caps text-primary">
-          Participant ID: {participantId}
+          Probanden-ID: {participantId}
         </span>
         {label ? (
           <>

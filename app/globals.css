@@ -13,8 +13,8 @@
  */
 
 @theme inline {
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-jetbrains-mono);
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* Surfaces & content */
   --color-background: var(--background);
@@ -147,23 +147,24 @@
     -webkit-font-smoothing: antialiased;
   }
   html {
-    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-sans);
   }
 }
 
 @layer components {
-  /* JetBrains Mono technical label — uppercase, tracked-out caps */
+  /* Technical label — Helvetica, uppercase, tracked-out caps */
   .label-caps {
-    font-family: var(--font-mono), ui-monospace, monospace;
-    font-size: 14px;
-    line-height: 20px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
   .data-mono {
-    font-family: var(--font-mono), ui-monospace, monospace;
-    font-weight: 400;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    letter-spacing: 0.02em;
   }
 }
 

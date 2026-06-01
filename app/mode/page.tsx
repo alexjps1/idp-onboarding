@@ -21,18 +21,18 @@ const MODES: ModeOption[] = [
   {
     id: "onboarding-only",
     icon: GraduationCap,
-    title: "Nur Onboarding (vor der Fahrt)",
+    title: "Onboarding & Fahrt (ohne Tutor)",
     description:
-      "Einführung in die Assistenzsysteme ohne anschließende Simulatorfahrt. Ideal für Erst-Einweisungen oder theoretische Validierungsschritte.",
-    duration: "Dauer: 15 Min.",
+      "Sie durchlaufen das Onboarding und fahren anschließend im Simulator.",
+    duration: "Dauer: 45 Min.",
     accent: "secondary",
   },
   {
     id: "onboarding-drive",
     icon: Cpu,
-    title: "Onboarding + Fahrt",
+    title: "Onboarding & Fahrt (mit Tutor)",
     description:
-      "Vollständiges Programm inklusive begleiteter Fahrt im Simulator. Umfassende Erfassung von Nutzerdaten während der Interaktion mit dem SAE L2 System.",
+      "Vollständiges Programm inklusive begleiteter Fahrt im Simulator.",
     duration: "Dauer: 45 Min.",
     accent: "primary",
   },
@@ -62,19 +62,19 @@ export default function ModePage() {
         />
       }
     >
-      <div className="mx-auto max-w-5xl space-y-12">
+      <div className="mx-auto w-full max-w-5xl space-y-6">
         <div className="space-y-2">
-          <h1 className="text-[32px] leading-10 font-bold tracking-tight">
-            Willkommen zur SAE Level 2 Studie
+          <h1 className="text-2xl font-bold tracking-tight">
+            Willkommen zur Studie zu KI-Tutor für Fahrzeugassistenzsysteme
           </h1>
-          <p className="max-w-2xl text-lg text-on-surface-variant">
+          <p className="max-w-2xl text-on-surface-variant">
             Bitte wählen Sie den gewünschten Studienmodus aus, um mit dem
             Protokoll fortzufahren. Ihre Auswahl beeinflusst die nachfolgenden
             Testphasen.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {MODES.map((option) => {
             const Icon = option.icon
             const selected = mode === option.id
@@ -84,7 +84,7 @@ export default function ModePage() {
                 type="button"
                 onClick={() => setMode(option.id)}
                 className={cn(
-                  "group flex cursor-pointer flex-col gap-6 rounded-xl p-8 text-left transition-all duration-300 active:scale-[0.98]",
+                  "group flex cursor-pointer flex-col gap-4 rounded-xl p-6 text-left transition-all duration-300 active:scale-[0.98]",
                   selected
                     ? "border-2 border-primary bg-surface-container-lowest shadow-[0_10px_25px_-5px_rgba(0,107,95,0.1)]"
                     : "border border-outline-variant bg-surface-container-low hover:bg-surface-variant"
@@ -92,23 +92,23 @@ export default function ModePage() {
               >
                 <span
                   className={cn(
-                    "flex size-16 items-center justify-center rounded-full",
+                    "flex size-14 items-center justify-center rounded-full",
                     option.accent === "primary"
                       ? "bg-primary/10 text-primary"
                       : "bg-secondary/10 text-secondary"
                   )}
                 >
-                  <Icon className="size-8" />
+                  <Icon className="size-7" />
                 </span>
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-semibold transition-colors group-hover:text-primary">
+                <div className="space-y-2">
+                  <h2 className="text-xl font-semibold transition-colors group-hover:text-primary">
                     {option.title}
                   </h2>
-                  <p className="leading-relaxed text-on-surface-variant">
+                  <p className="text-sm leading-relaxed text-on-surface-variant">
                     {option.description}
                   </p>
                 </div>
-                <div className="mt-auto flex items-center justify-between border-t border-outline-variant pt-6">
+                <div className="mt-auto flex items-center justify-between border-t border-outline-variant pt-4">
                   <span className="label-caps text-on-surface-variant">
                     {option.duration}
                   </span>

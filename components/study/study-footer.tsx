@@ -8,7 +8,7 @@ type StudyFooterProps = {
   /** Destination for the "Previous" button. Hidden when omitted. */
   prevHref?: string
   prevLabel?: string
-  /** Destination for the "Next Phase" button (link mode). */
+  /** Destination for the "Weiter" button (link mode). */
   nextHref?: string
   nextLabel?: string
   /** Disables the next button (e.g. until the step is completed). */
@@ -28,9 +28,9 @@ type StudyFooterProps = {
  */
 export function StudyFooter({
   prevHref,
-  prevLabel = "Previous",
+  prevLabel = "Zurück",
   nextHref,
-  nextLabel = "Next Phase",
+  nextLabel = "Weiter",
   nextDisabled = false,
   nextIcon = <ArrowRight />,
   center,

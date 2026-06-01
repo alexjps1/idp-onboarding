@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import {
   Music,
   Navigation,
@@ -14,19 +13,17 @@ import {
 import { cn } from "@/lib/utils"
 import { getAdjacentSteps } from "@/lib/study-steps"
 import { StudyTopBar } from "@/components/study/study-top-bar"
-import { StudyButton } from "@/components/study/study-button"
+import { StudyFooter } from "@/components/study/study-footer"
 
 const SIDEBAR_APPS = [
-  { icon: Music, label: "Medien", active: false },
-  { icon: Navigation, label: "Navigation", active: false },
-  { icon: Phone, label: "Telefon", active: false },
-  { icon: Sparkles, label: "Assistent", active: true },
+  { icon: Music, label: "Medien" },
+  { icon: Navigation, label: "Navigation" },
+  { icon: Phone, label: "Telefon" },
+  { icon: Sparkles, label: "Assistent" },
 ]
 
-const SUGGESTIONS = ['"Nächste Ausfahrt?"', '"Ladezeit berechnen"']
-
 export default function DrivePage() {
-  const [voiceVisible, setVoiceVisible] = React.useState(true)
+  const [assistantOpen, setAssistantOpen] = React.useState(false)
   const { previous, next } = getAdjacentSteps("drive")
 
   return (
@@ -36,25 +33,37 @@ export default function DrivePage() {
       <div className="flex flex-grow overflow-hidden">
         {/* App launcher sidebar */}
         <aside className="z-40 flex w-24 shrink-0 flex-col items-center gap-8 border-r border-outline-variant bg-surface-container-low py-8">
-          {SIDEBAR_APPS.map(({ icon: Icon, label, active }) => (
-            <button
-              key={label}
-              type="button"
-              aria-label={label}
-              className={cn(
-                "flex size-14 items-center justify-center rounded-2xl transition-all",
-                active
-                  ? "bg-primary-container text-on-primary-container shadow-lg shadow-primary/20"
-                  : "text-on-surface-variant opacity-40 hover:bg-surface-variant/50"
-              )}
-            >
-              <Icon className="size-7" />
-            </button>
-          ))}
+          {SIDEBAR_APPS.map(({ icon: Icon, label }) => {
+            const isAssistant = label === "Assistent"
+            const active = isAssistant && assistantOpen
+            return (
+              <button
+                key={label}
+                type="button"
+                aria-label={label}
+                aria-pressed={isAssistant ? assistantOpen : undefined}
+                onClick={
+                  isAssistant
+                    ? () => setAssistantOpen((open) => !open)
+                    : undefined
+                }
+                className={cn(
+                  "flex size-14 items-center justify-center rounded-2xl transition-all",
+                  active
+                    ? "bg-primary-container text-on-primary-container shadow-lg shadow-primary/20"
+                    : isAssistant
+                      ? "text-primary hover:bg-surface-variant/50"
+                      : "text-on-surface-variant opacity-40 hover:bg-surface-variant/50"
+                )}
+              >
+                <Icon className="size-7" />
+              </button>
+            )
+          })}
           <button
             type="button"
             aria-label="Alle Apps"
-            className="mt-auto flex size-14 items-center justify-center rounded-2xl text-on-surface-variant transition-colors hover:bg-surface-variant"
+            className="mt-auto flex size-14 items-center justify-center rounded-2xl text-on-surface-variant opacity-40 transition-colors hover:bg-surface-variant/50"
           >
             <LayoutGrid className="size-7" />
           </button>
@@ -78,70 +87,60 @@ export default function DrivePage() {
                 <span className="absolute inset-0 animate-ping rounded-full bg-primary opacity-40" />
               </span>
               <span className="label-caps text-[14px] tracking-wider text-primary">
-                Teilautomatisiert aktiv
+                Tutor aktiv
               </span>
             </div>
           </div>
 
-          {/* Voice agent overlay */}
-          {voiceVisible ? (
-            <div className="absolute bottom-10 left-1/2 w-full max-w-xl -translate-x-1/2 px-4">
-              <div className="flex items-center rounded-full border border-primary/10 bg-surface/50 p-2 shadow-2xl backdrop-blur-md">
-                <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-container">
-                  <div className="flex h-6 items-end gap-0.5">
-                    {[0.1, 0.3, 0.2, 0.5].map((delay, i) => (
+          {/* Voice assistant popup — circular voice visualisation */}
+          {assistantOpen ? (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-10 bg-background/70 backdrop-blur-md">
+              <button
+                type="button"
+                onClick={() => setAssistantOpen(false)}
+                aria-label="Sprachassistent schließen"
+                className="absolute top-8 right-8 flex size-12 items-center justify-center rounded-full bg-surface-container text-on-surface-variant transition-colors hover:bg-surface-variant"
+              >
+                <X className="size-6" />
+              </button>
+
+              {/* Pulsing circle visualiser — tap to end */}
+              <button
+                type="button"
+                onClick={() => setAssistantOpen(false)}
+                aria-label="Sprachassistent beenden"
+                className="relative flex size-64 items-center justify-center outline-none"
+              >
+                <span className="absolute inset-0 animate-ping rounded-full bg-primary/15" />
+                <span className="absolute inset-6 animate-pulse rounded-full bg-primary/25" />
+                <div className="relative flex size-40 items-center justify-center rounded-full bg-primary-container shadow-[0_0_60px_rgba(45,212,191,0.45)] transition-transform hover:scale-105 active:scale-95">
+                  <div className="flex h-14 items-end gap-1.5">
+                    {[0.1, 0.35, 0.2, 0.5, 0.3].map((delay, i) => (
                       <span
                         key={i}
-                        className="wave-bar w-0.5 rounded-full bg-on-primary-container"
+                        className="wave-bar w-1.5 rounded-full bg-on-primary-container"
                         style={{ animationDelay: `${delay}s` }}
                       />
                     ))}
                   </div>
                 </div>
-                <div className="flex-grow px-6">
-                  <div className="mb-0.5 label-caps text-[10px] tracking-[0.2em] text-primary">
-                    Ich höre zu…
-                  </div>
-                  <div className="truncate text-on-surface italic">
-                    &quot;Wie funktioniert die Ampelerkennung?&quot;
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setVoiceVisible(false)}
-                  aria-label="Sprachassistent schließen"
-                  className="flex size-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-variant"
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
-              <div className="mt-4 flex justify-center gap-3">
-                {SUGGESTIONS.map((suggestion) => (
-                  <span
-                    key={suggestion}
-                    className="rounded-full border border-outline-variant/20 bg-surface-container/50 px-3 py-1 label-caps text-[11px] text-on-surface-variant opacity-60"
-                  >
-                    {suggestion}
-                  </span>
-                ))}
+              </button>
+
+              <div className="text-center">
+                <p className="label-caps tracking-[0.2em] text-primary">
+                  Ich höre zu…
+                </p>
+                <p className="mt-2 text-lg text-on-surface italic">
+                  &quot;Wie funktioniert die Ampelerkennung?&quot;
+                </p>
               </div>
             </div>
           ) : null}
         </main>
       </div>
 
-      {/* Action bar */}
-      <footer className="z-50 flex h-20 w-full shrink-0 items-center justify-between border-t border-outline-variant bg-surface-container px-margin-tablet">
-        <StudyButton asChild variant="muted">
-          <Link href={previous?.path ?? "/"}>Previous</Link>
-        </StudyButton>
-        <div className="h-1 w-48 overflow-hidden rounded-full bg-surface-variant">
-          <div className="h-full w-full bg-primary" />
-        </div>
-        <StudyButton asChild variant="primary">
-          <Link href={next?.path ?? "/"}>Next Phase</Link>
-        </StudyButton>
-      </footer>
+      {/* Action bar — shared study footer for consistency */}
+      <StudyFooter prevHref={previous?.path} nextHref={next?.path} />
     </div>
   )
 }

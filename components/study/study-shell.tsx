@@ -47,7 +47,7 @@ export function StudyShell({
       {progress !== undefined ? <StudyProgress value={progress} /> : null}
       <main
         className={cn(
-          "study-scrollbar flex-1 overflow-y-auto px-margin-tablet py-12",
+          "flex flex-1 flex-col justify-center overflow-hidden px-margin-tablet py-6",
           mainClassName
         )}
       >
