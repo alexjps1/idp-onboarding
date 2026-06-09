@@ -13,7 +13,7 @@ export default function CompletePage() {
 
   function restart() {
     reset()
-    router.push("/consent")
+    router.push("/mode")
   }
 
   return (

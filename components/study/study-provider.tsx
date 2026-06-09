@@ -4,19 +4,33 @@ import * as React from "react"
 
 export type StudyMode = "onboarding-only" | "onboarding-drive"
 
+/** Self-assessment ratings (1–7 scale) keyed by assistance-system name. */
+export type Ratings = Record<string, number>
+
 type StudyState = {
   participantId: string | null
   mode: StudyMode | null
+  /** Theoretical-knowledge ratings from the self-assessment Fragebogen. */
+  theory: Ratings
+  /** Practical-experience ratings from the self-assessment Fragebogen. */
+  practice: Ratings
 }
 
 type StudyContextValue = StudyState & {
   setParticipantId: (id: string | null) => void
   setMode: (mode: StudyMode | null) => void
+  setTheory: (system: string, value: number) => void
+  setPractice: (system: string, value: number) => void
   reset: () => void
 }
 
 const STORAGE_KEY = "research-monitor-study"
-const SERVER_SNAPSHOT: StudyState = { participantId: null, mode: null }
+const SERVER_SNAPSHOT: StudyState = {
+  participantId: null,
+  mode: null,
+  theory: {},
+  practice: {},
+}
 
 const StudyContext = React.createContext<StudyContextValue | null>(null)
 
@@ -37,6 +51,8 @@ function createStudyStore() {
       return {
         participantId: parsed.participantId ?? null,
         mode: parsed.mode ?? null,
+        theory: parsed.theory ?? {},
+        practice: parsed.practice ?? {},
       }
     } catch {
       return SERVER_SNAPSHOT
@@ -67,7 +83,12 @@ function createStudyStore() {
     },
     setParticipantId: (participantId: string | null) => set({ participantId }),
     setMode: (mode: StudyMode | null) => set({ mode }),
-    reset: () => set({ participantId: null, mode: null }),
+    setTheory: (system: string, value: number) =>
+      set({ theory: { ...getSnapshot().theory, [system]: value } }),
+    setPractice: (system: string, value: number) =>
+      set({ practice: { ...getSnapshot().practice, [system]: value } }),
+    reset: () =>
+      set({ participantId: null, mode: null, theory: {}, practice: {} }),
   }
 }
 
@@ -85,6 +106,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       ...state,
       setParticipantId: store.setParticipantId,
       setMode: store.setMode,
+      setTheory: store.setTheory,
+      setPractice: store.setPractice,
       reset: store.reset,
     }),
     [state]

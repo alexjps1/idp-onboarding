@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-// The study always begins at the consent step.
+// The study now begins at the study-mode selection step.
 export default function Home() {
-  redirect("/consent")
+  redirect("/mode")
 }

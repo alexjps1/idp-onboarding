@@ -4,6 +4,7 @@ import * as React from "react"
 
 import { getStepProgress, getAdjacentSteps } from "@/lib/study-steps"
 import { ASSISTANCE_SYSTEMS } from "@/lib/assistance-systems"
+import { useStudy } from "@/components/study/study-provider"
 import { StudyShell } from "@/components/study/study-shell"
 import { StudyFooter } from "@/components/study/study-footer"
 import { LikertMatrix } from "@/components/study/likert-matrix"
@@ -19,8 +20,17 @@ const SCALE = [
 ]
 
 export default function PracticeAssessmentPage() {
-  const [answers, setAnswers] = React.useState<Record<number, number>>({})
+  const { practice, setPractice } = useStudy()
   const { previous, next } = getAdjacentSteps("self-assessment-practice")
+
+  // The matrix is index-based; map rows to system names for persistence.
+  const answers = React.useMemo<Record<number, number>>(() => {
+    const out: Record<number, number> = {}
+    ASSISTANCE_SYSTEMS.forEach((system, index) => {
+      if (practice[system.name] != null) out[index] = practice[system.name]
+    })
+    return out
+  }, [practice])
 
   const answered = Object.keys(answers).length
   const total = ASSISTANCE_SYSTEMS.length
@@ -57,7 +67,7 @@ export default function PracticeAssessmentPage() {
           systems={ASSISTANCE_SYSTEMS}
           answers={answers}
           onChange={(rowIndex, value) =>
-            setAnswers((prev) => ({ ...prev, [rowIndex]: value }))
+            setPractice(ASSISTANCE_SYSTEMS[rowIndex].name, value)
           }
         />
       </div>
