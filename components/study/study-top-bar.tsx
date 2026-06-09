@@ -1,6 +1,10 @@
+"use client"
+
 import { cn } from "@/lib/utils"
+import { useStudy } from "@/components/study/study-provider"
 
 type StudyTopBarProps = {
+  /** Override the participant id. Defaults to the value from the study store. */
   participantId?: string
   /** Optional content rendered after the participant id (e.g. a quiz label). */
   label?: string
@@ -14,11 +18,14 @@ type StudyTopBarProps = {
  * participant id in tracked-out monospace caps, matching the prototype.
  */
 export function StudyTopBar({
-  participantId = "8821",
+  participantId,
   label,
   actions,
   className,
 }: StudyTopBarProps) {
+  const { participantId: storeId } = useStudy()
+  const id = participantId ?? storeId ?? "—"
+
   return (
     <header
       className={cn(
@@ -27,9 +34,7 @@ export function StudyTopBar({
       )}
     >
       <div className="flex items-center gap-4">
-        <span className="label-caps text-primary">
-          Probanden-ID: {participantId}
-        </span>
+        <span className="label-caps text-primary">Probanden-ID: {id}</span>
         {label ? (
           <>
             <span className="h-4 w-px bg-outline-variant" />

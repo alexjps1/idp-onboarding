@@ -10,7 +10,6 @@ export type StudyStep = {
 }
 
 export const STUDY_STEPS: StudyStep[] = [
-  { slug: "mode", path: "/mode", title: "Studienmodus-Auswahl" },
   {
     slug: "self-assessment-theory",
     path: "/self-assessment/theory",

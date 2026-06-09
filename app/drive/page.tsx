@@ -32,12 +32,11 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { getAdjacentSteps } from "@/lib/study-steps"
+import { useStudy } from "@/components/study/study-provider"
 import {
   useVoiceTutor,
   type VoiceTutorStatus,
 } from "@/components/study/use-voice-tutor"
-
-const PARTICIPANT_ID = "8821"
 
 const SIDEBAR_APPS = [
   { icon: Navigation, label: "Karte" },
@@ -60,6 +59,8 @@ export default function DrivePage() {
   const [playing, setPlaying] = React.useState(true)
   const [endConfirmOpen, setEndConfirmOpen] = React.useState(false)
   const { previous, next } = getAdjacentSteps("drive")
+  const { participantId, mode } = useStudy()
+  const withTutor = mode !== "onboarding-only"
   const tutor = useVoiceTutor()
 
   // Open/close the assistant overlay and the mic together.
@@ -106,7 +107,8 @@ export default function DrivePage() {
               <Navigation className="size-4 fill-white" />
             </span>
             <span className="text-[15px] whitespace-nowrap">
-              Probanden-ID: <span className="font-bold">{PARTICIPANT_ID}</span>
+              Probanden-ID:{" "}
+              <span className="font-bold">{participantId ?? "—"}</span>
             </span>
           </div>
           <span className="absolute left-1/2 -translate-x-1/2 text-[15px] tabular-nums text-[#7e7f7f]">
@@ -167,23 +169,25 @@ export default function DrivePage() {
               )
             })}
 
-            {/* Assistent — gradient, wired to the voice tutor */}
-            <button
-              type="button"
-              aria-label="Assistent"
-              aria-pressed={assistantOpen}
-              onClick={toggleAssistant}
-              className={cn(
-                "flex size-[88px] flex-col items-center justify-center gap-2 rounded-2xl text-white transition-transform",
-                "bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)]",
-                assistantOpen
-                  ? "scale-105 shadow-lg shadow-[#a953da]/30"
-                  : "hover:scale-105"
-              )}
-            >
-              <Sparkles className="size-7" />
-              <span className="text-[15px] font-semibold">Assistent</span>
-            </button>
+            {/* Assistent — gradient, wired to the voice tutor (mit-Tutor only) */}
+            {withTutor ? (
+              <button
+                type="button"
+                aria-label="Assistent"
+                aria-pressed={assistantOpen}
+                onClick={toggleAssistant}
+                className={cn(
+                  "flex size-[88px] flex-col items-center justify-center gap-2 rounded-2xl text-white transition-transform",
+                  "bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)]",
+                  assistantOpen
+                    ? "scale-105 shadow-lg shadow-[#a953da]/30"
+                    : "hover:scale-105"
+                )}
+              >
+                <Sparkles className="size-7" />
+                <span className="text-[15px] font-semibold">Assistent</span>
+              </button>
+            ) : null}
           </aside>
 
           {/* Media player */}

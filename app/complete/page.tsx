@@ -13,7 +13,7 @@ export default function CompletePage() {
 
   function restart() {
     reset()
-    router.push("/mode")
+    router.push("/")
   }
 
   return (
