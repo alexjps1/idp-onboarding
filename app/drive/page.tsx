@@ -47,10 +47,10 @@ const SIDEBAR_APPS = [
 
 const STATUS_LABEL: Record<VoiceTutorStatus, string> = {
   idle: "Mikrofon aus",
+  connecting: "Verbinde…",
   listening: "Ich höre zu…",
   speaking: "Ich höre Sie…",
-  transcribing: "Verstehe…",
-  thinking: "Denke nach…",
+  responding: "Ich antworte…",
   error: "Fehler",
 }
 
@@ -79,7 +79,9 @@ export default function DrivePage() {
   }
 
   const voiceActive =
-    tutor.status === "speaking" || tutor.status === "listening"
+    tutor.status === "speaking" ||
+    tutor.status === "listening" ||
+    tutor.status === "responding"
 
   // Live clock for the car status bar.
   const [time, setTime] = React.useState<string | null>(null)
@@ -303,7 +305,8 @@ export default function DrivePage() {
                           key={i}
                           className={cn(
                             "w-1.5 rounded-full bg-white",
-                            tutor.status === "speaking"
+                            tutor.status === "speaking" ||
+                              tutor.status === "responding"
                               ? "wave-bar"
                               : "h-3 opacity-60"
                           )}

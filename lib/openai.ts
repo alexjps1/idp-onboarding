@@ -12,6 +12,12 @@ export const OPENAI_TRANSCRIPTION_MODEL =
 export const OPENAI_CONTENT_MODEL =
   process.env.OPENAI_CONTENT_MODEL ?? "gpt-4o-mini"
 
+export const OPENAI_REALTIME_MODEL =
+  process.env.OPENAI_REALTIME_MODEL ?? "gpt-realtime"
+
+export const OPENAI_REALTIME_VOICE =
+  process.env.OPENAI_REALTIME_VOICE ?? "cedar"
+
 /**
  * Returns the configured API key, or null when only the dummy placeholder is
  * present. Routes use this to fail loudly (501) instead of sending a doomed

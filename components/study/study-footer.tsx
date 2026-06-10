@@ -7,9 +7,13 @@ import { StudyButton } from "@/components/study/study-button"
 type StudyFooterProps = {
   /** Destination for the "Previous" button. Hidden when omitted. */
   prevHref?: string
+  /** Click handler for "Previous" (button mode, takes precedence over prevHref). */
+  onPrev?: () => void
   prevLabel?: string
   /** Destination for the "Weiter" button (link mode). */
   nextHref?: string
+  /** Click handler for "Weiter" (button mode, takes precedence over nextHref). */
+  onNext?: () => void
   nextLabel?: string
   /** Disables the next button (e.g. until the step is completed). */
   nextDisabled?: boolean
@@ -28,8 +32,10 @@ type StudyFooterProps = {
  */
 export function StudyFooter({
   prevHref,
+  onPrev,
   prevLabel = "Zurück",
   nextHref,
+  onNext,
   nextLabel = "Weiter",
   nextDisabled = false,
   nextIcon = <ArrowRight />,
@@ -44,7 +50,12 @@ export function StudyFooter({
         className
       )}
     >
-      {prevHref ? (
+      {onPrev ? (
+        <StudyButton variant="outline" onClick={onPrev}>
+          <ArrowLeft />
+          {prevLabel}
+        </StudyButton>
+      ) : prevHref ? (
         <StudyButton asChild variant="outline">
           <Link href={prevHref}>
             <ArrowLeft />
@@ -59,17 +70,22 @@ export function StudyFooter({
 
       <div className="flex items-center gap-4">
         {nextAdornment}
-        {nextDisabled || !nextHref ? (
-          <StudyButton variant="primary" disabled className="opacity-50">
+        {!nextDisabled && onNext ? (
+          <StudyButton variant="primary" onClick={onNext}>
             {nextLabel}
             {nextIcon}
           </StudyButton>
-        ) : (
+        ) : !nextDisabled && nextHref ? (
           <StudyButton asChild variant="primary">
             <Link href={nextHref}>
               {nextLabel}
               {nextIcon}
             </Link>
+          </StudyButton>
+        ) : (
+          <StudyButton variant="primary" disabled className="opacity-50">
+            {nextLabel}
+            {nextIcon}
           </StudyButton>
         )}
       </div>

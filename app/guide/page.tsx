@@ -3,6 +3,7 @@
 import * as React from "react"
 import { BookOpen, Car, Loader2, Sparkles, TriangleAlert } from "lucide-react"
 
+import { cn } from "@/lib/utils"
 import { getStepProgress, getAdjacentSteps } from "@/lib/study-steps"
 import { ONBOARDING_MODULES } from "@/lib/onboarding-modules"
 import { useStudy } from "@/components/study/study-provider"
@@ -26,6 +27,7 @@ export default function GuidePage() {
     new Map()
   )
   const [status, setStatus] = React.useState<AdaptStatus>("loading")
+  const [current, setCurrent] = React.useState(0)
 
   // Snapshot the ratings once on mount so the fetch isn't refired on every
   // store change. The Fragebogen is already complete by the time we reach here.
@@ -70,16 +72,41 @@ export default function GuidePage() {
     return () => controller.abort()
   }, [])
 
+  // Resolve the visible sections first: omitted ones are cut entirely, so the
+  // roadmap always shows a contiguous 1, 2, 3, … over what actually remains.
+  const visibleSections = React.useMemo(
+    () =>
+      ONBOARDING_MODULES.flatMap((module) => {
+        // Safety-critical content is always rendered verbatim.
+        const adapted = module.alwaysKeep ? undefined : sections.get(module.id)
+        if (adapted?.omitted) return []
+        const paragraphs =
+          adapted && adapted.paragraphs.length
+            ? adapted.paragraphs
+            : module.paragraphs
+        return [{ module, paragraphs }]
+      }),
+    [sections]
+  )
+
+  // Clamp in case the adaptation removes sections while the user is browsing.
+  const index = Math.min(current, visibleSections.length - 1)
+  const active = visibleSections[index]
+  const isFirst = index === 0
+  const isLast = index === visibleSections.length - 1
+
   return (
     <StudyShell
       progress={getStepProgress("guide")}
       mainClassName="justify-start"
       footer={
         <StudyFooter
-          prevHref={previous?.path}
-          nextHref={next?.path}
-          nextLabel="Zur Fahrt wechseln"
-          nextIcon={<Car />}
+          prevHref={isFirst ? previous?.path : undefined}
+          onPrev={isFirst ? undefined : () => setCurrent(index - 1)}
+          nextHref={isLast ? next?.path : undefined}
+          onNext={isLast ? undefined : () => setCurrent(index + 1)}
+          nextLabel={isLast ? "Zur Fahrt wechseln" : "Weiter"}
+          nextIcon={isLast ? <Car /> : undefined}
         />
       }
     >
@@ -100,64 +127,88 @@ export default function GuidePage() {
           <AdaptBadge status={status} />
         </header>
 
-        {/* Scrollable handbook */}
-        <div className="study-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto pr-2">
-          {ONBOARDING_MODULES.map((module, index) => {
-            // Safety-critical content is always rendered verbatim.
-            const adapted = module.alwaysKeep
-              ? undefined
-              : sections.get(module.id)
-
-            if (adapted?.omitted) return null
-
-            const paragraphs =
-              adapted && adapted.paragraphs.length
-                ? adapted.paragraphs
-                : module.paragraphs
-
-            return (
-              <section
-                key={module.id}
-                className={
-                  module.warning
-                    ? "rounded-xl border border-error/40 bg-error/5 p-5"
-                    : "rounded-xl border border-outline-variant bg-surface-container-low p-5"
-                }
+        {/* Roadmap: one numbered stop per visible section. Already-read
+            sections are clickable to jump back; upcoming ones are locked. */}
+        <nav aria-label="Module" className="mb-6 flex items-center px-1">
+          {visibleSections.map(({ module }, i) => (
+            <React.Fragment key={module.id}>
+              {i > 0 ? (
+                <span
+                  className={cn(
+                    "h-px flex-1",
+                    i <= index ? "bg-primary" : "bg-outline-variant"
+                  )}
+                />
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setCurrent(i)}
+                disabled={i > index}
+                aria-current={i === index ? "step" : undefined}
+                aria-label={module.title}
+                title={module.title}
+                className={cn(
+                  "data-mono flex size-9 shrink-0 items-center justify-center rounded-full border text-[13px] transition-colors",
+                  i === index
+                    ? "border-primary bg-primary text-on-primary"
+                    : i < index
+                      ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
+                      : "border-outline-variant bg-surface-container-low text-on-surface-variant"
+                )}
               >
-                <div className="mb-3 flex items-center gap-3">
-                  <span
-                    className={
-                      module.warning
-                        ? "flex size-7 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
-                        : "flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 data-mono text-[12px] text-primary"
-                    }
-                  >
-                    {module.warning ? (
-                      <TriangleAlert className="size-4" />
-                    ) : (
-                      String(index + 1).padStart(2, "0")
-                    )}
-                  </span>
-                  <h2 className="text-lg font-semibold text-on-surface">
-                    {module.title}
-                  </h2>
-                </div>
-                <div className="space-y-2 text-sm leading-relaxed text-on-surface-variant">
-                  {paragraphs.map((text, i) => (
-                    <p key={i}>{text}</p>
-                  ))}
-                  {module.bullets ? (
-                    <ul className="list-disc space-y-1 pl-5">
-                      {module.bullets.map((bullet) => (
-                        <li key={bullet}>{bullet}</li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              </section>
-            )
-          })}
-        </div>
+                {i + 1}
+              </button>
+            </React.Fragment>
+          ))}
+        </nav>
+
+        {/* Only the current section is shown. */}
+        {active ? (
+          <div className="study-scrollbar min-h-0 flex-1 overflow-y-auto pr-2">
+            <section
+              key={active.module.id}
+              className={
+                active.module.warning
+                  ? "rounded-xl border border-error/40 bg-error/5 p-6"
+                  : "rounded-xl border border-outline-variant bg-surface-container-low p-6"
+              }
+            >
+              <div className="mb-4 flex items-center gap-3">
+                <span
+                  className={
+                    active.module.warning
+                      ? "flex size-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
+                      : "data-mono flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[13px] text-primary"
+                  }
+                >
+                  {active.module.warning ? (
+                    <TriangleAlert className="size-4" />
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+                <h2 className="text-xl font-semibold text-on-surface">
+                  {active.module.title}
+                </h2>
+                <span className="data-mono ml-auto text-[12px] text-on-surface-variant">
+                  {index + 1} / {visibleSections.length}
+                </span>
+              </div>
+              <div className="space-y-3 text-[15px] leading-relaxed text-on-surface-variant">
+                {active.paragraphs.map((text, i) => (
+                  <p key={i}>{text}</p>
+                ))}
+                {active.module.bullets ? (
+                  <ul className="list-disc space-y-1 pl-5">
+                    {active.module.bullets.map((bullet) => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            </section>
+          </div>
+        ) : null}
       </div>
     </StudyShell>
   )
