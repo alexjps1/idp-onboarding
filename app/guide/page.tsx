@@ -13,7 +13,7 @@ import { StudyFooter } from "@/components/study/study-footer"
 type AdaptedSection = {
   id: string
   title: string
-  paragraphs: string[]
+  paragraphs: { text: string; gifs?: string[] }[]
   omitted?: boolean
 }
 
@@ -194,14 +194,42 @@ export default function GuidePage() {
                   {index + 1} / {visibleSections.length}
                 </span>
               </div>
-              <div className="space-y-3 text-[15px] leading-relaxed text-on-surface-variant">
-                {active.paragraphs.map((text, i) => (
-                  <p key={i}>{text}</p>
+              <div className="space-y-4 text-[15px] leading-relaxed text-on-surface-variant">
+                {active.paragraphs.map((para, i) => (
+                  <div key={i}>
+                    <p>{para.text}</p>
+                    {para.gifs && para.gifs.length > 0 ? (
+                      <div className="mt-3 flex gap-3">
+                        {para.gifs.map((gif) => (
+                          <img
+                            key={gif}
+                            src={`/gifs/${gif}`}
+                            alt=""
+                            className={cn(
+                              "rounded-lg object-contain",
+                              para.gifs!.length === 1
+                                ? "mx-auto max-h-52"
+                                : "max-h-44 min-w-0 flex-1"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 ))}
                 {active.module.bullets ? (
-                  <ul className="list-disc space-y-1 pl-5">
+                  <ul className="list-disc space-y-3 pl-5">
                     {active.module.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
+                      <li key={bullet.text}>
+                        {bullet.text}
+                        {bullet.gif ? (
+                          <img
+                            src={`/gifs/${bullet.gif}`}
+                            alt=""
+                            className="mt-2 max-h-40 rounded-lg object-contain"
+                          />
+                        ) : null}
+                      </li>
                     ))}
                   </ul>
                 ) : null}

@@ -23,8 +23,8 @@ const SCALE = [
 type ModulePayload = {
   id: string
   title: string
-  paragraphs: string[]
-  bullets?: string[]
+  paragraphs: { text: string; gifs?: string[] }[]
+  bullets?: { text: string; gif?: string }[]
   system?: string
   alwaysKeep?: boolean
 }
@@ -73,7 +73,10 @@ export async function POST(request: Request) {
       knowledge: m.system
         ? `System "${m.system}": Theorie=${scaleLabel(theory)}, Praxis=${scaleLabel(practice)}`
         : `Allgemein (kein Einzelsystem): Theorie≈${scaleLabel(theory)}, Praxis≈${scaleLabel(practice)}`,
-      baseline: [...m.paragraphs, ...(m.bullets ?? [])].join("\n"),
+      baseline: [
+        ...m.paragraphs.map((p) => p.text),
+        ...(m.bullets?.map((b) => b.text) ?? []),
+      ].join("\n"),
     }
   })
 
@@ -111,7 +114,7 @@ export async function POST(request: Request) {
       sections?: {
         id: string
         title: string
-        paragraphs: string[]
+        paragraphs: { text: string; gifs?: string[] }[]
         omitted?: boolean
       }[]
     }
