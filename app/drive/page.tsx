@@ -341,6 +341,14 @@ export default function DrivePage() {
                       {tutor.answer}
                     </p>
                   ) : null}
+                  {tutor.currentGif ? (
+                    <img
+                      key={tutor.currentGif}
+                      src={`/gifs/${tutor.currentGif}`}
+                      alt=""
+                      className="mx-auto mt-6 max-h-48 rounded-xl shadow-md"
+                    />
+                  ) : null}
                 </div>
               </div>
             ) : null}
