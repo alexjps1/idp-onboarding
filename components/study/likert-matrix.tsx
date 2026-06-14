@@ -13,6 +13,11 @@ type LikertMatrixProps = {
   /** Selected value (1-based) per system row index. */
   answers: Record<number, number>
   onChange: (rowIndex: number, value: number) => void
+  /**
+   * Stretch rows to fill the container's height (used on tablet so the matrix
+   * uses the whole screen instead of leaving empty space below).
+   */
+  fillHeight?: boolean
   className?: string
 }
 
@@ -27,23 +32,27 @@ export function LikertMatrix({
   systems,
   answers,
   onChange,
+  fillHeight = false,
   className,
 }: LikertMatrixProps) {
   const cols = scaleLabels.length
+  // Label column absorbs the extra width (so its text never clips); the scale
+  // columns stay a fixed, snug width so the radios cluster rather than spread.
   const template = {
-    gridTemplateColumns: `minmax(200px,1fr) repeat(${cols}, 56px)`,
+    gridTemplateColumns: `minmax(240px,1fr) repeat(${cols}, 64px)`,
   }
 
   return (
     <div
       className={cn(
         "overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low",
+        fillHeight && "flex flex-col",
         className
       )}
     >
       {/* Column captions */}
       <div
-        className="grid items-end gap-1.5 border-b border-outline-variant bg-surface-container px-4 py-3"
+        className="grid shrink-0 items-end gap-1.5 border-b border-outline-variant bg-surface-container px-5 py-3"
         style={template}
       >
         <span className="label-caps text-xs text-on-surface-variant">
@@ -64,7 +73,8 @@ export function LikertMatrix({
         <div
           key={system.name}
           className={cn(
-            "grid items-center gap-1.5 border-b border-outline-variant px-4 py-3 last:border-0",
+            "grid items-center gap-1.5 border-b border-outline-variant px-5 py-3 last:border-0",
+            fillHeight && "min-h-0 flex-1",
             rowIndex % 2 === 1 && "bg-surface-container/40"
           )}
           style={template}
@@ -94,7 +104,7 @@ export function LikertMatrix({
                 <RadioGroupItem
                   value={String(i + 1)}
                   aria-label={label}
-                  className="size-9"
+                  className="size-12"
                 />
               </div>
             ))}

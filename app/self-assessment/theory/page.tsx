@@ -46,8 +46,8 @@ export default function TheoryAssessmentPage() {
         />
       }
     >
-      <div className="mx-auto w-full max-w-5xl">
-        <header className="mb-5">
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
+        <header className="mb-5 shrink-0">
           <div className="mb-2 flex items-center justify-between">
             <span className="label-caps tracking-[0.2em] text-primary">
               Theoretisches Wissen
@@ -63,6 +63,8 @@ export default function TheoryAssessmentPage() {
         </header>
 
         <LikertMatrix
+          className="min-h-0 flex-1"
+          fillHeight
           scaleLabels={SCALE}
           systems={ASSISTANCE_SYSTEMS}
           answers={answers}
