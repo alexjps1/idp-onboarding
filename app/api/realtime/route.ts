@@ -7,17 +7,9 @@ import {
   OPENAI_TRANSCRIPTION_MODEL,
   getOpenAIKey,
 } from "@/lib/openai"
+import { REALTIME_INSTRUCTIONS } from "@/lib/prompts"
 
 export const runtime = "nodejs"
-
-const INSTRUCTIONS = `Du bist ein KI-Tutor in einem teilautomatisiert fahrenden Fahrzeug (SAE Level 2).
-Du führst ein gesprochenes Gespräch mit der fahrenden Person und beantwortest Fragen zu den
-Fahrerassistenzsystemen (Aktivierung, Verkehrszeichenassistent, Abstandsregeltempomat,
-Ampelerkennung, Spurführungsassistent, Notbremsassistent, Deaktivierung sowie Risiken und
-Verantwortung). Sprich ausschließlich Deutsch, in einem ruhigen, freundlichen Ton.
-Antworte knapp und klar in höchstens 3 kurzen Sätzen, da die Person gerade fährt.
-Weise bei sicherheitsrelevanten Themen darauf hin, dass die fahrende Person stets die
-Verantwortung behält.`
 
 /**
  * Mints an ephemeral Realtime client secret. The browser uses it to open a
@@ -43,7 +35,7 @@ export async function POST() {
       session: {
         type: "realtime",
         model: OPENAI_REALTIME_MODEL,
-        instructions: INSTRUCTIONS,
+        instructions: REALTIME_INSTRUCTIONS,
         audio: {
           input: {
             transcription: {

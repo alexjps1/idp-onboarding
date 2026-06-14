@@ -5,6 +5,7 @@ import {
   OPENAI_CONTENT_MODEL,
   getOpenAIKey,
 } from "@/lib/openai"
+import { ONBOARDING_SYSTEM_PROMPT, ONBOARDING_TEMPERATURE } from "@/lib/prompts"
 
 export const runtime = "nodejs"
 
@@ -38,24 +39,6 @@ function scaleLabel(value?: number): string {
   if (value == null || value < 1 || value > 7) return "unbekannt"
   return SCALE[value - 1]
 }
-
-const SYSTEM_PROMPT = `Du bereitest den Onboarding-Leitfaden für teilautomatisiertes Fahren (SAE Level 2) individuell auf.
-Für jedes Modul kennst du das Vorwissen der teilnehmenden Person (theoretisches Wissen und praktische Erfahrung auf einer Skala von "keins" bis "sehr viel").
-
-Passe jeden Abschnitt an dieses Vorwissen an:
-- Wenig/kein Vorwissen ("keins", "sehr wenig", "wenig"): ausführlicher erklären, einfache Sprache, ggf. eine kurze Alltagsanalogie. Mehr Sätze sind erlaubt.
-- Mittleres Vorwissen ("eher wenig", "eher viel"): knapp und sachlich halten.
-- Hohes Vorwissen ("viel", "sehr viel"): stark kürzen auf das prozedural Wesentliche; bei sehr hohem Vorwissen darfst du das Modul ganz weglassen (setze "omitted": true).
-
-Strenge Regeln:
-- Erfinde keine Funktionen oder Fakten. Bleib inhaltlich exakt bei der Vorlage.
-- Module mit "alwaysKeep": true (Sicherheit/Verantwortung) niemals kürzen oder weglassen; alle Stichpunkte sinngemäß vollständig behalten.
-- Antworte ausschließlich auf Deutsch.
-- Reihenfolge und "id" jedes Moduls unverändert lassen.
-
-Antworte als JSON-Objekt exakt in diesem Format:
-{"sections":[{"id":"...","title":"...","paragraphs":["..."],"omitted":false}]}
-Bei weggelassenen Modulen "omitted": true und "paragraphs": [].`
 
 export async function POST(request: Request) {
   const apiKey = getOpenAIKey()
@@ -102,10 +85,10 @@ export async function POST(request: Request) {
     },
     body: JSON.stringify({
       model: OPENAI_CONTENT_MODEL,
-      temperature: 0.4,
+      temperature: ONBOARDING_TEMPERATURE,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: ONBOARDING_SYSTEM_PROMPT },
         { role: "user", content: JSON.stringify({ modules: modulesForModel }) },
       ],
     }),
