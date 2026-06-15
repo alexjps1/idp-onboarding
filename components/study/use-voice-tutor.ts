@@ -259,7 +259,7 @@ export function useVoiceTutor() {
   const sendText = React.useCallback(
     (text: string) => {
       if (!dcRef.current) return
-      patch({ transcript: text, status: "responding" })
+      patch({ transcript: text, answer: "", currentGif: null, status: "responding" })
       dcRef.current.send(
         JSON.stringify({
           type: "conversation.item.create",
