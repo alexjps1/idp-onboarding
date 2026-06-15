@@ -14,6 +14,7 @@ type VoiceTutorState = {
   status: VoiceTutorStatus
   transcript: string // last recognised user utterance
   answer: string // tutor answer, streamed in as it is spoken
+  currentGif: string | null // GIF name currently shown below the speech bubble
   error: string | null
 }
 
@@ -21,6 +22,7 @@ const INITIAL: VoiceTutorState = {
   status: "idle",
   transcript: "",
   answer: "",
+  currentGif: null,
   error: null,
 }
 
@@ -29,6 +31,10 @@ type RealtimeEvent = {
   type: string
   transcript?: string
   delta?: string
+  // function call fields
+  call_id?: string
+  name?: string
+  arguments?: string
   error?: { message?: string }
 }
 
@@ -69,7 +75,7 @@ export function useVoiceTutor() {
 
   const stop = React.useCallback(() => {
     teardown()
-    patch({ status: "idle" })
+    patch({ status: "idle", currentGif: null })
   }, [teardown, patch])
 
   const handleEvent = React.useCallback(
@@ -102,6 +108,29 @@ export function useVoiceTutor() {
         case "response.done":
           patch({ status: "listening" })
           break
+        case "response.function_call_arguments.done": {
+          const { name, arguments: argsStr, call_id } = event
+          if (name === "show_gif") {
+            const gifName = (JSON.parse(argsStr ?? "{}") as { name?: string })
+              .name
+            if (gifName) {
+              setState((prev) =>
+                prev.currentGif === gifName ? prev : { ...prev, currentGif: gifName }
+              )
+            }
+          } else if (name === "hide_gif") {
+            patch({ currentGif: null })
+          }
+          // Acknowledge the tool call so the model can continue speaking.
+          dcRef.current?.send(
+            JSON.stringify({
+              type: "conversation.item.create",
+              item: { type: "function_call_output", call_id, output: "ok" },
+            })
+          )
+          dcRef.current?.send(JSON.stringify({ type: "response.create" }))
+          break
+        }
         case "error":
           patch({
             status: "error",

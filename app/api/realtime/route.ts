@@ -8,6 +8,7 @@ import {
   getOpenAIKey,
 } from "@/lib/openai"
 import { REALTIME_INSTRUCTIONS } from "@/lib/prompts"
+import { GIF_NAMES, buildShowGifDescription } from "@/lib/gif-catalog"
 
 export const runtime = "nodejs"
 
@@ -49,6 +50,36 @@ export async function POST() {
           },
           output: { voice: OPENAI_REALTIME_VOICE },
         },
+        tools: [
+          {
+            type: "function",
+            name: "show_gif",
+            description: buildShowGifDescription(),
+            parameters: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string",
+                  enum: GIF_NAMES,
+                  description: "Name des anzuzeigenden GIFs.",
+                },
+              },
+              required: ["name"],
+            },
+          },
+          {
+            type: "function",
+            name: "hide_gif",
+            description:
+              "Blendet das aktuell angezeigte GIF aus, wenn es nicht mehr relevant ist.",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: [],
+            },
+          },
+        ],
+        tool_choice: "auto",
       },
     }),
   })

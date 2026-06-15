@@ -1,18 +1,41 @@
 /**
  * LLM prompts and generation settings, kept in one place so the wording can be
- * tuned without touching the API route logic. Edit the strings below to adjust
- * how the models behave; the routes import these values verbatim.
+ * tuned without touching the API route logic.
  */
 
+import { GIF_CATALOG } from "@/lib/gif-catalog"
 import { ONBOARDING_MODULES } from "@/lib/onboarding-modules"
 
 /** Sampling temperature for the onboarding adaptation request (0–2). */
 export const ONBOARDING_TEMPERATURE = 0.4
 
 /**
+ * Builds a per-module list of available GIFs for adapted sections. Only
+ * non-alwaysKeep modules are included because alwaysKeep modules are never
+ * sent to the LLM.
+ */
+function buildOnboardingGifGuide(): string {
+  return ONBOARDING_MODULES.filter((m) => !m.alwaysKeep)
+    .map((m) => {
+      const folder = m.gifFolder ?? m.id
+      const available = GIF_CATALOG.filter((g) =>
+        g.name.startsWith(`${folder}/`)
+      )
+      if (!available.length) return null
+      const lines = available
+        .map((g) => `  - "${g.name}": ${g.description}`)
+        .join("\n")
+      return `Modul "${m.id}":\n${lines}`
+    })
+    .filter(Boolean)
+    .join("\n\n")
+}
+
+/**
  * System prompt for the onboarding adaptation route. Tailors the onboarding
  * guide to each participant's prior knowledge (theory + practice, "keins" to
- * "sehr viel").
+ * "sehr viel"). The available GIF catalog is embedded so the model can assign
+ * illustrations to paragraphs.
  */
 export const ONBOARDING_SYSTEM_PROMPT = `Du bist ein didaktischer Assistent und bereitest den Onboarding-Leitfaden für teilautomatisiertes Fahren (SAE Level 2) individuell für eine teilnehmende Person auf.
 
@@ -33,19 +56,32 @@ Strenge Regeln:
 - Reihenfolge, "id" und "title" jedes Moduls unverändert lassen.
 - Formuliere in vollständigen, gut lesbaren Sätzen ohne Aufzählungszeichen innerhalb der Absätze.
 
+GIF-Platzierung:
+- Jeder Absatz kann 1–3 GIFs erhalten. Wähle GIFs, die den Inhalt des Absatzes direkt illustrieren. Im Zweifel lieber ein GIF zeigen als keins.
+- Lass "gifs" nur weg, wenn kein Eintrag des Moduls zum Absatzinhalt passt.
+- Verwende ausschließlich die unten aufgelisteten Dateinamen für das jeweilige Modul. Erfinde keine Dateinamen.
+- Bei mehr als einem GIF: Füge die Positionsangabe (links), (rechts) oder (Mitte) in den Absatztext ein, damit die Person weiß, welches GIF was zeigt.
+- Strukturiere Absatzgrenzen bewusst so, dass jeder Absatz sinnvoll zu seinen GIFs passt – teile lange Absätze auf, wenn so jeder Teil ein eigenes GIF erhalten kann.
+
+Verfügbare GIFs je Modul (nur diese Dateinamen sind erlaubt):
+
+${buildOnboardingGifGuide()}
+
 Antworte ausschließlich als JSON-Objekt exakt in diesem Format:
-{"sections":[{"id":"...","title":"...","paragraphs":["..."],"omitted":false}]}
+{"sections":[{"id":"...","title":"...","paragraphs":[{"text":"...","gifs":["dateiname"]}],"omitted":false}]}
+Das Feld "gifs" ist optional – lass es weg, wenn kein GIF zum Absatz passt. Schreibe niemals leere Arrays für "gifs".
 Bei weggelassenen Modulen "omitted": true und "paragraphs": [].`
 
 /**
- * Compiles the onboarding modules into a plain-text reference manual ("Handbuch")
- * that is handed to the voice tutor as grounding context. This keeps the tutor's
- * answers consistent with the written guide instead of relying on the model's
- * general knowledge of driver-assistance systems.
+ * Compiles the onboarding modules into a plain-text reference manual that is
+ * handed to the voice tutor as grounding context.
  */
 function buildHandbuch(): string {
   return ONBOARDING_MODULES.map((module) => {
-    const lines = [...module.paragraphs, ...(module.bullets ?? [])]
+    const lines = [
+      ...module.paragraphs.map((p) => p.text),
+      ...(module.bullets?.map((b) => b.text) ?? []),
+    ]
     const body = lines.map((line) => `- ${line}`).join("\n")
     return `## ${module.title}\n${body}`
   }).join("\n\n")
@@ -54,8 +90,6 @@ function buildHandbuch(): string {
 /**
  * Instructions for the Realtime voice tutor. Drives a spoken conversation with
  * the driver about the assistance systems while they are driving (SAE Level 2).
- * The onboarding manual is appended as grounding so answers stay faithful to the
- * guide the participant was shown.
  */
 export const REALTIME_INSTRUCTIONS = `Du bist ein freundlicher KI-Tutor in einem teilautomatisiert fahrenden Fahrzeug (SAE Level 2). Du führst ein gesprochenes Gespräch mit der fahrenden Person und beantwortest ihre Fragen zu den Fahrerassistenzsystemen sowie zu Aktivierung, Deaktivierung, Risiken und Verantwortung.
 
@@ -64,8 +98,13 @@ Verhalten:
 - Die Person fährt gerade – fasse dich kurz: höchstens 3 kurze Sätze pro Antwort. Bei komplexen Themen biete an, nachzuhaken ("Soll ich das genauer erklären?").
 - Antworte konkret und handlungsorientiert: Welche Taste, welches Symbol, welcher Schritt.
 - Stütze dich ausschließlich auf das Handbuch unten. Erfinde keine Funktionen, Tasten oder Fakten. Steht etwas nicht im Handbuch, sage offen, dass du es nicht sicher weißt, statt zu raten.
-- Bei sicherheitsrelevanten Themen weise klar darauf hin, dass die fahrende Person jederzeit die Verantwortung behält und sofort eingreifen können muss.
+- Weise auf die Fahrerverantwortung nur dann hin, wenn die Person explizit nach Systemgrenzen, Fehlern oder Risiken fragt – nicht als pauschalen Zusatz nach jeder Antwort.
 - Wenn die Person abgelenkt oder unsicher wirkt, ermutige sie, den Blick auf die Straße zu richten.
+
+GIF-Nutzung:
+- Rufe show_gif bei nahezu jeder Antwort auf, wenn ein passendes GIF das Gesagte veranschaulichen kann. Im Zweifel lieber ein GIF zeigen als keins.
+- Lass ein GIF nur dann weg, wenn kein Eintrag aus dem Katalog zum Thema passt.
+- Rufe hide_gif auf, wenn das aktuelle GIF nach dem Ende eines Themas nicht mehr relevant ist.
 
 Verwende das folgende Handbuch als verbindliche Wissensquelle:
 
