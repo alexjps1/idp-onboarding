@@ -36,6 +36,7 @@ import { useStudy } from "@/components/study/study-provider"
 import {
   useVoiceTutor,
   type VoiceTutorStatus,
+  REALTIME_TEXT_INPUT,
 } from "@/components/study/use-voice-tutor"
 
 const SIDEBAR_APPS = [
@@ -58,6 +59,8 @@ export default function DrivePage() {
   const [assistantOpen, setAssistantOpen] = React.useState(false)
   const [playing, setPlaying] = React.useState(true)
   const [endConfirmOpen, setEndConfirmOpen] = React.useState(false)
+  const [textDraft, setTextDraft] = React.useState("")
+  const [textInputVisible, setTextInputVisible] = React.useState(false)
   const { previous, next } = getAdjacentSteps("drive")
   const { participantId, mode } = useStudy()
   const withTutor = mode !== "onboarding-only"
@@ -350,6 +353,7 @@ export default function DrivePage() {
                     />
                   ) : null}
                 </div>
+
               </div>
             ) : null}
           </main>
@@ -378,6 +382,53 @@ export default function DrivePage() {
           </div>
         </div>
       </div>
+
+      {/* Debug text input — invisible unless hovered; hidden during screenshots */}
+      {REALTIME_TEXT_INPUT ? (
+        <div className="fixed bottom-5 right-5 z-[70] flex flex-col items-end gap-2">
+          {textInputVisible ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const text = textDraft.trim()
+                if (!text) return
+                tutor.sendText(text)
+                setTextDraft("")
+                setTextInputVisible(false)
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                autoFocus
+                type="text"
+                value={textDraft}
+                onChange={(e) => setTextDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setTextInputVisible(false)
+                }}
+                placeholder="Nachricht eingeben…"
+                disabled={tutor.status === "idle" || tutor.status === "connecting" || tutor.status === "responding"}
+                className="w-72 rounded-full border border-black/10 bg-white/90 px-4 py-2 text-[13px] text-black shadow-lg placeholder:text-black/30 focus:outline-none disabled:opacity-40"
+              />
+              <button
+                type="submit"
+                disabled={!textDraft.trim() || tutor.status === "idle" || tutor.status === "connecting" || tutor.status === "responding"}
+                className="rounded-full bg-black/70 px-4 py-2 text-[13px] text-white transition-opacity disabled:opacity-30"
+              >
+                Senden
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setTextInputVisible(true)}
+              className="text-[12px] text-transparent transition-colors duration-200 hover:text-gray-400 select-none"
+            >
+              Texteingabe zeigen
+            </button>
+          )}
+        </div>
+      ) : null}
 
       {/* "Studie beenden?" confirmation before the final step */}
       {endConfirmOpen && next ? (

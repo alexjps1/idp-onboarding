@@ -2,6 +2,15 @@
 
 import * as React from "react"
 
+/**
+ * Set to true to replace microphone input with a text field.
+ * Useful for testing in quiet environments (library, office).
+ * The agent still responds with audio; a silent dummy stream is sent instead
+ * of real mic data so the WebRTC connection succeeds without requesting
+ * microphone permission.
+ */
+export const REALTIME_TEXT_INPUT = true
+
 export type VoiceTutorStatus =
   | "idle" // no session
   | "connecting" // minting token + WebRTC handshake
@@ -59,6 +68,7 @@ export function useVoiceTutor() {
   const dcRef = React.useRef<RTCDataChannel | null>(null)
   const streamRef = React.useRef<MediaStream | null>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
+  const audioCtxRef = React.useRef<AudioContext | null>(null)
 
   const teardown = React.useCallback(() => {
     dcRef.current?.close()
@@ -71,6 +81,8 @@ export function useVoiceTutor() {
       audioRef.current.srcObject = null
       audioRef.current = null
     }
+    audioCtxRef.current?.close().catch(() => {})
+    audioCtxRef.current = null
   }, [])
 
   const stop = React.useCallback(() => {
@@ -115,7 +127,9 @@ export function useVoiceTutor() {
               .name
             if (gifName) {
               setState((prev) =>
-                prev.currentGif === gifName ? prev : { ...prev, currentGif: gifName }
+                prev.currentGif === gifName
+                  ? prev
+                  : { ...prev, currentGif: gifName }
               )
             }
           } else if (name === "hide_gif") {
@@ -159,16 +173,31 @@ export function useVoiceTutor() {
         model: string
       }
 
-      // Echo cancellation keeps the tutor's own voice (played over the
-      // speakers) from re-entering the mic and interrupting the answer;
-      // noise suppression keeps background sounds from triggering the VAD.
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      })
+      let stream: MediaStream
+      if (REALTIME_TEXT_INPUT) {
+        // Produce a silent audio track so the WebRTC offer has a valid audio
+        // m-line without requesting microphone permission.
+        const ctx = new AudioContext()
+        audioCtxRef.current = ctx
+        const oscillator = ctx.createOscillator()
+        const gain = ctx.createGain()
+        gain.gain.value = 0
+        const dst = ctx.createMediaStreamDestination()
+        oscillator.connect(gain)
+        gain.connect(dst)
+        oscillator.start()
+        stream = dst.stream
+      } else {
+        // Echo cancellation keeps the tutor's own voice from re-entering the
+        // mic; noise suppression prevents background sounds from triggering VAD.
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        })
+      }
       streamRef.current = stream
 
       const pc = new RTCPeerConnection()
@@ -227,8 +256,27 @@ export function useVoiceTutor() {
     }
   }, [patch, handleEvent, teardown])
 
+  const sendText = React.useCallback(
+    (text: string) => {
+      if (!dcRef.current) return
+      patch({ transcript: text, status: "responding" })
+      dcRef.current.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text }],
+          },
+        })
+      )
+      dcRef.current.send(JSON.stringify({ type: "response.create" }))
+    },
+    [patch]
+  )
+
   // Tear down on unmount.
   React.useEffect(() => () => teardown(), [teardown])
 
-  return { ...state, start, stop }
+  return { ...state, start, stop, sendText }
 }
