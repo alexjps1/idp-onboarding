@@ -199,6 +199,37 @@
   animation: study-orb 4s ease-in-out infinite;
 }
 
+/* Assistant overlay entrance animations — ease-out quint (fast start, slow finish) */
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up-anim {
+  animation: slide-up-fade 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.slide-down-anim {
+  animation: slide-down-fade 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Thin precision scrollbar used across scrollable study panels */
 .study-scrollbar::-webkit-scrollbar {
   width: 6px;
