@@ -18,6 +18,9 @@
 # production
 /build
 
+# collected study data (participant records)
+/data
+
 # misc
 .DS_Store
 *.pem

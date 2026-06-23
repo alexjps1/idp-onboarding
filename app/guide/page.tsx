@@ -7,21 +7,15 @@ import { cn } from "@/lib/utils"
 import { getStepProgress, getAdjacentSteps } from "@/lib/study-steps"
 import { ONBOARDING_MODULES } from "@/lib/onboarding-modules"
 import { useStudy } from "@/components/study/study-provider"
+import type { AdaptedSection } from "@/lib/study-data"
 import { StudyShell } from "@/components/study/study-shell"
 import { StudyFooter } from "@/components/study/study-footer"
-
-type AdaptedSection = {
-  id: string
-  title: string
-  paragraphs: { text: string; gifs?: string[] }[]
-  omitted?: boolean
-}
 
 type AdaptStatus = "loading" | "adapted" | "baseline"
 
 export default function GuidePage() {
   const { previous, next } = getAdjacentSteps("guide")
-  const { theory, practice } = useStudy()
+  const { theory, practice, setAdaptedModules } = useStudy()
 
   const [sections, setSections] = React.useState<Map<string, AdaptedSection>>(
     new Map()
@@ -58,18 +52,26 @@ export default function GuidePage() {
         if (!res.ok) {
           // 501 (no key) or upstream error → render the baseline as-is.
           setStatus("baseline")
+          setAdaptedModules(null, "baseline")
           return
         }
         const data = (await res.json()) as { sections: AdaptedSection[] }
         setSections(new Map(data.sections.map((s) => [s.id, s])))
         setStatus("adapted")
+        setAdaptedModules(data.sections, "adapted")
       } catch (err) {
-        if ((err as Error).name !== "AbortError") setStatus("baseline")
+        if ((err as Error).name !== "AbortError") {
+          setStatus("baseline")
+          setAdaptedModules(null, "baseline")
+        }
       }
     }
 
     void adapt()
     return () => controller.abort()
+    // Runs once on mount; ratings are snapshotted via ratingsRef and
+    // setAdaptedModules is a stable store action.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Resolve the visible sections first: omitted ones are cut entirely, so the

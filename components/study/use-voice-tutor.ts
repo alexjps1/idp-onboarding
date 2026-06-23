@@ -56,8 +56,18 @@ type RealtimeEvent = {
  * channel drive the status/transcript display. Turn-taking (VAD) and barge-in
  * are handled server-side, so the session stays open until stop().
  */
-export function useVoiceTutor() {
+export function useVoiceTutor(
+  options: { onMessage?: (message: VoiceMessage) => void } = {}
+) {
   const [state, setState] = React.useState<VoiceTutorState>(INITIAL)
+
+  // Keep the latest callback in a ref so handleEvent's identity stays stable
+  // and the live WebRTC session isn't torn down when the parent re-renders.
+  const onMessageRef = React.useRef(options.onMessage)
+  React.useEffect(() => {
+    onMessageRef.current = options.onMessage
+  }, [options.onMessage])
+
   const patch = React.useCallback(
     (partial: Partial<VoiceTutorState>) =>
       setState((prev) => ({ ...prev, ...partial })),
@@ -100,6 +110,13 @@ export function useVoiceTutor() {
           break
         case "conversation.item.input_audio_transcription.completed":
           patch({ transcript: event.transcript ?? "" })
+          if (event.transcript) {
+            onMessageRef.current?.({
+              role: "user",
+              text: event.transcript,
+              at: new Date().toISOString(),
+            })
+          }
           break
         case "response.created":
           patch({ status: "responding" })
@@ -115,7 +132,14 @@ export function useVoiceTutor() {
           break
         case "response.output_audio_transcript.done":
         case "response.audio_transcript.done":
-          if (event.transcript) patch({ answer: event.transcript })
+          if (event.transcript) {
+            patch({ answer: event.transcript })
+            onMessageRef.current?.({
+              role: "assistant",
+              text: event.transcript,
+              at: new Date().toISOString(),
+            })
+          }
           break
         case "response.done":
           patch({ status: "listening" })

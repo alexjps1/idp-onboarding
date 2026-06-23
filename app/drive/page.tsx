@@ -62,16 +62,22 @@ export default function DrivePage() {
   const [textDraft, setTextDraft] = React.useState("")
   const [textInputVisible, setTextInputVisible] = React.useState(false)
   const { previous, next } = getAdjacentSteps("drive")
-  const { participantId, mode } = useStudy()
+  const { participantId, mode, startVoiceConversation, appendVoiceMessage } =
+    useStudy()
   const withTutor = mode !== "onboarding-only"
-  const tutor = useVoiceTutor()
+  const tutor = useVoiceTutor({ onMessage: appendVoiceMessage })
 
-  // Open/close the assistant overlay and the mic together.
+  // Open/close the assistant overlay and the mic together. Each open starts a
+  // fresh conversation in the study record (the tutor can be opened repeatedly).
   function toggleAssistant() {
     setAssistantOpen((open) => {
       const nextOpen = !open
-      if (nextOpen) void tutor.start()
-      else tutor.stop()
+      if (nextOpen) {
+        startVoiceConversation("user_initiated")
+        void tutor.start()
+      } else {
+        tutor.stop()
+      }
       return nextOpen
     })
   }
