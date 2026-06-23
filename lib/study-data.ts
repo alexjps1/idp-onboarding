@@ -6,6 +6,7 @@
  * store mirrors to the server (one JSON file per participant) for later analysis.
  */
 
+import { withBasePath } from "@/lib/base-path"
 import type { StudyMode, Ratings } from "@/components/study/study-provider"
 
 /** A single completed turn in a voice-tutor conversation. */
@@ -63,7 +64,7 @@ export type StudySession = {
  */
 export async function saveSession(session: StudySession): Promise<void> {
   try {
-    await fetch("/api/study-data", {
+    await fetch(withBasePath("/api/study-data"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(session),

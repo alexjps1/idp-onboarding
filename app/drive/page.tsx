@@ -31,6 +31,7 @@ import Link from "next/link"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { withBasePath } from "@/lib/base-path"
 import { getAdjacentSteps } from "@/lib/study-steps"
 import { useStudy } from "@/components/study/study-provider"
 import {
@@ -255,7 +256,7 @@ export default function DrivePage() {
                 {/* Album art */}
                 <div className="relative aspect-[3/4] w-[300px] shrink-0 overflow-hidden rounded-3xl shadow-[0px_4px_12px_rgba(0,0,0,0.25)]">
                   <img
-                    src="/neon-avenue.png"
+                    src={withBasePath("/neon-avenue.png")}
                     alt="Neon Avenue"
                     className="absolute inset-0 size-full object-cover"
                   />
@@ -412,7 +413,7 @@ export default function DrivePage() {
                     {tutor.currentGif ? (
                       <img
                         key={tutor.currentGif}
-                        src={`/gifs/${tutor.currentGif}`}
+                        src={withBasePath(`/gifs/${tutor.currentGif}`)}
                         alt=""
                         className="slide-down-anim max-h-96 max-w-2xl rounded-2xl object-contain shadow-md"
                       />

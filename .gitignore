@@ -24,6 +24,9 @@
 # self-signed dev certificates (next dev --experimental-https)
 /certificates
 
+# local deploy script (contains personal server target)
+/scripts/deploy.sh
+
 # misc
 .DS_Store
 *.pem

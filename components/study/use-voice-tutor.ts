@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { withBasePath } from "@/lib/base-path"
 import type { VoiceMessage } from "@/lib/study-data"
 
 /**
@@ -224,7 +225,9 @@ export function useVoiceTutor(
       }
       streamRef.current = stream
 
-      const tokenRes = await fetch("/api/realtime", { method: "POST" })
+      const tokenRes = await fetch(withBasePath("/api/realtime"), {
+        method: "POST",
+      })
       if (!tokenRes.ok) {
         throw new Error(
           (await tokenRes.json()).error ??

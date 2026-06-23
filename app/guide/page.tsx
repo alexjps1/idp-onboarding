@@ -4,6 +4,7 @@ import * as React from "react"
 import { BookOpen, Car, Loader2, Sparkles, TriangleAlert } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { withBasePath } from "@/lib/base-path"
 import { getStepProgress, getAdjacentSteps } from "@/lib/study-steps"
 import { ONBOARDING_MODULES } from "@/lib/onboarding-modules"
 import { useStudy } from "@/components/study/study-provider"
@@ -43,7 +44,7 @@ export default function GuidePage() {
         // Only the Fahrzeugassistenzsysteme are adapted; the fixed intro/outro
         // and safety modules (alwaysKeep) are rendered verbatim and not sent.
         const adaptable = ONBOARDING_MODULES.filter((m) => !m.alwaysKeep)
-        const res = await fetch("/api/onboarding", {
+        const res = await fetch(withBasePath("/api/onboarding"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ modules: adaptable, knowledge }),
@@ -205,7 +206,7 @@ export default function GuidePage() {
                         {para.gifs.map((gif) => (
                           <img
                             key={gif}
-                            src={`/gifs/${gif}`}
+                            src={withBasePath(`/gifs/${gif}`)}
                             alt=""
                             className={cn(
                               "rounded-lg object-contain",
@@ -226,7 +227,7 @@ export default function GuidePage() {
                         {bullet.text}
                         {bullet.gif ? (
                           <img
-                            src={`/gifs/${bullet.gif}`}
+                            src={withBasePath(`/gifs/${bullet.gif}`)}
                             alt=""
                             className="mt-2 max-h-40 rounded-lg object-contain"
                           />
