@@ -4,6 +4,18 @@ import * as React from "react"
 
 import { withBasePath } from "@/lib/base-path"
 import type { VoiceMessage } from "@/lib/study-data"
+import type { Ratings } from "@/components/study/study-provider"
+
+/**
+ * Options for {@link useVoiceTutor.start}. When `proactive` is set the session
+ * is opened in proactive mode (the tutor speaks first), and the self-assessment
+ * ratings are forwarded so the server can tailor the opening offer.
+ */
+export type StartOptions = {
+  proactive?: boolean
+  theory?: Ratings
+  practice?: Ratings
+}
 
 /**
  * Replace microphone input with a text field — useful for testing in quiet
@@ -184,8 +196,9 @@ export function useVoiceTutor(
     [patch]
   )
 
-  const start = React.useCallback(async () => {
+  const start = React.useCallback(async (opts?: StartOptions) => {
     if (pcRef.current) return
+    const proactive = opts?.proactive ?? false
     try {
       patch({ status: "connecting", error: null, transcript: "", answer: "" })
 
@@ -227,6 +240,16 @@ export function useVoiceTutor(
 
       const tokenRes = await fetch(withBasePath("/api/realtime"), {
         method: "POST",
+        ...(proactive
+          ? {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                proactive: true,
+                theory: opts?.theory ?? {},
+                practice: opts?.practice ?? {},
+              }),
+            }
+          : {}),
       })
       if (!tokenRes.ok) {
         throw new Error(
@@ -254,7 +277,16 @@ export function useVoiceTutor(
 
       const dc = pc.createDataChannel("oai-events")
       dcRef.current = dc
-      dc.onopen = () => patch({ status: "listening" })
+      dc.onopen = () => {
+        patch({ status: "listening" })
+        // In proactive mode the user hasn't said anything, so ask the model to
+        // generate the opening turn itself (it follows the proactive session
+        // instructions and greets first).
+        if (proactive) {
+          patch({ status: "responding" })
+          dc.send(JSON.stringify({ type: "response.create" }))
+        }
+      }
       dc.onmessage = (e) => {
         try {
           handleEvent(JSON.parse(e.data) as RealtimeEvent)

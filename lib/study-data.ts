@@ -18,11 +18,11 @@ export type VoiceMessage = {
 }
 
 /**
- * Why a voice conversation was started. Modelled as a union so additional
- * triggers (e.g. system-initiated prompts) can be added later. For now the
- * assistant is only ever opened manually, so this is always "user_initiated".
+ * Why a voice conversation was started. "user_initiated" = the participant
+ * tapped the assistant button; "proactive" = the assistant opened itself when
+ * the driving automation was first switched on (see use-adas-monitor).
  */
-export type VoiceConversationTrigger = "user_initiated"
+export type VoiceConversationTrigger = "user_initiated" | "proactive"
 
 /**
  * One run of the voice tutor. The participant can open and close the assistant
