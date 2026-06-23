@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import "./globals.css"
+import { PwaRelauncher } from "@/components/study/pwa-relauncher"
 import { StudyProvider } from "@/components/study/study-provider"
 
 export const metadata: Metadata = {
@@ -17,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="de" suppressHydrationWarning>
       <body className="antialiased">
-        <StudyProvider>{children}</StudyProvider>
+        <StudyProvider>
+          <PwaRelauncher />
+          {children}
+        </StudyProvider>
       </body>
     </html>
   )
