@@ -2,14 +2,17 @@
 
 import * as React from "react"
 
+import type { VoiceMessage } from "@/lib/study-data"
+
 /**
- * Set to true to replace microphone input with a text field.
- * Useful for testing in quiet environments (library, office).
- * The agent still responds with audio; a silent dummy stream is sent instead
- * of real mic data so the WebRTC connection succeeds without requesting
- * microphone permission.
+ * Replace microphone input with a text field — useful for testing in quiet
+ * environments (library, office). Controlled via NEXT_PUBLIC_REALTIME_TEXT_INPUT
+ * and defaults to false (real microphone). When enabled, the agent still
+ * responds with audio; a silent dummy stream is sent instead of real mic data
+ * so the WebRTC connection succeeds without requesting microphone permission.
  */
-export const REALTIME_TEXT_INPUT = true
+export const REALTIME_TEXT_INPUT =
+  process.env.NEXT_PUBLIC_REALTIME_TEXT_INPUT === "true"
 
 export type VoiceTutorStatus =
   | "idle" // no session
@@ -185,18 +188,9 @@ export function useVoiceTutor(
     try {
       patch({ status: "connecting", error: null, transcript: "", answer: "" })
 
-      const tokenRes = await fetch("/api/realtime", { method: "POST" })
-      if (!tokenRes.ok) {
-        throw new Error(
-          (await tokenRes.json()).error ??
-            "Sprachsitzung konnte nicht erstellt werden"
-        )
-      }
-      const { clientSecret, model } = (await tokenRes.json()) as {
-        clientSecret: string
-        model: string
-      }
-
+      // Acquire the audio stream first, while the user's tap is still the active
+      // gesture. iOS Safari drops that activation across an awaited network
+      // request, which would otherwise suppress the mic-permission prompt.
       let stream: MediaStream
       if (REALTIME_TEXT_INPUT) {
         // Produce a silent audio track so the WebRTC offer has a valid audio
@@ -212,6 +206,12 @@ export function useVoiceTutor(
         oscillator.start()
         stream = dst.stream
       } else {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          // getUserMedia only exists in a secure context (HTTPS or localhost).
+          throw new Error(
+            "Mikrofon nur über HTTPS verfügbar – bitte die Seite über https:// öffnen."
+          )
+        }
         // Echo cancellation keeps the tutor's own voice from re-entering the
         // mic; noise suppression prevents background sounds from triggering VAD.
         stream = await navigator.mediaDevices.getUserMedia({
@@ -223,6 +223,18 @@ export function useVoiceTutor(
         })
       }
       streamRef.current = stream
+
+      const tokenRes = await fetch("/api/realtime", { method: "POST" })
+      if (!tokenRes.ok) {
+        throw new Error(
+          (await tokenRes.json()).error ??
+            "Sprachsitzung konnte nicht erstellt werden"
+        )
+      }
+      const { clientSecret, model } = (await tokenRes.json()) as {
+        clientSecret: string
+        model: string
+      }
 
       const pc = new RTCPeerConnection()
       pcRef.current = pc

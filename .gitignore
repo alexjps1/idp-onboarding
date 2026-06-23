@@ -21,6 +21,9 @@
 # collected study data (participant records)
 /data
 
+# self-signed dev certificates (next dev --experimental-https)
+/certificates
+
 # misc
 .DS_Store
 *.pem
