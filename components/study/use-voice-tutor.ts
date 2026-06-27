@@ -61,16 +61,25 @@ type RealtimeEvent = {
  * are handled server-side, so the session stays open until stop().
  */
 export function useVoiceTutor(
-  options: { onMessage?: (message: VoiceMessage) => void } = {}
+  options: {
+    onMessage?: (message: VoiceMessage) => void
+    /** Called when the tutor ends the session itself (driver asked to stop). */
+    onEnd?: () => void
+  } = {}
 ) {
   const [state, setState] = React.useState<VoiceTutorState>(INITIAL)
 
-  // Keep the latest callback in a ref so handleEvent's identity stays stable
+  // Keep the latest callbacks in refs so handleEvent's identity stays stable
   // and the live WebRTC session isn't torn down when the parent re-renders.
   const onMessageRef = React.useRef(options.onMessage)
   React.useEffect(() => {
     onMessageRef.current = options.onMessage
   }, [options.onMessage])
+
+  const onEndRef = React.useRef(options.onEnd)
+  React.useEffect(() => {
+    onEndRef.current = options.onEnd
+  }, [options.onEnd])
 
   const patch = React.useCallback(
     (partial: Partial<VoiceTutorState>) =>
@@ -83,8 +92,17 @@ export function useVoiceTutor(
   const streamRef = React.useRef<MediaStream | null>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const audioCtxRef = React.useRef<AudioContext | null>(null)
+  // Set when the tutor calls end_session; the session is torn down once the
+  // spoken goodbye has finished playing (or a fallback timer fires).
+  const endRequestedRef = React.useRef(false)
+  const endTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const teardown = React.useCallback(() => {
+    if (endTimerRef.current) {
+      clearTimeout(endTimerRef.current)
+      endTimerRef.current = null
+    }
+    endRequestedRef.current = false
     dcRef.current?.close()
     dcRef.current = null
     pcRef.current?.close()
@@ -102,6 +120,16 @@ export function useVoiceTutor(
   const stop = React.useCallback(() => {
     teardown()
     patch({ status: "idle", currentGif: null })
+  }, [teardown, patch])
+
+  // Finalise a tutor-initiated end: tear down and notify the parent so the
+  // assistant overlay closes. Guarded so it runs once even if both the
+  // audio-finished event and the fallback timer fire.
+  const finishEnd = React.useCallback(() => {
+    if (!endRequestedRef.current) return
+    teardown()
+    patch({ status: "idle", currentGif: null })
+    onEndRef.current?.()
   }, [teardown, patch])
 
   const handleEvent = React.useCallback(
@@ -148,8 +176,27 @@ export function useVoiceTutor(
         case "response.done":
           patch({ status: "listening" })
           break
+        case "output_audio_buffer.stopped":
+          // The spoken goodbye has finished playing — safe to close now.
+          if (endRequestedRef.current) finishEnd()
+          break
         case "response.function_call_arguments.done": {
           const { name, arguments: argsStr, call_id } = event
+          if (name === "end_session") {
+            // The driver asked to end the conversation. Acknowledge the call,
+            // let the goodbye spoken in this same response play out, then tear
+            // down on output_audio_buffer.stopped. The timer is a safety net in
+            // case that event never arrives (e.g. a goodbye-less response).
+            endRequestedRef.current = true
+            dcRef.current?.send(
+              JSON.stringify({
+                type: "conversation.item.create",
+                item: { type: "function_call_output", call_id, output: "ok" },
+              })
+            )
+            endTimerRef.current = setTimeout(finishEnd, 8000)
+            break
+          }
           if (name === "show_gif") {
             const gifName = (JSON.parse(argsStr ?? "{}") as { name?: string })
               .name
@@ -181,7 +228,7 @@ export function useVoiceTutor(
           break
       }
     },
-    [patch]
+    [patch, finishEnd]
   )
 
   const start = React.useCallback(async () => {

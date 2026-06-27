@@ -66,7 +66,12 @@ export default function DrivePage() {
   const { participantId, mode, startVoiceConversation, appendVoiceMessage } =
     useStudy()
   const withTutor = mode !== "onboarding-only"
-  const tutor = useVoiceTutor({ onMessage: appendVoiceMessage })
+  const tutor = useVoiceTutor({
+    onMessage: appendVoiceMessage,
+    // The tutor ended the conversation itself (driver asked to stop) — close
+    // the overlay; the hook has already torn the session down.
+    onEnd: () => setAssistantOpen(false),
+  })
 
   // Open/close the assistant overlay and the mic together. Each open starts a
   // fresh conversation in the study record (the tutor can be opened repeatedly).

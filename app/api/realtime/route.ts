@@ -78,6 +78,17 @@ export async function POST() {
               required: [],
             },
           },
+          {
+            type: "function",
+            name: "end_session",
+            description:
+              "Beendet das Sprachgespräch und schließt den Assistenten. Nur aufrufen, wenn die fahrende Person das Gespräch ausdrücklich beenden möchte – erst nach einem kurzen gesprochenen Abschied.",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: [],
+            },
+          },
         ],
         tool_choice: "auto",
       },
