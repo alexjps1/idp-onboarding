@@ -35,11 +35,3 @@ export const ASSISTANCE_SYSTEMS: AssistanceSystem[] = [
       "Erkennt Kollisionsgefahren und warnt davor. Bremst bei drohender Kollision automatisch zur Reduktion der Aufprallgeschwindigkeit.",
   },
 ]
-
-/**
- * Systems the proactive tutor must never offer to explain on its own, because
- * they are self-explanatory and require no change to how the person drives. The
- * driver can still ask about them — the tutor just won't proactively propose
- * them. Add more names here as needed.
- */
-export const NON_OFFERABLE_SYSTEMS: string[] = ["Notbremsassistent"]

@@ -39,7 +39,6 @@ import {
   type VoiceTutorStatus,
   REALTIME_TEXT_INPUT,
 } from "@/components/study/use-voice-tutor"
-import { useAdasMonitor } from "@/components/study/use-adas-monitor"
 
 const SIDEBAR_APPS = [
   { icon: Navigation, label: "Karte" },
@@ -64,14 +63,8 @@ export default function DrivePage() {
   const [textDraft, setTextDraft] = React.useState("")
   const [textInputVisible, setTextInputVisible] = React.useState(false)
   const { previous, next } = getAdjacentSteps("drive")
-  const {
-    participantId,
-    mode,
-    theory,
-    practice,
-    startVoiceConversation,
-    appendVoiceMessage,
-  } = useStudy()
+  const { participantId, mode, startVoiceConversation, appendVoiceMessage } =
+    useStudy()
   const withTutor = mode !== "onboarding-only"
   const tutor = useVoiceTutor({ onMessage: appendVoiceMessage })
 
@@ -89,20 +82,6 @@ export default function DrivePage() {
       return nextOpen
     })
   }
-
-  // Proactive trigger: the first time the driving automation is switched on,
-  // open the assistant on its own and have it greet (unless already open).
-  const openAssistantProactively = React.useCallback(() => {
-    setAssistantOpen(true)
-    startVoiceConversation("proactive")
-    void tutor.start({ proactive: true, theory, practice })
-  }, [tutor, theory, practice, startVoiceConversation])
-
-  useAdasMonitor({
-    enabled: withTutor,
-    onActivate: openAssistantProactively,
-    shouldSuppress: () => assistantOpen,
-  })
 
   function closeAssistant() {
     tutor.stop()

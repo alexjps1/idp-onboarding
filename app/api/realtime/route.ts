@@ -7,31 +7,17 @@ import {
   OPENAI_TRANSCRIPTION_MODEL,
   getOpenAIKey,
 } from "@/lib/openai"
-import {
-  REALTIME_INSTRUCTIONS,
-  buildProactiveInstructions,
-} from "@/lib/prompts"
+import { REALTIME_INSTRUCTIONS } from "@/lib/prompts"
 import { GIF_NAMES, buildShowGifDescription } from "@/lib/gif-catalog"
 
 export const runtime = "nodejs"
-
-type RealtimeBody = {
-  proactive?: boolean
-  theory?: Record<string, number>
-  practice?: Record<string, number>
-}
 
 /**
  * Mints an ephemeral Realtime client secret. The browser uses it to open a
  * WebRTC session directly with OpenAI — the long-lived API key never leaves
  * the server. Called once each time the assistant overlay is opened.
- *
- * An optional JSON body opens the session in *proactive* mode: the tutor greets
- * on its own and offers to explain one assistance system, chosen from the
- * participant's self-assessment (theory/practice ratings) passed in the body.
- * No body (or an invalid one) yields the normal reactive tutor.
  */
-export async function POST(req: Request) {
+export async function POST() {
   const apiKey = getOpenAIKey()
   if (!apiKey) {
     return NextResponse.json(
@@ -39,17 +25,6 @@ export async function POST(req: Request) {
       { status: 501 }
     )
   }
-
-  let body: RealtimeBody = {}
-  try {
-    body = (await req.json()) as RealtimeBody
-  } catch {
-    // No/invalid body → default reactive session.
-  }
-
-  const instructions = body.proactive
-    ? buildProactiveInstructions(body.theory ?? {}, body.practice ?? {})
-    : REALTIME_INSTRUCTIONS
 
   const res = await fetch(`${OPENAI_BASE_URL}/realtime/client_secrets`, {
     method: "POST",
@@ -61,7 +36,7 @@ export async function POST(req: Request) {
       session: {
         type: "realtime",
         model: OPENAI_REALTIME_MODEL,
-        instructions,
+        instructions: REALTIME_INSTRUCTIONS,
         audio: {
           input: {
             transcription: {
