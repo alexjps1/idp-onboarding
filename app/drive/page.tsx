@@ -75,17 +75,18 @@ export default function DrivePage() {
 
   // Open/close the assistant overlay and the mic together. Each open starts a
   // fresh conversation in the study record (the tutor can be opened repeatedly).
+  // Side effects run here in the click handler — never inside a setState updater,
+  // which React may invoke mid-render (that would update StudyProvider during
+  // DrivePage's render and trigger a cross-component setState warning).
   function toggleAssistant() {
-    setAssistantOpen((open) => {
-      const nextOpen = !open
-      if (nextOpen) {
-        startVoiceConversation("user_initiated")
-        void tutor.start()
-      } else {
-        tutor.stop()
-      }
-      return nextOpen
-    })
+    if (assistantOpen) {
+      tutor.stop()
+      setAssistantOpen(false)
+    } else {
+      startVoiceConversation("user_initiated")
+      void tutor.start()
+      setAssistantOpen(true)
+    }
   }
 
   function closeAssistant() {
