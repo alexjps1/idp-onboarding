@@ -50,16 +50,46 @@ export default function GuidePage() {
           body: JSON.stringify({ modules: adaptable, knowledge }),
           signal: controller.signal,
         })
-        if (!res.ok) {
+        if (!res.ok || !res.body) {
           // 501 (no key) or upstream error → render the baseline as-is.
           setStatus("baseline")
           setAdaptedModules(null, "baseline")
           return
         }
-        const data = (await res.json()) as { sections: AdaptedSection[] }
-        setSections(new Map(data.sections.map((s) => [s.id, s])))
+
+        // The route streams one newline-delimited JSON object per module as it
+        // is adapted. Apply each section the moment it arrives so the module
+        // swaps from baseline to the adapted version without waiting for the
+        // rest. Order in the index follows the baseline module order.
+        const order = new Map(adaptable.map((m, i) => [m.id, i]))
+        const collected: AdaptedSection[] = []
+        const apply = (section?: AdaptedSection) => {
+          if (!section) return
+          collected.push(section)
+          setSections((prev) => new Map(prev).set(section.id, section))
+        }
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ""
+        for (;;) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          let nl: number
+          while ((nl = buffer.indexOf("\n")) !== -1) {
+            const line = buffer.slice(0, nl).trim()
+            buffer = buffer.slice(nl + 1)
+            if (line) apply(parseSection(line))
+          }
+        }
+        if (buffer.trim()) apply(parseSection(buffer.trim()))
+
+        collected.sort(
+          (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)
+        )
         setStatus("adapted")
-        setAdaptedModules(data.sections, "adapted")
+        setAdaptedModules(collected, "adapted")
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
           setStatus("baseline")
@@ -243,6 +273,15 @@ export default function GuidePage() {
       </div>
     </StudyShell>
   )
+}
+
+/** Parses one streamed NDJSON line into a section, ignoring malformed lines. */
+function parseSection(line: string): AdaptedSection | undefined {
+  try {
+    return (JSON.parse(line) as { section?: AdaptedSection }).section
+  } catch {
+    return undefined
+  }
 }
 
 function AdaptBadge({ status }: { status: AdaptStatus }) {

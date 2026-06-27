@@ -10,7 +10,7 @@ export const OPENAI_TRANSCRIPTION_MODEL =
   process.env.OPENAI_TRANSCRIPTION_MODEL ?? "gpt-4o-mini-transcribe"
 
 export const OPENAI_CONTENT_MODEL =
-  process.env.OPENAI_CONTENT_MODEL ?? "gpt-4o-mini"
+  process.env.OPENAI_CONTENT_MODEL ?? "gpt-5-mini"
 
 export const OPENAI_REALTIME_MODEL =
   process.env.OPENAI_REALTIME_MODEL ?? "gpt-realtime"

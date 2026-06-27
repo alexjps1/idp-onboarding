@@ -43,11 +43,18 @@ Für jedes Modul kennst du das Vorwissen der Person getrennt nach theoretischem 
 
 Ziel: Die Person soll nach dem Lesen jedes aktive Assistenzsystem sicher bedienen können – ohne überflüssige Wiederholung von bereits Bekanntem, aber ohne Sicherheitslücken.
 
-Passe jeden Abschnitt am Vorwissen aus:
-- Kein/wenig Vorwissen ("keins", "sehr wenig", "wenig"): ausführlich und in einfacher, konkreter Sprache erklären. Eine kurze Alltagsanalogie ist erlaubt. Beschreibe die Bedienschritte explizit. Mehr Sätze sind ausdrücklich erwünscht.
+WICHTIGSTE REGEL – Modul weglassen:
+- Kennt die Person ein System bereits vollständig (Theorie UND Praxis beide "viel" oder "sehr viel"), wird das GESAMTE Modul weggelassen: Setze dann zwingend "omitted": true und "paragraphs": [] (leeres Array).
+- Ein weggelassenes Modul enthält null Absätze. Gib in diesem Fall KEINEN Text aus – keine Begründung, keinen Hinweis, keinen Satz wie "Da Sie bereits umfassend informiert sind, entfällt hier eine ausführliche Wiederholung …". Ein erklärender Satz statt des Weglassens ist ein Fehler.
+- Nur weglassen, wenn BEIDE Werte hoch sind. Ist nur eine Dimension hoch, wird gekürzt (siehe unten), nicht weggelassen.
+- Module mit "alwaysKeep": true werden niemals weggelassen.
+
+Passe jeden Abschnitt an das Vorwissen an. Grundprinzip: Je mehr die Person zu einem System weiß, desto kürzer und kompakter; je weniger sie weiß, desto ausführlicher und einfacher.
+- Sehr hohes Vorwissen (beide Dimensionen "viel"/"sehr viel"): Modul weglassen – siehe WICHTIGSTE REGEL oben.
+- Hohes Vorwissen (nur eine Dimension "viel"/"sehr viel"): stark auf das prozedural Wesentliche kürzen – nur die konkreten Bedienschritte, keine Hintergründe.
 - Mittleres Vorwissen ("eher wenig", "eher viel"): knapp und sachlich auf die Kernbedienung fokussieren.
-- Hohes Vorwissen ("viel", "sehr viel"): stark auf das prozedural Wesentliche kürzen. Bei sehr hohem Vorwissen darfst du ein Modul ganz weglassen ("omitted": true, "paragraphs": []).
-- Gewichte theoretisches Wissen und praktische Erfahrung gemeinsam; ist eines davon niedrig, erkläre eher mehr.
+- Kein/wenig Vorwissen ("keins", "sehr wenig", "wenig"): ausführlich und in einfacher, konkreter Sprache erklären. Eine kurze Alltagsanalogie ist erlaubt. Beschreibe die Bedienschritte explizit. Mehr Sätze sind ausdrücklich erwünscht. Je weniger Vorwissen, desto einfacher und konkreter die Sprache.
+- Unterscheiden sich Theorie und Praxis deutlich (mehrere Stufen Abstand): richte dich nach dem niedrigeren Wert und zeige eher mehr. Erkläre gezielt die schwächere Seite aus – fehlt die Praxis, betone die konkreten Bedienschritte; fehlt die Theorie, ordne Funktion und Zweck kurz ein.
 
 Strenge Regeln:
 - Bleib inhaltlich exakt bei der Vorlage. Erfinde keine Funktionen, Tasten, Fakten oder Sicherheitshinweise.
@@ -69,8 +76,14 @@ ${buildOnboardingGifGuide()}
 
 Antworte ausschließlich als JSON-Objekt exakt in diesem Format:
 {"sections":[{"id":"...","title":"...","paragraphs":[{"text":"...","gifs":["dateiname"]}],"omitted":false}]}
-Das Feld "gifs" ist optional – lass es weg, wenn kein GIF zum Absatz passt. Schreibe niemals leere Arrays für "gifs".
-Bei weggelassenen Modulen "omitted": true und "paragraphs": [].`
+
+Beispiel – angepasstes Modul (Person braucht Erklärung):
+{"sections":[{"id":"abstandsregeltempomat","title":"Abstandsregeltempomat","paragraphs":[{"text":"Das Fahrzeug hält den Abstand zum Vorderfahrzeug automatisch …","gifs":["abstandsregeltempomat/abstandsregelung-automatisch.gif"]}],"omitted":false}]}
+
+Beispiel – weggelassenes Modul (Person kennt es bereits vollständig, Theorie und Praxis "sehr viel"):
+{"sections":[{"id":"ampelerkennung","title":"Ampelerkennung","paragraphs":[],"omitted":true}]}
+
+"omitted" ist immer anzugeben (true oder false). Das Feld "gifs" ist optional – lass es weg, wenn kein GIF zum Absatz passt. Schreibe niemals leere Arrays für "gifs".`
 
 /**
  * Compiles the onboarding modules into a plain-text reference manual that is
