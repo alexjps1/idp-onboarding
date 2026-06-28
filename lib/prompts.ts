@@ -5,6 +5,10 @@
 
 import { GIF_CATALOG } from "@/lib/gif-catalog"
 import { ONBOARDING_MODULES } from "@/lib/onboarding-modules"
+import {
+  ASSISTANCE_SYSTEMS,
+  NON_OFFERABLE_SYSTEMS,
+} from "@/lib/assistance-systems"
 
 /** Sampling temperature for the onboarding adaptation request (0–2). */
 export const ONBOARDING_TEMPERATURE = 0.4
@@ -126,3 +130,55 @@ GIF-Nutzung:
 Verwende das folgende Handbuch als verbindliche Wissensquelle:
 
 ${buildHandbuch()}`
+
+/** Self-assessment ratings (1–7) keyed by assistance-system name. */
+type Ratings = Record<string, number>
+
+/**
+ * Renders the participant's self-assessment as a per-system list of theory and
+ * practice ratings, so the proactive tutor can judge where help is most useful.
+ */
+function buildSelfAssessment(theory: Ratings, practice: Ratings): string {
+  const fmt = (v: number | undefined) =>
+    typeof v === "number" ? `${v}/7` : "keine Angabe"
+  return ASSISTANCE_SYSTEMS.map(
+    (s) => `- ${s.name}: Theorie ${fmt(theory[s.name])}, Praxis ${fmt(practice[s.name])}`
+  ).join("\n")
+}
+
+/**
+ * Instructions for a *proactive* Realtime session, opened automatically the
+ * first time the driving automation is switched on. Extends the normal tutor
+ * prompt with a one-sentence opening: the tutor offers, on its own, to explain
+ * exactly one assistance system it judges most useful from the self-assessment
+ * — never one of the non-offerable (self-explanatory) systems. After the
+ * opening it behaves like the normal reactive tutor.
+ */
+export function buildProactiveInstructions(
+  theory: Ratings,
+  practice: Ratings
+): string {
+  const hasRatings =
+    Object.keys(theory).length > 0 || Object.keys(practice).length > 0
+
+  const selfAssessment = hasRatings
+    ? `Die Person hat sich vor der Fahrt selbst eingeschätzt (Skala 1 = kein Wissen bis 7 = sehr viel Wissen):
+${buildSelfAssessment(theory, practice)}
+
+Wähle eigenständig das System, bei dem eine Erklärung am hilfreichsten erscheint – tendenziell dort, wo theoretisches Wissen oder praktische Erfahrung niedrig ist.`
+    : `Es liegt keine Selbsteinschätzung vor. Biete in diesem Fall allgemein an, ein für die Fahrt relevantes Assistenzsystem zu erklären.`
+
+  const nonOfferable =
+    NON_OFFERABLE_SYSTEMS.length > 0
+      ? `
+
+Biete folgende Systeme niemals von dir aus an, da sie selbsterklärend sind und keine Anpassung der Fahrweise erfordern: ${NON_OFFERABLE_SYSTEMS.join(", ")}. Fragt die Person selbst danach, darfst du sie natürlich erklären.`
+      : ""
+
+  return `${REALTIME_INSTRUCTIONS}
+
+# Proaktive Eröffnung
+Die Fahrautomatisierung wurde gerade zum ersten Mal aktiviert. Eröffne das Gespräch von dir aus mit genau EINEM kurzen Satz: Biete an, zu erklären, wie genau ein bestimmtes Assistenzsystem funktioniert, und nenne dieses eine System konkret beim Namen. Stelle nur diese eine Frage und warte dann auf die Antwort der Person.
+
+${selfAssessment}${nonOfferable}`
+}

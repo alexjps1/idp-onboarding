@@ -1,0 +1,2335 @@
+SILAB SILABAEdit
+{
+	SILAB_VERSION = 700;
+	MergedLayout = 1;
+	NAreaSpecificGraphicsInfos = 0;
+	NAreaSpecificTrafficInfos = 0;
+	ShowSCNInfo = 1;
+	ShowObjectNames = 1;
+	ShowFigureShapes = 1;
+	ShowFigurePreview = 0;
+	xmin = -200;
+	ymin = -200;
+	xmax = 200;
+	ymax = 200;
+	ActiveLayer = 2;
+	Layer0Visible = 1;
+	Layer1Visible = 1;
+	Layer2Visible = 1;
+	Layer3Visible = 1;
+	Layer4Visible = 1;
+	Layer5Visible = 0;
+	Layer l0
+	{
+		NFigures = 0;
+	};
+	Layer l1
+	{
+		NFigures = 8;
+		Figure f0
+		{
+			# AR2FLayoutLine
+			Type = 1;
+			ID = 0;
+			x0 = -48;
+			y0 = -34;
+			x1 = 23;
+			y1 = -34.2;
+			NParents = 0;
+		};
+		Figure f1
+		{
+			# AR2FLayoutLine
+			Type = 1;
+			ID = 2;
+			x0 = -42.2;
+			y0 = -34;
+			x1 = 92.4;
+			y1 = -34.2;
+			NParents = 0;
+		};
+		Figure f2
+		{
+			# AR2FLayoutLine
+			Type = 1;
+			ID = 3;
+			x0 = -30;
+			y0 = -34;
+			x1 = -92.2;
+			y1 = -34;
+			NParents = 0;
+		};
+		Figure f3
+		{
+			# AR2FLayoutLine
+			Type = 1;
+			ID = 4;
+			x0 = 64.51;
+			y0 = -30.21;
+			x1 = -88.3;
+			y1 = -29.74;
+			NParents = 0;
+		};
+		Figure f4
+		{
+			# AR2FLayoutCrossSection
+			Type = 3;
+			ID = 6;
+			x = 85.2342998;
+			y = -34.1893526;
+			sAnchor = 127.4344405;
+			TauAnchor = 0.946763;
+			dAnchor = 0;
+			phi = -1.57228221;
+			phiOffset = 0;
+			rvis = 1e+10;
+			DesiredPort = 2;
+			zOffset = 0;
+			grade = -1000;
+			levelManual = 0;
+			level = 0;
+			NLaneInfos = 7;
+			lanewidth0 = 2.5;
+			lanedir0 = 1;
+			lanetype0 = 0;
+			lanewidth1 = 3.75;
+			lanedir1 = 1;
+			lanetype1 = 0;
+			lanewidth2 = 3.75;
+			lanedir2 = 1;
+			lanetype2 = 0;
+			lanewidth3 = 3;
+			lanedir3 = 1;
+			lanetype3 = 1;
+			lanewidth4 = 3.75;
+			lanedir4 = 0;
+			lanetype4 = 0;
+			lanewidth5 = 3.75;
+			lanedir5 = 0;
+			lanetype5 = 0;
+			lanewidth6 = 2.5;
+			lanedir6 = 0;
+			lanetype6 = 0;
+			NParents = 1;
+			Parent0 = l1.f1;
+			Parent0UserData = 0;
+		};
+		Figure f5
+		{
+			# AR2FLayoutCrossSection
+			Type = 3;
+			ID = 8;
+			x = -88.64;
+			y = -32.16;
+			sAnchor = 152.487;
+			TauAnchor = 0.997884;
+			dAnchor = 0;
+			phi = -1.57361;
+			phiOffset = 0;
+			rvis = 1e+10;
+			DesiredPort = 1;
+			zOffset = 0;
+			grade = -1000;
+			levelManual = 0;
+			level = 0;
+			NLaneInfos = 2;
+			lanewidth0 = 3.5;
+			lanedir0 = 1;
+			lanetype0 = 0;
+			lanewidth1 = 3.5;
+			lanedir1 = 0;
+			lanetype1 = 0;
+			NParents = 0;
+		};
+		Figure f6
+		{
+			# AR2FLayoutCrossSection
+			Type = 3;
+			ID = 5;
+			x = -24.62;
+			y = -31.95;
+			sAnchor = 88.5015;
+			TauAnchor = 0.579158;
+			dAnchor = 0;
+			phi = -1.57361;
+			phiOffset = 0;
+			rvis = 1e+10;
+			DesiredPort = 0;
+			zOffset = 0;
+			grade = -1000;
+			levelManual = 0;
+			level = 0;
+			NLaneInfos = 3;
+			lanewidth0 = 3.75;
+			lanedir0 = 1;
+			lanetype0 = 0;
+			lanewidth1 = 3;
+			lanedir1 = 1;
+			lanetype1 = 1;
+			lanewidth2 = 3.75;
+			lanedir2 = 0;
+			lanetype2 = 0;
+			NParents = 0;
+		};
+		Figure f7
+		{
+			# AR2FLayoutCrossSection
+			Type = 3;
+			ID = 7;
+			x = 29.8;
+			y = -34.2;
+			sAnchor = 45.201;
+			TauAnchor = 0.636631;
+			dAnchor = 0;
+			phi = -1.57361;
+			phiOffset = 0;
+			rvis = 1e+10;
+			DesiredPort = 0;
+			zOffset = 0;
+			grade = -1000;
+			levelManual = 0;
+			level = 0;
+			NLaneInfos = 5;
+			lanewidth0 = 3.75;
+			lanedir0 = 1;
+			lanetype0 = 0;
+			lanewidth1 = 3.75;
+			lanedir1 = 1;
+			lanetype1 = 0;
+			lanewidth2 = 3;
+			lanedir2 = 1;
+			lanetype2 = 1;
+			lanewidth3 = 3.75;
+			lanedir3 = 0;
+			lanetype3 = 0;
+			lanewidth4 = 3.75;
+			lanedir4 = 0;
+			lanetype4 = 0;
+			NParents = 0;
+		};
+	};
+	Layer l2
+	{
+		NLaneGroups = 1;
+		LanesGroup lg0
+		{
+			GroupID = 1;
+			GroupName = "default";
+		};
+		NFigures = 13;
+		Figure f0
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 1;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 0;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 1;
+			firstInCS = 0;
+			lastInCS = 0;
+			roadinfo = "TarOld2";
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 2;
+			neighbour0 = 2;
+			neighbour1 = 13;
+			NParents = 2;
+			Parent0 = l1.f4;
+			Parent0UserData = 2;
+			Parent1 = l1.f7;
+			Parent1UserData = 1;
+		};
+		Figure f1
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 2;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 1;
+			firstInCS = 0;
+			lastInCS = 0;
+			roadinfo = "TarOld2";
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 3;
+			neighbour0 = 1;
+			neighbour1 = 3;
+			neighbour2 = 13;
+			NParents = 2;
+			Parent0 = l1.f4;
+			Parent0UserData = 1;
+			Parent1 = l1.f7;
+			Parent1UserData = 0;
+		};
+		Figure f2
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 3;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 1;
+			neighbour0 = 2;
+			NParents = 2;
+			Parent0 = l1.f4;
+			Parent0UserData = 0;
+			Parent1 = l1.f7;
+			Parent1UserData = 0;
+		};
+		Figure f3
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 4;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 1;
+			firstInCS = 0;
+			lastInCS = 0;
+			roadinfo = "TarOld2";
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 1;
+			neighbour0 = 5;
+			NParents = 2;
+			Parent0 = l1.f7;
+			Parent0UserData = 3;
+			Parent1 = l1.f4;
+			Parent1UserData = 4;
+		};
+		Figure f4
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 5;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 1;
+			firstInCS = 0;
+			lastInCS = 0;
+			roadinfo = "TarOld2";
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 2;
+			neighbour0 = 4;
+			neighbour1 = 6;
+			NParents = 2;
+			Parent0 = l1.f7;
+			Parent0UserData = 4;
+			Parent1 = l1.f4;
+			Parent1UserData = 5;
+		};
+		Figure f5
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 6;
+			headingleft = 0;
+			headingright = 1;
+			headingstraight = 0;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 1;
+			neighbour0 = 5;
+			NParents = 2;
+			Parent0 = l1.f7;
+			Parent0UserData = 4;
+			Parent1 = l1.f4;
+			Parent1UserData = 6;
+		};
+		Figure f6
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 7;
+			headingleft = 0;
+			headingright = 1;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 0;
+			NParents = 2;
+			Parent0 = l1.f5;
+			Parent0UserData = 1;
+			Parent1 = l1.f6;
+			Parent1UserData = 2;
+		};
+		Figure f7
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 8;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 0;
+			NParents = 2;
+			Parent0 = l1.f6;
+			Parent0UserData = 0;
+			Parent1 = l1.f5;
+			Parent1UserData = 0;
+		};
+		Figure f8
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 9;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 0;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 1;
+			neighbour0 = 10;
+			NParents = 2;
+			Parent0 = l1.f7;
+			Parent0UserData = 1;
+			Parent1 = l1.f6;
+			Parent1UserData = 0;
+		};
+		Figure f9
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 10;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 1;
+			neighbour0 = 9;
+			NParents = 2;
+			Parent0 = l1.f7;
+			Parent0UserData = 0;
+			Parent1 = l1.f6;
+			Parent1UserData = 0;
+		};
+		Figure f10
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 11;
+			headingleft = 0;
+			headingright = 0;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 1;
+			neighbour0 = 12;
+			NParents = 2;
+			Parent0 = l1.f6;
+			Parent0UserData = 2;
+			Parent1 = l1.f7;
+			Parent1UserData = 3;
+		};
+		Figure f11
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 12;
+			headingleft = 0;
+			headingright = 1;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 1;
+			neighbour0 = 11;
+			NParents = 2;
+			Parent0 = l1.f6;
+			Parent0UserData = 2;
+			Parent1 = l1.f7;
+			Parent1UserData = 4;
+		};
+		Figure f12
+		{
+			# AR2FLanesLane
+			Type = 1;
+			ID = 13;
+			headingleft = 0;
+			headingright = 1;
+			headingstraight = 1;
+			obsid = 0;
+			mu = 0.85;
+			istargetroute = 0;
+			visible = 0;
+			firstInCS = 0;
+			lastInCS = 0;
+			directconnection = 0;
+			lanegroupidx = 0;
+			ghostbegin = 0;
+			ghostend = 0;
+			nneighbours = 2;
+			neighbour0 = 1;
+			neighbour1 = 2;
+			NParents = 2;
+			Parent0 = l1.f4;
+			Parent0UserData = 2;
+			Parent1 = l1.f7;
+			Parent1UserData = 0;
+		};
+	};
+	Layer l3
+	{
+		NFigures = 15;
+		Figure f0
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 8;
+			seg0_laneid = 10;
+			seg0_lanedistsign = -1;
+			seg0_tau = 0.068208;
+			seg0_d = 1.875;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 0;
+			seg0_linewidth = 0.15;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 8;
+			seg1_lanedistsign = -1;
+			seg1_tau = 0.005293;
+			seg1_d = 1.875;
+			seg1_offset = 0.3;
+			seg1_linelength = 6;
+			seg1_linegap = 0;
+			seg1_linewidth = 0.3;
+			seg1_double = 0;
+			seg1_color = 0;
+			nsegs = 2;
+			onborder = 0;
+			NParents = 2;
+			Parent0 = l2.f9;
+			Parent0UserData = 0;
+			Parent1 = l2.f7;
+			Parent1UserData = 0;
+		};
+		Figure f1
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 12;
+			seg0_laneid = 12;
+			seg0_lanedistsign = -1;
+			seg0_tau = 0.743979;
+			seg0_d = 1.875;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 12;
+			seg0_linewidth = 0.15;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 5;
+			seg1_lanedistsign = -1;
+			seg1_tau = 1;
+			seg1_d = 1.875;
+			seg1_offset = 0;
+			seg1_linelength = 6;
+			seg1_linegap = 12;
+			seg1_linewidth = 0.15;
+			seg1_double = 0;
+			seg1_color = 0;
+			nsegs = 2;
+			onborder = 0;
+			NParents = 2;
+			Parent0 = l2.f11;
+			Parent0UserData = 0;
+			Parent1 = l2.f4;
+			Parent1UserData = 0;
+		};
+		Figure f2
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 14;
+			seg0_laneid = 5;
+			seg0_lanedistsign = 1;
+			seg0_tau = 0;
+			seg0_d = 1.875;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 0;
+			seg0_linewidth = 0.15;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 5;
+			seg1_lanedistsign = 1;
+			seg1_tau = 1;
+			seg1_d = 1.875;
+			seg1_offset = 0;
+			seg1_linelength = 6;
+			seg1_linegap = 0;
+			seg1_linewidth = 0.3;
+			seg1_double = 0;
+			seg1_color = 0;
+			nsegs = 2;
+			onborder = 0;
+			NParents = 1;
+			Parent0 = l2.f4;
+			Parent0UserData = 0;
+		};
+		Figure f3
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 20;
+			seg0_laneid = 2;
+			seg0_lanedistsign = 1;
+			seg0_tau = 0;
+			seg0_d = 1.875;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 0;
+			seg0_linewidth = 0.15;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 10;
+			seg1_lanedistsign = 1;
+			seg1_tau = 0;
+			seg1_d = 1.875;
+			seg1_offset = 0;
+			seg1_linelength = 6;
+			seg1_linegap = 0;
+			seg1_linewidth = 0.3;
+			seg1_double = 0;
+			seg1_color = 0;
+			nsegs = 2;
+			onborder = 0;
+			NParents = 2;
+			Parent0 = l2.f1;
+			Parent0UserData = 0;
+			Parent1 = l2.f9;
+			Parent1UserData = 0;
+		};
+		Figure f4
+		{
+			# AR2FGraphicsChanIslandSep
+			Type = 6;
+			ID = 21;
+			ground = GrassNoLine;
+			seg0_lane0id = 1;
+			seg0_lane0idx = 2;
+			seg0_lane1id = 4;
+			seg0_lane1idx = 4;
+			seg0_round = 1;
+			seg0_cs = 6;
+			seg0_laneidx = 3;
+			seg0_taustart = 0;
+			seg0_tauend = 0;
+			seg0_lanedistsign = 0;
+			seg1_lane0id = 9;
+			seg1_lane0idx = 1;
+			seg1_lane1id = 11;
+			seg1_lane1idx = 3;
+			seg1_round = 1;
+			seg1_cs = 7;
+			seg1_laneidx = 2;
+			seg1_taustart = 0;
+			seg1_tauend = 0;
+			seg1_lanedistsign = 0;
+			seg2_round = 1;
+			seg2_cs = 5;
+			seg2_laneidx = 1;
+			seg2_taustart = 0;
+			seg2_tauend = 0;
+			seg2_lanedistsign = 0;
+			nsegs = 3;
+			NParents = 4;
+			Parent0 = l2.f0;
+			Parent0UserData = 0;
+			Parent1 = l2.f3;
+			Parent1UserData = 0;
+			Parent2 = l2.f8;
+			Parent2UserData = 0;
+			Parent3 = l2.f10;
+			Parent3UserData = 0;
+		};
+		Figure f5
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 25;
+			seg0_laneid = 11;
+			seg0_lanedistsign = -1;
+			seg0_tau = 0;
+			seg0_d = 1.875;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 0;
+			seg0_linewidth = 0.3;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 4;
+			seg1_lanedistsign = -1;
+			seg1_tau = 1;
+			seg1_d = 1.875;
+			seg1_offset = 0.3;
+			seg1_linelength = 6;
+			seg1_linegap = 0;
+			seg1_linewidth = 0.3;
+			seg1_double = 0;
+			seg1_color = 0;
+			nsegs = 2;
+			onborder = 0;
+			NParents = 2;
+			Parent0 = l2.f10;
+			Parent0UserData = 0;
+			Parent1 = l2.f3;
+			Parent1UserData = 0;
+		};
+		Figure f6
+		{
+			Type = 5;
+			ID = 26;
+			# AR2FGraphicsArrowMarker
+			typename = Right;
+			laneid = 1;
+			tau = 0.043429;
+			offset = 0;
+			onborder = 0;
+			color = 0;
+			NParents = 1;
+			Parent0 = l2.f0;
+			Parent0UserData = 0;
+		};
+		Figure f7
+		{
+			Type = 5;
+			ID = 27;
+			# AR2FGraphicsArrowMarker
+			typename = Right;
+			laneid = 1;
+			tau = 0.245721;
+			offset = 0;
+			onborder = 0;
+			color = 0;
+			NParents = 1;
+			Parent0 = l2.f0;
+			Parent0UserData = 0;
+		};
+		Figure f8
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 34;
+			seg0_laneid = 13;
+			seg0_lanedistsign = -1;
+			seg0_tau = 0;
+			seg0_d = 1.875;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 12;
+			seg0_linewidth = 0.3;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 10;
+			seg1_lanedistsign = -1;
+			seg1_tau = 0.073301;
+			seg1_d = 1.875;
+			seg1_offset = 0.3;
+			seg1_linelength = 6;
+			seg1_linegap = 0;
+			seg1_linewidth = 0.3;
+			seg1_double = 0;
+			seg1_color = 0;
+			nsegs = 2;
+			onborder = 0;
+			NParents = 2;
+			Parent0 = l2.f12;
+			Parent0UserData = 0;
+			Parent1 = l2.f9;
+			Parent1UserData = 0;
+		};
+		Figure f9
+		{
+			# AR2FGraphicsBorderPoly
+			Type = 9;
+			ID = 35;
+			ground = Marking;
+			vertex0_laneid = 1;
+			vertex0_tau = 0.690754;
+			vertex0_d = 1.34015;
+			vertex0_fillet = 0;
+			vertex1_laneid = 1;
+			vertex1_tau = 0.977336;
+			vertex1_d = 2.13834;
+			vertex1_fillet = 0;
+			vertex2_laneid = 9;
+			vertex2_tau = 0.24259;
+			vertex2_d = 1.62263;
+			vertex2_fillet = 0;
+			vertex3_laneid = 9;
+			vertex3_tau = 0.47246;
+			vertex3_d = 0.467754;
+			vertex3_fillet = 0;
+			vertex4_x = -15.59;
+			vertex4_y = -30.2;
+			vertex4_fillet = 0;
+			vertex5_x = 21.97;
+			vertex5_y = -32.39;
+			vertex5_fillet = 0;
+			vertex6_x = 77.93;
+			vertex6_y = -32.35;
+			vertex6_fillet = 0;
+			nvertices = 7;
+			NParents = 2;
+			Parent0 = l2.f0;
+			Parent0UserData = 0;
+			Parent1 = l2.f8;
+			Parent1UserData = 0;
+		};
+		Figure f10
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 36;
+			seg0_laneid = 7;
+			seg0_lanedistsign = 1;
+			seg0_tau = 0.000306;
+			seg0_d = 1.75;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 12;
+			seg0_linewidth = 0.3;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 7;
+			seg1_lanedistsign = 1;
+			seg1_tau = 0.95108;
+			seg1_d = 1.87406;
+			seg1_offset = 0;
+			seg1_linelength = 6;
+			seg1_linegap = 0;
+			seg1_linewidth = 0.3;
+			seg1_double = 0;
+			seg1_color = 0;
+			seg2_laneid = 12;
+			seg2_lanedistsign = 1;
+			seg2_tau = 0.442143;
+			seg2_d = 1.875;
+			seg2_offset = 0;
+			seg2_linelength = 6;
+			seg2_linegap = 0;
+			seg2_linewidth = 0.3;
+			seg2_double = 0;
+			seg2_color = 0;
+			seg3_laneid = 12;
+			seg3_lanedistsign = 1;
+			seg3_tau = 1;
+			seg3_d = 1.875;
+			seg3_offset = 0;
+			seg3_linelength = 6;
+			seg3_linegap = 0;
+			seg3_linewidth = 0.3;
+			seg3_double = 0;
+			seg3_color = 0;
+			seg4_laneid = 5;
+			seg4_lanedistsign = 1;
+			seg4_tau = 0.016652;
+			seg4_d = 1.875;
+			seg4_offset = 0.3;
+			seg4_linelength = 6;
+			seg4_linegap = 12;
+			seg4_linewidth = 0.3;
+			seg4_double = 0;
+			seg4_color = 0;
+			nsegs = 5;
+			onborder = 0;
+			NParents = 3;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+			Parent1 = l2.f11;
+			Parent1UserData = 0;
+			Parent2 = l2.f4;
+			Parent2UserData = 0;
+		};
+		Figure f11
+		{
+			# AR2FGraphicsMarkerLine
+			Type = 3;
+			ID = 37;
+			seg0_laneid = 10;
+			seg0_lanedistsign = 1;
+			seg0_tau = 0.009238;
+			seg0_d = 1.875;
+			seg0_offset = 0;
+			seg0_linelength = 6;
+			seg0_linegap = 0;
+			seg0_linewidth = 0.3;
+			seg0_double = 0;
+			seg0_color = 0;
+			seg1_laneid = 8;
+			seg1_lanedistsign = 1;
+			seg1_tau = 0.062738;
+			seg1_d = 1.87359;
+			seg1_offset = 0;
+			seg1_linelength = 6;
+			seg1_linegap = 0;
+			seg1_linewidth = 0.3;
+			seg1_double = 0;
+			seg1_color = 0;
+			seg2_laneid = 8;
+			seg2_lanedistsign = 1;
+			seg2_tau = 1;
+			seg2_d = 1.75004;
+			seg2_offset = 0;
+			seg2_linelength = 6;
+			seg2_linegap = 0;
+			seg2_linewidth = 0.3;
+			seg2_double = 0;
+			seg2_color = 0;
+			nsegs = 3;
+			onborder = 0;
+			NParents = 2;
+			Parent0 = l2.f9;
+			Parent0UserData = 0;
+			Parent1 = l2.f7;
+			Parent1UserData = 0;
+		};
+		Figure f12
+		{
+			# AR2FGraphicsChanIslandSep
+			Type = 6;
+			ID = 38;
+			ground = Marking;
+			seg0_lane0id = 7;
+			seg0_lane0idx = 1;
+			seg0_lane1id = 8;
+			seg0_lane1idx = 0;
+			seg0_round = 0;
+			seg0_cs = 8;
+			seg0_laneidx = 0;
+			seg0_taustart = 0;
+			seg0_tauend = 0;
+			seg0_lanedistsign = 0;
+			seg1_round = 1;
+			seg1_cs = 5;
+			seg1_laneidx = 1;
+			seg1_taustart = 0;
+			seg1_tauend = 0;
+			seg1_lanedistsign = 0;
+			nsegs = 2;
+			NParents = 2;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+			Parent1 = l2.f7;
+			Parent1UserData = 0;
+		};
+		Figure f13
+		{
+			# FGraphicsBorderStrip
+			Type = 1;
+			ID = 39;
+			ground = GrassNoLine;
+			seg0_nsupports = 4;
+			seg0_supp0_tau = 0;
+			seg0_supp0_d = 1.82642;
+			seg0_supp1_tau = 0.290284;
+			seg0_supp1_d = 1.601648;
+			seg0_supp2_tau = 0.683606;
+			seg0_supp2_d = 1.900734;
+			seg0_supp3_tau = 0.991142;
+			seg0_supp3_d = 1.591953;
+			seg0_laneid = 7;
+			seg0_lanedistsign = 1;
+			seg0_jumptonext = 0;
+			seg0_jumpfromend = 0;
+			seg0_jumpfromprev = 0;
+			seg0_jumptostart = 0;
+			seg0_flipdir = 0;
+			seg1_nsupports = 4;
+			seg1_supp0_tau = 0.1979;
+			seg1_supp0_d = 1.638709;
+			seg1_supp1_tau = 0.392117;
+			seg1_supp1_d = 1.831656;
+			seg1_supp2_tau = 0.629805;
+			seg1_supp2_d = 2.023502;
+			seg1_supp3_tau = 0.839048;
+			seg1_supp3_d = 1.966725;
+			seg1_laneid = 12;
+			seg1_lanedistsign = 1;
+			seg1_jumptonext = 0;
+			seg1_jumpfromend = 0;
+			seg1_jumpfromprev = 0;
+			seg1_jumptostart = 0;
+			seg1_flipdir = 0;
+			seg2_nsupports = 4;
+			seg2_supp0_tau = 0;
+			seg2_supp0_d = 1.649312;
+			seg2_supp1_tau = 0.346546;
+			seg2_supp1_d = 1.652987;
+			seg2_supp2_tau = 0.629926;
+			seg2_supp2_d = 1.940226;
+			seg2_supp3_tau = 1;
+			seg2_supp3_d = 1.914249;
+			seg2_laneid = 6;
+			seg2_lanedistsign = 1;
+			seg2_jumptonext = 0;
+			seg2_jumpfromend = 0;
+			seg2_jumpfromprev = 0;
+			seg2_jumptostart = 0;
+			seg2_flipdir = 0;
+			nsegs = 3;
+			bordertype = 0;
+			borderparam = 0;
+			filllandscape = 0;
+			NParents = 3;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+			Parent1 = l2.f11;
+			Parent1UserData = 0;
+			Parent2 = l2.f5;
+			Parent2UserData = 0;
+		};
+		Figure f14
+		{
+			# FGraphicsBorderStrip
+			Type = 1;
+			ID = 40;
+			ground = GrassNoLine;
+			seg0_nsupports = 4;
+			seg0_supp0_tau = 0;
+			seg0_supp0_d = 1.839969;
+			seg0_supp1_tau = 0.169469;
+			seg0_supp1_d = 2.079427;
+			seg0_supp2_tau = 0.353;
+			seg0_supp2_d = 2.02846;
+			seg0_supp3_tau = 0.881676;
+			seg0_supp3_d = 1.968343;
+			seg0_laneid = 3;
+			seg0_lanedistsign = 1;
+			seg0_jumptonext = 0;
+			seg0_jumpfromend = 0;
+			seg0_jumpfromprev = 0;
+			seg0_jumptostart = 0;
+			seg0_flipdir = 0;
+			seg1_nsupports = 1;
+			seg1_supp0_tau = 0.471488;
+			seg1_supp0_d = 1.990667;
+			seg1_laneid = 10;
+			seg1_lanedistsign = 1;
+			seg1_jumptonext = 0;
+			seg1_jumpfromend = 0;
+			seg1_jumpfromprev = 0;
+			seg1_jumptostart = 0;
+			seg1_flipdir = 0;
+			seg2_nsupports = 4;
+			seg2_supp0_tau = 0;
+			seg2_supp0_d = 2.065252;
+			seg2_supp1_tau = 0.3391;
+			seg2_supp1_d = 2.073447;
+			seg2_supp2_tau = 0.680202;
+			seg2_supp2_d = 1.993654;
+			seg2_supp3_tau = 1;
+			seg2_supp3_d = 1.895331;
+			seg2_laneid = 8;
+			seg2_lanedistsign = 1;
+			seg2_jumptonext = 0;
+			seg2_jumpfromend = 0;
+			seg2_jumpfromprev = 0;
+			seg2_jumptostart = 0;
+			seg2_flipdir = 0;
+			nsegs = 3;
+			bordertype = 0;
+			borderparam = 0;
+			filllandscape = 0;
+			NParents = 3;
+			Parent0 = l2.f2;
+			Parent0UserData = 0;
+			Parent1 = l2.f9;
+			Parent1UserData = 0;
+			Parent2 = l2.f7;
+			Parent2UserData = 0;
+		};
+	};
+	Layer l4
+	{
+		NFigures = 40;
+		Figure f0
+		{
+			Type = 1;
+			ID = 6;
+			# AR2FGraphics2Object
+			laneid = 8;
+			tau = 0.25069;
+			dist = 24.1227;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -8;
+			ymin = -50;
+			xmax = 8;
+			ymax = 50;
+			Model = "area2.hills.huegel1_a";
+			Preview = "aedit\Hill1";
+			Icon = "aedit/icon/Hill1";
+			Billboard = 0;
+			Kategorie = "Hügel";
+			Title = "Hügel 1";
+			Name = "Hill1";
+			OffsRotZ = 0;
+			Flags = 1;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f7;
+			Parent0UserData = 0;
+		};
+		Figure f1
+		{
+			Type = 1;
+			ID = 7;
+			# AR2FGraphics2Object
+			laneid = 2;
+			tau = 0.914431;
+			dist = 33.5252;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -8;
+			ymin = -50;
+			xmax = 8;
+			ymax = 50;
+			Model = "area2.hills.huegel1_a";
+			Preview = "aedit\Hill1";
+			Icon = "aedit/icon/Hill1";
+			Billboard = 0;
+			Kategorie = "Hügel";
+			Title = "Hügel 1";
+			Name = "Hill1";
+			OffsRotZ = 0;
+			Flags = 1;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f1;
+			Parent0UserData = 0;
+		};
+		Figure f2
+		{
+			Type = 1;
+			ID = 8;
+			# AR2FGraphics2Object
+			laneid = 3;
+			tau = 1;
+			dist = 16.9392;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -7.3;
+			ymin = -7.68;
+			xmax = 6.56;
+			ymax = 6.78;
+			zmin = -0.84;
+			zmax = 16.51;
+			Model = "environment.vegetation.tree.tree_1";
+			Preview = "aedit/vegetation/tree/tree_1";
+			Icon = "aedit/icon/vegetation/tree/tree_1";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Baum 1";
+			Name = "Tree_Tree_1";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f2;
+			Parent0UserData = 0;
+		};
+		Figure f3
+		{
+			Type = 1;
+			ID = 9;
+			# AR2FGraphics2Object
+			laneid = 12;
+			tau = 0.962418;
+			dist = 37.1062;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -10.62;
+			ymin = -11.82;
+			xmax = 10.37;
+			ymax = 10.95;
+			zmin = -0.4;
+			zmax = 19.71;
+			Model = "environment.vegetation.tree.tree_9";
+			Preview = "aedit/vegetation/tree/tree_9";
+			Icon = "aedit/icon/vegetation/tree/tree_9";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Baum 9";
+			Name = "Tree_Tree_9";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f11;
+			Parent0UserData = 0;
+		};
+		Figure f4
+		{
+			Type = 1;
+			ID = 10;
+			# AR2FGraphics2Object
+			laneid = 7;
+			tau = 0.439603;
+			dist = 46.9811;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -10.62;
+			ymin = -11.82;
+			xmax = 10.37;
+			ymax = 10.95;
+			zmin = -0.4;
+			zmax = 19.71;
+			Model = "environment.vegetation.tree.tree_9";
+			Preview = "aedit/vegetation/tree/tree_9";
+			Icon = "aedit/icon/vegetation/tree/tree_9";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Baum 9";
+			Name = "Tree_Tree_9";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+		};
+		Figure f5
+		{
+			Type = 1;
+			ID = 11;
+			# AR2FGraphics2Object
+			laneid = 7;
+			tau = 0.642722;
+			dist = 2.66077;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+		};
+		Figure f6
+		{
+			Type = 1;
+			ID = 12;
+			# AR2FGraphics2Object
+			laneid = 8;
+			tau = 0.346109;
+			dist = 2.71191;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f7;
+			Parent0UserData = 0;
+		};
+		Figure f7
+		{
+			Type = 1;
+			ID = 13;
+			# AR2FGraphics2Object
+			laneid = 11;
+			tau = 0.269364;
+			dist = 3.31708;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f10;
+			Parent0UserData = 0;
+		};
+		Figure f8
+		{
+			Type = 1;
+			ID = 14;
+			# AR2FGraphics2Object
+			laneid = 12;
+			tau = 0.826854;
+			dist = 2.73284;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f11;
+			Parent0UserData = 0;
+		};
+		Figure f9
+		{
+			Type = 1;
+			ID = 15;
+			# AR2FGraphics2Object
+			laneid = 6;
+			tau = 0.669133;
+			dist = 2.03415;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f5;
+			Parent0UserData = 0;
+		};
+		Figure f10
+		{
+			Type = 1;
+			ID = 16;
+			# AR2FGraphics2Object
+			laneid = 3;
+			tau = 0.353437;
+			dist = 2.20479;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f2;
+			Parent0UserData = 0;
+		};
+		Figure f11
+		{
+			Type = 1;
+			ID = 17;
+			# AR2FGraphics2Object
+			laneid = 10;
+			tau = 0.184595;
+			dist = 2.79169;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f9;
+			Parent0UserData = 0;
+		};
+		Figure f12
+		{
+			Type = 1;
+			ID = 18;
+			# AR2FGraphics2Object
+			laneid = 9;
+			tau = 0.731134;
+			dist = 3.34723;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -0.5;
+			ymin = -0.5;
+			xmax = 0.5;
+			ymax = 0.5;
+			Model = "scnx.road.superstructures.objects.post_shiny";
+			Preview = "aedit\PostNight";
+			Icon = "aedit/icon/road/post_night";
+			Billboard = 0;
+			Kategorie = "Straße";
+			Title = "Leitpfosten 1, weiß leuchtend";
+			Name = "PostNight";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f8;
+			Parent0UserData = 0;
+		};
+		Figure f13
+		{
+			Type = 1;
+			ID = 19;
+			# AR2FGraphics2Object
+			x = -43.24;
+			y = -139.93;
+			z = 0;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -5.33;
+			ymin = -5.92;
+			xmax = 5.2;
+			ymax = 5.45;
+			zmin = -0.43;
+			zmax = 10.4;
+			Model = "environment.vegetation.tree.tree_10";
+			Preview = "aedit/vegetation/tree/tree_10";
+			Icon = "aedit/icon/vegetation/tree/tree_10";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Baum 10";
+			Name = "Tree_Tree_10";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 0;
+		};
+		Figure f14
+		{
+			Type = 1;
+			ID = 20;
+			# AR2FGraphics2Object
+			x = -5.59;
+			y = -128.69;
+			z = 0;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -5.33;
+			ymin = -5.92;
+			xmax = 5.2;
+			ymax = 5.45;
+			zmin = -0.43;
+			zmax = 10.4;
+			Model = "environment.vegetation.tree.tree_10";
+			Preview = "aedit/vegetation/tree/tree_10";
+			Icon = "aedit/icon/vegetation/tree/tree_10";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Baum 10";
+			Name = "Tree_Tree_10";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 0;
+		};
+		Figure f15
+		{
+			Type = 1;
+			ID = 21;
+			# AR2FGraphics2Object
+			x = 84.87;
+			y = -139.93;
+			z = 0;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -5.33;
+			ymin = -5.92;
+			xmax = 5.2;
+			ymax = 5.45;
+			zmin = -0.43;
+			zmax = 10.4;
+			Model = "environment.vegetation.tree.tree_10";
+			Preview = "aedit/vegetation/tree/tree_10";
+			Icon = "aedit/icon/vegetation/tree/tree_10";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Baum 10";
+			Name = "Tree_Tree_10";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 0;
+		};
+		Figure f16
+		{
+			Type = 1;
+			ID = 22;
+			# AR2FGraphics2Object
+			laneid = 6;
+			tau = 0.476107;
+			dist = 2.84855;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.330";
+			Preview = "330";
+			Icon = "sign/330";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_330";
+			Name = "Schild_330";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f5;
+			Parent0UserData = 0;
+		};
+		Figure f17
+		{
+			Type = 1;
+			ID = 23;
+			# AR2FGraphics2Object
+			laneid = 4;
+			tau = 0.466322;
+			dist = -3.52137;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.330";
+			Preview = "330";
+			Icon = "sign/330";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_330";
+			Name = "Schild_330";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 0;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f3;
+			Parent0UserData = 0;
+		};
+		Figure f18
+		{
+			Type = 1;
+			ID = 24;
+			# AR2FGraphics2Object
+			laneid = 1;
+			tau = 0.518167;
+			dist = -3.32976;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.334";
+			Preview = "334";
+			Icon = "sign/334";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_334";
+			Name = "Schild_334";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f0;
+			Parent0UserData = 0;
+		};
+		Figure f19
+		{
+			Type = 1;
+			ID = 25;
+			# AR2FGraphics2Object
+			laneid = 2;
+			tau = 0.516267;
+			dist = 4.38011;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.334";
+			Preview = "334";
+			Icon = "sign/334";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_334";
+			Name = "Schild_334";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f1;
+			Parent0UserData = 0;
+		};
+		Figure f20
+		{
+			Type = 1;
+			ID = 26;
+			# AR2FGraphics2Object
+			x = -32.21;
+			y = -68.6;
+			z = 0;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -24;
+			ymin = -0.5;
+			xmax = 24;
+			ymax = 0.5;
+			Model = "environment.lgfarmed.hedge1";
+			Preview = "aedit\hedge1.bmp";
+			Icon = "aedit\hedge1/bmp";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Hedge1";
+			Name = "Hedge1";
+			OffsRotZ = -1.57078;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 0;
+		};
+		Figure f21
+		{
+			Type = 1;
+			ID = 27;
+			# AR2FGraphics2Object
+			x = -15.91;
+			y = -74.01;
+			z = 0;
+			phi = 0;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -24;
+			ymin = -0.5;
+			xmax = 24;
+			ymax = 0.5;
+			Model = "environment.lgfarmed.hedge1";
+			Preview = "aedit\hedge1.bmp";
+			Icon = "aedit\hedge1/bmp";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Hedge1";
+			Name = "Hedge1";
+			OffsRotZ = -1.57078;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 0;
+		};
+		Figure f22
+		{
+			Type = 1;
+			ID = 28;
+			# AR2FGraphics2Object
+			x = 61.83;
+			y = -100.6;
+			z = 0;
+			phi = 1.58825;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -24;
+			ymin = -0.5;
+			xmax = 24;
+			ymax = 0.5;
+			Model = "environment.lgfarmed.hedge1";
+			Preview = "aedit\hedge1.bmp";
+			Icon = "aedit\hedge1/bmp";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Hedge1";
+			Name = "Hedge1";
+			OffsRotZ = -1.57078;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 0;
+		};
+		Figure f23
+		{
+			Type = 1;
+			ID = 29;
+			# AR2FGraphics2Object
+			x = 64.06;
+			y = -9.06;
+			z = 0;
+			phi = 1.5708;
+			type = 0;
+			colorizeindex = 0;
+			xmin = -24;
+			ymin = -0.5;
+			xmax = 24;
+			ymax = 0.5;
+			Model = "environment.lgfarmed.hedge1";
+			Preview = "aedit\hedge1.bmp";
+			Icon = "aedit\hedge1/bmp";
+			Billboard = 0;
+			Kategorie = "Bäume";
+			Title = "Hedge1";
+			Name = "Hedge1";
+			OffsRotZ = -1.57078;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 0;
+		};
+		Figure f24
+		{
+			Type = 1;
+			ID = 30;
+			# AR2FGraphics2Object
+			laneid = 7;
+			tau = 0.997283;
+			dist = -4.30449;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.267";
+			Preview = "267";
+			Icon = "sign/267";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_267";
+			Name = "Schild_267";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+		};
+		Figure f25
+		{
+			Type = 1;
+			ID = 31;
+			# AR2FGraphics2Object
+			laneid = 7;
+			tau = 0.996895;
+			dist = -2.6144;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.222_10";
+			Preview = "222_10";
+			Icon = "sign/222_10";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_222_10";
+			Name = "Schild_222_10";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+		};
+		Figure f26
+		{
+			Type = 1;
+			ID = 32;
+			# AR2FGraphics2Object
+			laneid = 10;
+			tau = 0.989357;
+			dist = -3.31393;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.125";
+			Preview = "125";
+			Icon = "sign/125";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_125";
+			Name = "Schild_125";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f9;
+			Parent0UserData = 0;
+		};
+		Figure f27
+		{
+			Type = 1;
+			ID = 33;
+			# AR2FGraphics2Object
+			laneid = 10;
+			tau = 0.9912;
+			dist = 2.98604;
+			phi = 0;
+			type = 1;
+			colorizeindex = 0;
+			xmin = -1;
+			ymin = -0.2;
+			xmax = 1;
+			ymax = 0.2;
+			Model = "sign.125";
+			Preview = "125";
+			Icon = "sign/125";
+			Billboard = 0;
+			Kategorie = "_";
+			Title = "Schild_125";
+			Name = "Schild_125";
+			OffsRotZ = 0;
+			Flags = 0;
+			istrfrule = 0;
+			isvisible = 1;
+			info2 = 0;
+			NParents = 1;
+			Parent0 = l2.f9;
+			Parent0UserData = 0;
+		};
+		Figure f28
+		{
+			Type = 4;
+			ID = 34;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlantShoulder;
+			randomseed = 1;
+			lanedistsign = 1;
+			taustart = 0;
+			tauend = 0.552117;
+			d = 2.406461;
+			seg0_laneid = 7;
+			seg1_laneid = 12;
+			seg2_laneid = 6;
+			nsegs = 3;
+			NParents = 3;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+			Parent1 = l2.f11;
+			Parent1UserData = 0;
+			Parent2 = l2.f5;
+			Parent2UserData = 0;
+		};
+		Figure f29
+		{
+			Type = 4;
+			ID = 35;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlantShoulder;
+			randomseed = 1;
+			lanedistsign = 1;
+			taustart = 0.522543;
+			tauend = 1;
+			d = 2.100734;
+			seg0_laneid = 6;
+			nsegs = 1;
+			NParents = 1;
+			Parent0 = l2.f5;
+			Parent0UserData = 0;
+		};
+		Figure f30
+		{
+			Type = 4;
+			ID = 36;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlantShoulder;
+			randomseed = 1;
+			lanedistsign = 1;
+			taustart = 0;
+			tauend = 0.648802;
+			d = 2.218269;
+			seg0_laneid = 3;
+			nsegs = 1;
+			NParents = 1;
+			Parent0 = l2.f2;
+			Parent0UserData = 0;
+		};
+		Figure f31
+		{
+			Type = 4;
+			ID = 37;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlantShoulder;
+			randomseed = 1;
+			lanedistsign = 1;
+			taustart = 0.625272;
+			tauend = 1;
+			d = 2.515783;
+			seg0_laneid = 3;
+			seg1_laneid = 10;
+			seg2_laneid = 8;
+			nsegs = 3;
+			NParents = 3;
+			Parent0 = l2.f2;
+			Parent0UserData = 0;
+			Parent1 = l2.f9;
+			Parent1UserData = 0;
+			Parent2 = l2.f7;
+			Parent2UserData = 0;
+		};
+		Figure f32
+		{
+			Type = 4;
+			ID = 38;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = Guardrail;
+			randomseed = 1;
+			lanedistsign = -1;
+			taustart = 0.012302;
+			tauend = 1;
+			d = 2.34783;
+			seg0_laneid = 11;
+			seg1_laneid = 4;
+			nsegs = 2;
+			NParents = 2;
+			Parent0 = l2.f10;
+			Parent0UserData = 0;
+			Parent1 = l2.f3;
+			Parent1UserData = 0;
+		};
+		Figure f33
+		{
+			Type = 4;
+			ID = 39;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = Guardrail;
+			randomseed = 1;
+			lanedistsign = -1;
+			taustart = 0;
+			tauend = 0.993973;
+			d = 2.325362;
+			seg0_laneid = 1;
+			seg1_laneid = 9;
+			nsegs = 2;
+			NParents = 2;
+			Parent0 = l2.f0;
+			Parent0UserData = 0;
+			Parent1 = l2.f8;
+			Parent1UserData = 0;
+		};
+		Figure f34
+		{
+			Type = 4;
+			ID = 41;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlantHighway;
+			randomseed = 1;
+			lanedistsign = -1;
+			taustart = 0.010011;
+			tauend = 0.979592;
+			d = 3.287173;
+			seg0_laneid = 11;
+			seg1_laneid = 4;
+			nsegs = 2;
+			NParents = 2;
+			Parent0 = l2.f10;
+			Parent0UserData = 0;
+			Parent1 = l2.f3;
+			Parent1UserData = 0;
+		};
+		Figure f35
+		{
+			Type = 4;
+			ID = 42;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = RoadsideBush;
+			randomseed = 1;
+			lanedistsign = -1;
+			taustart = 0.009468;
+			tauend = 0.385852;
+			d = 3.227022;
+			seg0_laneid = 11;
+			seg1_laneid = 4;
+			nsegs = 2;
+			NParents = 2;
+			Parent0 = l2.f10;
+			Parent0UserData = 0;
+			Parent1 = l2.f3;
+			Parent1UserData = 0;
+		};
+		Figure f36
+		{
+			Type = 4;
+			ID = 43;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = RoadsideBush;
+			randomseed = 1;
+			lanedistsign = -1;
+			taustart = 0.569708;
+			tauend = 0.977907;
+			d = 3.35352;
+			seg0_laneid = 4;
+			nsegs = 1;
+			NParents = 1;
+			Parent0 = l2.f3;
+			Parent0UserData = 0;
+		};
+		Figure f37
+		{
+			Type = 4;
+			ID = 44;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlant;
+			randomseed = 1;
+			lanedistsign = 1;
+			taustart = 0.004975;
+			tauend = 1;
+			d = 10.352435;
+			seg0_laneid = 7;
+			seg1_laneid = 12;
+			seg2_laneid = 6;
+			nsegs = 3;
+			NParents = 3;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+			Parent1 = l2.f11;
+			Parent1UserData = 0;
+			Parent2 = l2.f5;
+			Parent2UserData = 0;
+		};
+		Figure f38
+		{
+			Type = 4;
+			ID = 45;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlant;
+			randomseed = 1;
+			lanedistsign = 1;
+			taustart = 0.008673;
+			tauend = 1;
+			d = 19.7343;
+			seg0_laneid = 7;
+			seg1_laneid = 12;
+			seg2_laneid = 6;
+			nsegs = 3;
+			NParents = 3;
+			Parent0 = l2.f6;
+			Parent0UserData = 0;
+			Parent1 = l2.f11;
+			Parent1UserData = 0;
+			Parent2 = l2.f5;
+			Parent2UserData = 0;
+		};
+		Figure f39
+		{
+			Type = 4;
+			ID = 46;
+			# AR2FGraphics2ObjectStrip
+			objectstrip = GrasslandPlant;
+			randomseed = 1;
+			lanedistsign = 1;
+			taustart = 0;
+			tauend = 0.987135;
+			d = 10.483408;
+			seg0_laneid = 3;
+			seg1_laneid = 10;
+			seg2_laneid = 8;
+			nsegs = 3;
+			NParents = 3;
+			Parent0 = l2.f2;
+			Parent0UserData = 0;
+			Parent1 = l2.f9;
+			Parent1UserData = 0;
+			Parent2 = l2.f7;
+			Parent2UserData = 0;
+		};
+	};
+	Layer l5
+	{
+		NPedSetupGroups = 1;
+		PedSetupGroup psg0
+		{
+			GroupName = ambient;
+			NPedestrians = 0;
+			IDOffset = -1;
+			Category = 0;
+			Title = "";
+			NArguments = 0;
+			Description = "";
+		};
+		NFigures = 0;
+	};
+	# SCN/SIG - Export
+	ProjectPath = 1;
+	ProjectPathName = "C:\SILAB\Projects\SILABDemo";
+	CFGFN = "parts\MotorwayBegin_27.cfg";
+	SIGFN = "models\MotorwayBegin_27.sig";
+	Road = "Tar2";
+	TypeName = "MotorwayBegin_27";
+	NodeID = 407011;
+	PHCurveRefinement = 89;
+	PHShoulder = 1;
+	LevelHeight = 6;
+	HBorderExt = 0;
+	LaneBased = 1;
+	ve = 70;
+	SmallVisRange = 0;
+	ModuleType = 1;
+	TRF = 0;
+	MOP = 0;
+	WallsODB = 1;
+	NumPersons = 10;
+	PathPlanner = 1;
+	BlockCrossing = 1000;
+	ModuleTypeName = "MotorwayBegin_27";
+	ModuleTypeID = 40701;
+	Area2InstanceName = "MotorwayBegin_27";
+	DPUInclude = "";
+	OBSInclude = "";
+	LGInclude = "";
+	CompatibilityMode = 0;
+	TestScript = 1;
+	TestScriptFN = "TS_MotorwayBegin_27.cfg";
+	TestBEV = 0;
+	TestSetupPort = 1;
+	ViewX = 10;
+	ViewY = 10;
+	ViewW = 500;
+	ViewH = 400;
+	BEVX = 520;
+	BEVY = 10;
+	BEVW = 500;
+	BEVH = 400;
+	AConTest = 0;
+	AConTestDir = "";
+	NComments = 0;
+	Exporter PNG
+	{
+		FileName = "noname.png";
+		SizeFactor = 1;
+		Antialiasing = 1;
+		TransparentBackground = 0;
+		LineWidth = 2;
+	};
+	Exporter SVG
+	{
+		FileName = "noname.svg";
+		Antialiasing = 1;
+		LineWidth = 0.4;
+	};
+	Exporter PDF
+	{
+		FileName = "noname.pdf";
+		Antialiasing = 1;
+		LineWidth = 1;
+	};
+};
