@@ -15,9 +15,17 @@ Wissen komplett weglassen.**
 
 ## Setup
 
+> ⚠️ **venv NICHT im Projektbaum anlegen.** Next/turbopack beobachtet den Projektordner;
+> ein venv mit Tausenden Dateien überlastet den File-Watcher und kann `npm run dev` aufhängen.
+> Lege das venv außerhalb des Repos an:
+
 ```bash
-cd prompt-tuning
-pip install -r requirements.txt
+# venv außerhalb des Projekts (einmalig)
+python3 -m venv ~/.venvs/idp-tuning
+~/.venvs/idp-tuning/bin/pip install -r prompt-tuning/requirements.txt
+
+# Skript darüber ausführen
+~/.venvs/idp-tuning/bin/python prompt-tuning/tune.py --prompt prompt-tuning/prompts/current.txt --dry-run
 # OPENAI_API_KEY kommt aus ../.env.local (dieselbe Datei wie die App)
 ```
 
