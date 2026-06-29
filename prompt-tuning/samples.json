@@ -1,0 +1,104 @@
+{
+  "_comment": "Von Opus kuratierte Tuning-Samples. modules = Baseline-Fixtures, verbatim aus lib/onboarding-modules.ts (Absätze per \\n verbunden). scenarios = Modul x Wissensprofil. theory/practice sind 1–7 (Selbsteinschätzungs-Skala). 'expect' ist nur eine Notiz für den menschlichen/Opus-Judge und wird NICHT an das Modell geschickt.",
+  "modules": {
+    "abstandsregeltempomat": {
+      "id": "abstandsregeltempomat",
+      "title": "Abstandsregeltempomat",
+      "system": "Abstandsregeltempomat",
+      "baseline": "Das Fahrzeug hält den Abstand zum Vorderfahrzeug automatisch. Es bremst oder beschleunigt, falls nötig.\nDrücken Sie die Abstandstasten, um den Abstand zum Vorderfahrzeug individuell zu erhöhen (rechts) oder zu verringern (links).\nDer individuell eingestellte Abstand wird im Display symbolisch angezeigt. Die Striche vor dem Fahrzeug visualisieren den Abstand – je mehr Striche, desto größer der eingestellte Abstand."
+    },
+    "spurfuehrungsassistent": {
+      "id": "spurfuehrungsassistent",
+      "title": "Spurführungsassistent",
+      "system": "Spurführungsassistent",
+      "baseline": "Das Fahrzeug hält automatisch die Spur, wenn das teilautomatisierte Fahren aktiv ist.\nAutomatische Spurwechsel sind nicht möglich. Drücken Sie die Aktivierungstaste (links), um das teilautomatisierte Fahren zu deaktivieren und den Spurwechsel manuell auszuführen (rechts)."
+    }
+  },
+  "scenarios": [
+    {
+      "label": "ARC – kein Vorwissen",
+      "module": "abstandsregeltempomat",
+      "theory": 1,
+      "practice": 1,
+      "expect": "Sehr ausführlich, einfache konkrete Sprache, Alltagsanalogie erlaubt, alle Bedienschritte explizit. Höchste Wortzahl der ARC-Reihe."
+    },
+    {
+      "label": "ARC – wenig",
+      "module": "abstandsregeltempomat",
+      "theory": 2,
+      "practice": 3,
+      "expect": "Ausführlich und einfach, mehr Sätze erwünscht. Etwas kürzer als 'kein Vorwissen'."
+    },
+    {
+      "label": "ARC – mittel",
+      "module": "abstandsregeltempomat",
+      "theory": 4,
+      "practice": 4,
+      "expect": "Knapp und sachlich auf die Kernbedienung fokussiert, keine Analogien."
+    },
+    {
+      "label": "ARC – hoch (eine Dimension)",
+      "module": "abstandsregeltempomat",
+      "theory": 6,
+      "practice": 2,
+      "expect": "Auf prozedural Wesentliches kürzen; schwache Praxis-Seite betonen (konkrete Bedienschritte). NICHT weglassen."
+    },
+    {
+      "label": "ARC – divergent (Theorie hoch, Praxis sehr niedrig)",
+      "module": "abstandsregeltempomat",
+      "theory": 6,
+      "practice": 1,
+      "expect": "Nach niedrigerem Wert (Praxis) richten, eher mehr zeigen, Bedienschritte betonen. NICHT weglassen."
+    },
+    {
+      "label": "ARC – sehr hoch (beide)",
+      "module": "abstandsregeltempomat",
+      "theory": 7,
+      "practice": 7,
+      "expect": "omitted:true, leere paragraphs, KEIN Fülltext/Begründung."
+    },
+
+    {
+      "label": "Spur – kein Vorwissen",
+      "module": "spurfuehrungsassistent",
+      "theory": 1,
+      "practice": 1,
+      "expect": "Sehr ausführlich, einfache Sprache, Analogie erlaubt, alle Schritte explizit. Höchste Wortzahl der Spur-Reihe."
+    },
+    {
+      "label": "Spur – wenig",
+      "module": "spurfuehrungsassistent",
+      "theory": 2,
+      "practice": 3,
+      "expect": "Ausführlich und einfach, mehr Sätze erwünscht."
+    },
+    {
+      "label": "Spur – mittel",
+      "module": "spurfuehrungsassistent",
+      "theory": 4,
+      "practice": 4,
+      "expect": "Knapp und sachlich auf die Kernbedienung."
+    },
+    {
+      "label": "Spur – hoch (eine Dimension)",
+      "module": "spurfuehrungsassistent",
+      "theory": 2,
+      "practice": 6,
+      "expect": "Stark kürzen auf prozedural Wesentliches; schwache Theorie-Seite kurz einordnen (Funktion/Zweck). NICHT weglassen."
+    },
+    {
+      "label": "Spur – divergent (Praxis hoch, Theorie sehr niedrig)",
+      "module": "spurfuehrungsassistent",
+      "theory": 1,
+      "practice": 6,
+      "expect": "Nach niedrigerem Wert (Theorie) richten, Funktion/Zweck kurz einordnen. NICHT weglassen."
+    },
+    {
+      "label": "Spur – sehr hoch (beide)",
+      "module": "spurfuehrungsassistent",
+      "theory": 6,
+      "practice": 7,
+      "expect": "omitted:true, leere paragraphs, KEIN Fülltext. (beide 'viel'/'sehr viel')"
+    }
+  ]
+}

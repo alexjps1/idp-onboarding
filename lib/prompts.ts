@@ -54,11 +54,18 @@ WICHTIGSTE REGEL – Modul weglassen:
 - Module mit "alwaysKeep": true werden niemals weggelassen.
 
 Passe jeden Abschnitt an das Vorwissen an. Grundprinzip: Je mehr die Person zu einem System weiß, desto kürzer und kompakter; je weniger sie weiß, desto ausführlicher und einfacher.
+
+MONOTONIE (verbindlich): Weniger Vorwissen ergibt IMMER mindestens so viel – in aller Regel deutlich mehr – Erklärung wie mehr Vorwissen. Die ausführlichste und einfachste Fassung gehört immer der Person mit dem geringsten Vorwissen. Eine Person ganz ohne Vorwissen darf niemals eine kürzere oder knappere Erklärung erhalten als eine Person mit etwas Vorwissen.
+
+GEDANKLICHE LÄNGENSKALA (von kürzer nach länger, ohne Zahlen im Text): weggelassen < hohes Vorwissen (eine Dimension) < mittleres Vorwissen < wenig Vorwissen < gar kein Vorwissen. Ordne deine Antwort in diese Reihenfolge ein und stelle sicher, dass eine niedrigere Wissensstufe nicht kürzer ausfällt als die nächsthöhere.
+
+LÄNGE NICHT AN DER VORLAGE FESTMACHEN: Die Vorlage ist nur das inhaltliche Faktengerüst, nicht die Zielänge. Bei wenig Vorwissen formulierst du dieses Gerüst aktiv aus und weitest es aus (streng innerhalb der Fakten der Vorlage, ohne Neues zu erfinden); bei viel Vorwissen verdichtest du es. Spiegele eine kurze Vorlage niemals nahezu 1:1 zurück – sonst erhält gerade die unerfahrene Person zu wenig.
 - Sehr hohes Vorwissen (beide Dimensionen "viel"/"sehr viel"): Modul weglassen – siehe WICHTIGSTE REGEL oben.
-- Hohes Vorwissen (nur eine Dimension "viel"/"sehr viel"): stark auf das prozedural Wesentliche kürzen – nur die konkreten Bedienschritte, keine Hintergründe.
+- Hohes Vorwissen (nur eine Dimension "viel"/"sehr viel"): stark auf das prozedural Wesentliche kürzen – nur die konkreten Bedienschritte, keine Hintergründe. Ein bis zwei kompakte Absätze.
 - Mittleres Vorwissen ("eher wenig", "eher viel"): knapp und sachlich auf die Kernbedienung fokussieren.
-- Kein/wenig Vorwissen ("keins", "sehr wenig", "wenig"): ausführlich und in einfacher, konkreter Sprache erklären. Eine kurze Alltagsanalogie ist erlaubt. Beschreibe die Bedienschritte explizit. Mehr Sätze sind ausdrücklich erwünscht. Je weniger Vorwissen, desto einfacher und konkreter die Sprache.
-- Unterscheiden sich Theorie und Praxis deutlich (mehrere Stufen Abstand): richte dich nach dem niedrigeren Wert und zeige eher mehr. Erkläre gezielt die schwächere Seite aus – fehlt die Praxis, betone die konkreten Bedienschritte; fehlt die Theorie, ordne Funktion und Zweck kurz ein.
+- Wenig Vorwissen ("sehr wenig", "wenig"): ausführlich und in einfacher Sprache in mehreren Absätzen erklären; jeden Bedienschritt explizit benennen.
+- Gar kein Vorwissen (mindestens eine Dimension "keins"/"keine"): die ausführlichste und einfachste Fassung überhaupt – ausführlicher als jede andere Stufe, auch ausführlicher als "sehr wenig"/"wenig". Decke aktiv und in mehreren Absätzen ab: (1) was das System tut, (2) wozu es dient (eine kurze Alltagsanalogie ist erlaubt), (3) jeden Bedienschritt einzeln und in der richtigen Reihenfolge, (4) woran die Person den Zustand bzw. die Anzeige im Display erkennt. Gib jedem Bedienschritt einen eigenen Satz und verwende die einfachste, konkreteste Sprache. Hier wird unter keinen Umständen gekürzt.
+- Unterscheiden sich Theorie und Praxis deutlich (mehrere Stufen Abstand): richte dich nach dem NIEDRIGEREN der beiden Werte und zeige eher mehr, als diese Stufe ohnehin vorsieht – nicht weniger. Erkläre gezielt die schwächere Seite aus – fehlt die Praxis, betone die konkreten Bedienschritte Schritt für Schritt; fehlt die Theorie, ordne Funktion und Zweck kurz ein.
 
 Strenge Regeln:
 - Bleib inhaltlich exakt bei der Vorlage. Erfinde keine Funktionen, Tasten, Fakten oder Sicherheitshinweise.
