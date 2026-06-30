@@ -20,8 +20,8 @@ const SCALE = [
 ]
 
 export default function TheoryAssessmentPage() {
-  const { theory, setTheory } = useStudy()
-  const { previous, next } = getAdjacentSteps("self-assessment-theory")
+  const { mode, theory, setTheory } = useStudy()
+  const { previous, next } = getAdjacentSteps("self-assessment-theory", mode)
 
   // The matrix is index-based; map rows to system names for persistence.
   const answers = React.useMemo<Record<number, number>>(() => {
@@ -37,7 +37,7 @@ export default function TheoryAssessmentPage() {
 
   return (
     <StudyShell
-      progress={getStepProgress("self-assessment-theory")}
+      progress={getStepProgress("self-assessment-theory", mode)}
       footer={
         <StudyFooter
           prevHref={previous?.path}

@@ -28,6 +28,7 @@ import {
 } from "lucide-react"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -63,7 +64,6 @@ export default function DrivePage() {
   const [endConfirmOpen, setEndConfirmOpen] = React.useState(false)
   const [textDraft, setTextDraft] = React.useState("")
   const [textInputVisible, setTextInputVisible] = React.useState(false)
-  const { previous, next } = getAdjacentSteps("drive")
   const {
     participantId,
     mode,
@@ -72,6 +72,8 @@ export default function DrivePage() {
     startVoiceConversation,
     appendVoiceMessage,
   } = useStudy()
+  const { previous, next } = getAdjacentSteps("drive", mode)
+  const router = useRouter()
   const withTutor = mode !== "onboarding-only"
   const tutor = useVoiceTutor({
     onMessage: appendVoiceMessage,
@@ -134,6 +136,14 @@ export default function DrivePage() {
     const id = setInterval(update, 1000)
     return () => clearInterval(id)
   }, [])
+
+  // Guard: the onboarding-only (/ohnetutor) condition has no tutor and no drive.
+  // If this page is reached directly in that mode, skip to the end screen.
+  React.useEffect(() => {
+    if (mode === "onboarding-only") router.replace("/complete")
+  }, [mode, router])
+
+  if (mode === "onboarding-only") return null
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#f2f1f2] text-black">

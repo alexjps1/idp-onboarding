@@ -15,8 +15,8 @@ import { StudyFooter } from "@/components/study/study-footer"
 type AdaptStatus = "loading" | "adapted" | "baseline"
 
 export default function GuidePage() {
-  const { previous, next } = getAdjacentSteps("guide")
-  const { theory, practice, setAdaptedModules } = useStudy()
+  const { mode, theory, practice, setAdaptedModules } = useStudy()
+  const { previous, next } = getAdjacentSteps("guide", mode)
 
   const [sections, setSections] = React.useState<Map<string, AdaptedSection>>(
     new Map()
@@ -130,7 +130,7 @@ export default function GuidePage() {
 
   return (
     <StudyShell
-      progress={getStepProgress("guide")}
+      progress={getStepProgress("guide", mode)}
       mainClassName="justify-start"
       footer={
         <StudyFooter

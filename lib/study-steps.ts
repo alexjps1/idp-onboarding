@@ -2,6 +2,8 @@
  * Ordered definition of the onboarding study flow. A single source of truth for
  * routing ("Next Phase" / "Previous"), progress indication and step labels.
  */
+import type { StudyMode } from "@/components/study/study-provider"
+
 export type StudyStep = {
   slug: string
   path: string
@@ -25,28 +27,45 @@ export const STUDY_STEPS: StudyStep[] = [
   { slug: "complete", path: "/complete", title: "Abschluss" },
 ]
 
-export function getStepIndex(slug: string): number {
-  return STUDY_STEPS.findIndex((step) => step.slug === slug)
+/**
+ * The steps for a given run. "onboarding-only" (the /ohnetutor condition) has no
+ * tutor and therefore no drive: after the onboarding guide it goes straight to
+ * the end screen, so the drive (Fahrtansicht) step is dropped.
+ */
+export function getStudySteps(mode?: StudyMode | null): StudyStep[] {
+  if (mode === "onboarding-only") {
+    return STUDY_STEPS.filter((step) => step.slug !== "drive")
+  }
+  return STUDY_STEPS
+}
+
+export function getStepIndex(slug: string, mode?: StudyMode | null): number {
+  return getStudySteps(mode).findIndex((step) => step.slug === slug)
 }
 
 export function getStep(slug: string): StudyStep | undefined {
   return STUDY_STEPS.find((step) => step.slug === slug)
 }
 
-export function getAdjacentSteps(slug: string): {
+export function getAdjacentSteps(
+  slug: string,
+  mode?: StudyMode | null
+): {
   previous?: StudyStep
   next?: StudyStep
 } {
-  const index = getStepIndex(slug)
+  const steps = getStudySteps(mode)
+  const index = steps.findIndex((step) => step.slug === slug)
   return {
-    previous: index > 0 ? STUDY_STEPS[index - 1] : undefined,
-    next: index < STUDY_STEPS.length - 1 ? STUDY_STEPS[index + 1] : undefined,
+    previous: index > 0 ? steps[index - 1] : undefined,
+    next: index >= 0 && index < steps.length - 1 ? steps[index + 1] : undefined,
   }
 }
 
 /** Progress fraction (0–1) for a given step, used by the top progress bar. */
-export function getStepProgress(slug: string): number {
-  const index = getStepIndex(slug)
+export function getStepProgress(slug: string, mode?: StudyMode | null): number {
+  const steps = getStudySteps(mode)
+  const index = steps.findIndex((step) => step.slug === slug)
   if (index < 0) return 0
-  return (index + 1) / STUDY_STEPS.length
+  return (index + 1) / steps.length
 }
