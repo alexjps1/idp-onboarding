@@ -45,7 +45,7 @@ export default function CompletePage() {
               Probanden-ID:
             </span>
             <span className="data-mono text-on-surface">
-              {participantId ?? "PB-8821"}
+              {participantId ?? "RAND0000"}
             </span>
           </div>
 
