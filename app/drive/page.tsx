@@ -151,13 +151,9 @@ export default function DrivePage() {
       <div className="flex flex-grow flex-col overflow-hidden">
         {/* Car status bar — carries the study chrome (ID + navigation) */}
         <div className="relative flex h-14 shrink-0 items-center border-b border-[#e2e2e2] bg-[#f2f1f2]">
-          <div className="flex shrink-0 items-center gap-3 border-r border-[#e2e2e2] px-5">
-            <span className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-[#1973f7] to-[#39c9f6] text-white">
-              <Navigation className="size-4 fill-white" />
-            </span>
-            <span className="text-[15px] whitespace-nowrap">
-              Probanden-ID:{" "}
-              <span className="font-bold">{participantId ?? "—"}</span>
+          <div className="flex shrink-0 items-center border-r border-[#e2e2e2] px-5">
+            <span className="font-mono text-sm text-muted-foreground">
+              {participantId ?? "—"}
             </span>
           </div>
           <span className="absolute left-1/2 -translate-x-1/2 text-[15px] tabular-nums text-[#7e7f7f]">

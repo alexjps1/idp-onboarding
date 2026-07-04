@@ -3,6 +3,17 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { PARTICIPANT_ID_PATTERN, isParticipantIdTaken } from "@/lib/participant"
 
 // Participants receive a direct link (/mittutor or /ohnetutor). This root page
@@ -49,53 +60,53 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-background px-8 text-on-surface">
-      <h1 className="text-center text-2xl font-bold tracking-tight">
-        Onboarding-Studie Fahrassistenz
-      </h1>
+    <div className="flex h-screen w-screen items-center justify-center bg-background p-6">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Onboarding-Studie Fahrassistenz</CardTitle>
+          <CardDescription>
+            Bitte eine Probanden-ID vergeben oder für eine zufällige ID leer
+            lassen.
+          </CardDescription>
+        </CardHeader>
 
-      <div className="flex w-full max-w-sm flex-col gap-2">
-        <label
-          htmlFor="participant-id"
-          className="label-caps text-on-surface-variant"
-        >
-          Probanden-ID
-        </label>
-        <input
-          id="participant-id"
-          value={id}
-          onChange={handleChange}
-          autoComplete="off"
-          autoCapitalize="characters"
-          spellCheck={false}
-          placeholder="Leer lassen für zufällige ID"
-          className="data-mono rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 text-center text-lg tracking-widest text-on-surface outline-none focus:border-primary"
-        />
-        <p className="text-sm text-on-surface-variant">
-          Nur Großbuchstaben, Zahlen und Unterstriche, max. 8 Zeichen. Leer
-          lassen, um eine zufällige ID zu erzeugen.
-        </p>
-        {error ? <p className="text-sm text-error">{error}</p> : null}
-      </div>
+        <CardContent className="flex flex-col gap-2">
+          <Label htmlFor="participant-id">Probanden-ID</Label>
+          <Input
+            id="participant-id"
+            value={id}
+            onChange={handleChange}
+            autoComplete="off"
+            autoCapitalize="characters"
+            spellCheck={false}
+            placeholder="Leer lassen für zufällige ID"
+          />
+          <p className="text-sm text-muted-foreground">
+            Nur Großbuchstaben, Zahlen und Unterstriche, max. 8 Zeichen.
+          </p>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        </CardContent>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <button
-          type="button"
-          onClick={() => start("/ohnetutor")}
-          disabled={checking}
-          className="rounded-xl border border-outline-variant bg-surface-container-low px-8 py-4 text-center text-lg font-semibold transition-colors hover:bg-surface-variant disabled:opacity-60"
-        >
-          Studie ohne Tutor starten
-        </button>
-        <button
-          type="button"
-          onClick={() => start("/mittutor")}
-          disabled={checking}
-          className="rounded-xl bg-primary px-8 py-4 text-center text-lg font-semibold text-on-primary transition-opacity hover:opacity-90 disabled:opacity-60"
-        >
-          Studie mit Tutor starten
-        </button>
-      </div>
+        <CardFooter className="gap-3">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => start("/ohnetutor")}
+            disabled={checking}
+            className="flex-1"
+          >
+            Studie ohne Tutor starten
+          </Button>
+          <Button
+            size="lg"
+            onClick={() => start("/mittutor")}
+            disabled={checking}
+            className="flex-1"
+          >
+            Studie mit Tutor starten
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   )
 }

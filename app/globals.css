@@ -13,8 +13,12 @@
  */
 
 @theme inline {
-  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-mono: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* SF Pro on Apple devices (the study iPad) via -apple-system; Geist
+     (shadcn's default) as the loaded fallback for everything else. */
+  --font-sans: -apple-system, BlinkMacSystemFont, var(--font-geist-sans),
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", var(--font-geist-mono),
+    Menlo, monospace;
 
   /* Surfaces & content */
   --color-background: var(--background);
@@ -54,8 +58,28 @@
   --color-outline: var(--outline);
   --color-outline-variant: var(--outline-variant);
 
+  /* shadcn/ui token surface (neutral base, black primary). Target system for
+     the migration off the Proton roles above; consumed by components/ui/*.
+     --color-primary / -secondary / -background already exist above. */
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
   /* Radii — soft, precision-machined (0.25rem base) */
   --radius-DEFAULT: 0.25rem;
+  --radius-md: 0.5rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 
@@ -84,7 +108,7 @@
   --inverse-surface: #2d3133;
   --inverse-on-surface: #eff1f3;
 
-  --primary: #006b5f;
+  --primary: oklch(0.205 0 0); /* black accent (shadcn neutral) */
   --on-primary: #ffffff;
   --primary-container: #2dd4bf;
   --on-primary-container: #00574d;
@@ -99,6 +123,24 @@
 
   --outline: #6b7a76;
   --outline-variant: #bacac5;
+
+  /* shadcn/ui neutral tokens (black primary). Non-overlapping names live here;
+     --primary / --secondary / --background reuse the Proton roles above. */
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary-foreground: #ffffff;
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
 }
 
 /* Dark cockpit — applied to the driving view via a wrapper element */
@@ -139,7 +181,7 @@
 
 @layer base {
   * {
-    border-color: var(--outline-variant);
+    border-color: var(--border);
   }
   body {
     background-color: var(--background);

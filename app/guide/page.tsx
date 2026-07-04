@@ -5,12 +5,13 @@ import { BookOpen, Car, Loader2, Sparkles, TriangleAlert } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { withBasePath } from "@/lib/base-path"
-import { getStepProgress, getAdjacentSteps } from "@/lib/study-steps"
+import { getAdjacentSteps } from "@/lib/study-steps"
 import { ONBOARDING_MODULES } from "@/lib/onboarding-modules"
 import { useStudy } from "@/components/study/study-provider"
 import type { AdaptedSection } from "@/lib/study-data"
 import { StudyShell } from "@/components/study/study-shell"
 import { StudyFooter } from "@/components/study/study-footer"
+import { Card, CardContent } from "@/components/ui/card"
 
 type AdaptStatus = "loading" | "adapted" | "baseline"
 
@@ -128,10 +129,21 @@ export default function GuidePage() {
   const isFirst = index === 0
   const isLast = index === visibleSections.length - 1
 
+  // Top fade-out that ramps in with scroll: the card only dissolves into the
+  // roadmap once the user actually scrolls, so at rest (scrollTop 0) the top
+  // edge stays crisp. Capped at 2rem (32px).
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+  const [fadePx, setFadePx] = React.useState(0)
+
+  // Reset to the top whenever the chapter changes. Scrolling to the top fires
+  // onScroll, which zeroes the fade, so no extra state update is needed here.
+  React.useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [index])
+
   return (
     <StudyShell
-      progress={getStepProgress("guide", mode)}
-      mainClassName="justify-start"
+      mainClassName="justify-start pb-0"
       footer={
         <StudyFooter
           prevHref={isFirst ? previous?.path : undefined}
@@ -150,10 +162,10 @@ export default function GuidePage() {
             <BookOpen className="size-5" />
           </span>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold tracking-tight text-on-surface">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Modulhandbuch
             </h1>
-            <p className="text-sm text-on-surface-variant">
+            <p className="text-sm text-muted-foreground">
               Teilautomatisiertes Fahren – Funktionen der Assistenzsysteme
             </p>
           </div>
@@ -169,7 +181,7 @@ export default function GuidePage() {
                 <span
                   className={cn(
                     "h-px flex-1",
-                    i <= index ? "bg-primary" : "bg-outline-variant"
+                    i <= index ? "bg-primary" : "bg-border"
                   )}
                 />
               ) : null}
@@ -181,12 +193,12 @@ export default function GuidePage() {
                 aria-label={module.title}
                 title={module.title}
                 className={cn(
-                  "data-mono flex size-9 shrink-0 items-center justify-center rounded-full border text-[13px] transition-colors",
+                  "flex size-9 shrink-0 items-center justify-center rounded-full border text-[13px] font-medium transition-colors",
                   i === index
-                    ? "border-primary bg-primary text-on-primary"
+                    ? "border-primary bg-primary text-primary-foreground"
                     : i < index
                       ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
-                      : "border-outline-variant bg-surface-container-low text-on-surface-variant"
+                      : "border-border bg-muted text-muted-foreground"
                 )}
               >
                 {i + 1}
@@ -197,77 +209,97 @@ export default function GuidePage() {
 
         {/* Only the current section is shown. */}
         {active ? (
-          <div className="study-scrollbar min-h-0 flex-1 overflow-y-auto pr-2">
-            <section
-              key={active.module.id}
-              className={
-                active.module.warning
-                  ? "rounded-xl border border-error/40 bg-error/5 p-6"
-                  : "rounded-xl border border-outline-variant bg-surface-container-low p-6"
-              }
-            >
-              <div className="mb-4 flex items-center gap-3">
-                <span
-                  className={
-                    active.module.warning
-                      ? "flex size-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
-                      : "data-mono flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[13px] text-primary"
+          // The whole card scrolls as a unit and dissolves into the roadmap
+          // above via the top fade mask on this scroll viewport. The card keeps
+          // its rounded corners, but since it is taller than the viewport its
+          // rounded bottom stays off-screen while scrolling (a straight cut at
+          // the bottom bar) and only appears once the true end is reached.
+          // Horizontal padding keeps the card's ring from being clipped.
+          <div
+            ref={scrollRef}
+            onScroll={(e) =>
+              setFadePx(Math.min(e.currentTarget.scrollTop, 32))
+            }
+            style={
+              fadePx > 0
+                ? {
+                    maskImage: `linear-gradient(to bottom, transparent, black ${fadePx}px)`,
+                    WebkitMaskImage: `linear-gradient(to bottom, transparent, black ${fadePx}px)`,
                   }
-                >
-                  {active.module.warning ? (
-                    <TriangleAlert className="size-4" />
-                  ) : (
-                    index + 1
-                  )}
-                </span>
-                <h2 className="text-xl font-semibold text-on-surface">
-                  {active.module.title}
-                </h2>
-                <span className="data-mono ml-auto text-[12px] text-on-surface-variant">
-                  {index + 1} / {visibleSections.length}
-                </span>
-              </div>
-              <div className="space-y-4 text-[15px] leading-relaxed text-on-surface-variant">
-                {active.paragraphs.map((para, i) => (
-                  <div key={i}>
-                    <p>{para.text}</p>
-                    {para.gifs && para.gifs.length > 0 ? (
-                      <div className="mt-3 flex gap-3">
-                        {para.gifs.map((gif) => (
-                          <img
-                            key={gif}
-                            src={withBasePath(`/gifs/${gif}`)}
-                            alt=""
-                            className={cn(
-                              "rounded-lg object-contain",
-                              para.gifs!.length === 1
-                                ? "mx-auto max-h-52"
-                                : "max-h-44 min-w-0 flex-1"
-                            )}
-                          />
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-                {active.module.bullets ? (
-                  <ul className="list-disc space-y-3 pl-5">
-                    {active.module.bullets.map((bullet) => (
-                      <li key={bullet.text}>
-                        {bullet.text}
-                        {bullet.gif ? (
-                          <img
-                            src={withBasePath(`/gifs/${bullet.gif}`)}
-                            alt=""
-                            className="mt-2 max-h-40 rounded-lg object-contain"
-                          />
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            </section>
+                : undefined
+            }
+            className="study-scrollbar min-h-0 flex-1 overflow-y-auto px-2 pt-2 pb-4"
+          >
+            <Card
+              key={active.module.id}
+              className={cn(
+                active.module.warning && "bg-destructive/5 ring-destructive/30"
+              )}
+            >
+              <CardContent>
+                <div className="mb-4 flex items-center gap-3">
+                  <span
+                    className={
+                      active.module.warning
+                        ? "flex size-8 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive"
+                        : "flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[13px] font-medium text-primary"
+                    }
+                  >
+                    {active.module.warning ? (
+                      <TriangleAlert className="size-4" />
+                    ) : (
+                      index + 1
+                    )}
+                  </span>
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {active.module.title}
+                  </h2>
+                  <span className="ml-auto text-[12px] text-muted-foreground">
+                    {index + 1} / {visibleSections.length}
+                  </span>
+                </div>
+                <div className="space-y-4 text-[15px] leading-relaxed text-muted-foreground">
+                  {active.paragraphs.map((para, i) => (
+                    <div key={i}>
+                      <p>{para.text}</p>
+                      {para.gifs && para.gifs.length > 0 ? (
+                        <div className="mt-3 flex gap-3">
+                          {para.gifs.map((gif) => (
+                            <img
+                              key={gif}
+                              src={withBasePath(`/gifs/${gif}`)}
+                              alt=""
+                              className={cn(
+                                "rounded-lg object-contain",
+                                para.gifs!.length === 1
+                                  ? "mx-auto max-h-52"
+                                  : "max-h-44 min-w-0 flex-1"
+                              )}
+                            />
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                  {active.module.bullets ? (
+                    <ul className="list-disc space-y-3 pl-5">
+                      {active.module.bullets.map((bullet) => (
+                        <li key={bullet.text}>
+                          {bullet.text}
+                          {bullet.gif ? (
+                            <img
+                              src={withBasePath(`/gifs/${bullet.gif}`)}
+                              alt=""
+                              className="mt-2 max-h-40 rounded-lg object-contain"
+                            />
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         ) : null}
       </div>
@@ -287,7 +319,7 @@ function parseSection(line: string): AdaptedSection | undefined {
 function AdaptBadge({ status }: { status: AdaptStatus }) {
   if (status === "loading") {
     return (
-      <span className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-highest px-3 py-1.5 text-[12px] text-on-surface-variant">
+      <span className="flex items-center gap-2 rounded-full border bg-muted px-3 py-1.5 text-[12px] text-muted-foreground">
         <Loader2 className="size-3.5 animate-spin" />
         Wird an Ihr Vorwissen angepasst…
       </span>
@@ -295,7 +327,7 @@ function AdaptBadge({ status }: { status: AdaptStatus }) {
   }
   if (status === "adapted") {
     return (
-      <span className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-highest px-3 py-1.5 text-[12px] text-primary">
+      <span className="flex items-center gap-2 rounded-full border bg-muted px-3 py-1.5 text-[12px] text-primary">
         <Sparkles className="size-3.5" />
         An Ihr Vorwissen angepasst
       </span>

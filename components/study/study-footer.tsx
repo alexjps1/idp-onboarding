@@ -2,7 +2,7 @@ import Link from "next/link"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { StudyButton } from "@/components/study/study-button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 type StudyFooterProps = {
   /** Destination for the "Previous" button. Hidden when omitted. */
@@ -46,22 +46,23 @@ export function StudyFooter({
   return (
     <footer
       className={cn(
-        "flex h-20 w-full shrink-0 items-center justify-between border-t border-outline-variant bg-surface-container-lowest px-margin-tablet",
+        "flex h-20 w-full shrink-0 items-center justify-between border-t bg-background px-margin-tablet",
         className
       )}
     >
       {onPrev ? (
-        <StudyButton variant="outline" onClick={onPrev}>
+        <Button variant="outline" size="lg" onClick={onPrev}>
           <ArrowLeft />
           {prevLabel}
-        </StudyButton>
+        </Button>
       ) : prevHref ? (
-        <StudyButton asChild variant="outline">
-          <Link href={prevHref}>
-            <ArrowLeft />
-            {prevLabel}
-          </Link>
-        </StudyButton>
+        <Link
+          href={prevHref}
+          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+        >
+          <ArrowLeft />
+          {prevLabel}
+        </Link>
       ) : (
         <span />
       )}
@@ -71,22 +72,20 @@ export function StudyFooter({
       <div className="flex items-center gap-4">
         {nextAdornment}
         {!nextDisabled && onNext ? (
-          <StudyButton variant="primary" onClick={onNext}>
+          <Button size="lg" onClick={onNext}>
             {nextLabel}
             {nextIcon}
-          </StudyButton>
+          </Button>
         ) : !nextDisabled && nextHref ? (
-          <StudyButton asChild variant="primary">
-            <Link href={nextHref}>
-              {nextLabel}
-              {nextIcon}
-            </Link>
-          </StudyButton>
-        ) : (
-          <StudyButton variant="primary" disabled className="opacity-50">
+          <Link href={nextHref} className={cn(buttonVariants({ size: "lg" }))}>
             {nextLabel}
             {nextIcon}
-          </StudyButton>
+          </Link>
+        ) : (
+          <Button size="lg" disabled>
+            {nextLabel}
+            {nextIcon}
+          </Button>
         )}
       </div>
     </footer>

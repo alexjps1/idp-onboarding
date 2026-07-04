@@ -3,6 +3,15 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { useStudy, type StudyMode } from "@/components/study/study-provider"
 import {
   PARTICIPANT_ID_PATTERN,
@@ -59,45 +68,42 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
 
   if (randomId) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background px-8 text-on-surface">
-        <div className="flex w-full max-w-md flex-col gap-6 rounded-2xl border border-outline-variant bg-surface-container-low p-8 text-center shadow-lg">
-          <h2 className="text-xl font-bold tracking-tight">
-            Studie ohne Probanden-ID gestartet
-          </h2>
-          <p className="text-on-surface-variant">
-            Es wurde automatisch eine zufällige Probanden-ID generiert:
-          </p>
-          <p className="data-mono text-3xl tracking-widest text-primary">
-            {randomId}
-          </p>
-          <p className="text-sm text-on-surface-variant">
-            Wenn Sie stattdessen eine eigene Probanden-ID vergeben möchten,
-            kehren Sie zur Startseite zurück.
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row-reverse">
-            <button
-              type="button"
-              onClick={confirmRandom}
-              className="rounded-xl bg-primary px-6 py-3 text-base font-semibold text-on-primary transition-opacity hover:opacity-90"
-            >
-              Fortfahren
-            </button>
-            <button
-              type="button"
+      <div className="flex h-screen w-screen items-center justify-center bg-background p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Studie ohne Probanden-ID gestartet</CardTitle>
+            <CardDescription>
+              Es wurde automatisch eine zufällige Probanden-ID generiert. Wenn
+              Sie stattdessen eine eigene ID vergeben möchten, kehren Sie zur
+              Startseite zurück.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <span className="font-mono text-3xl font-semibold tracking-wide">
+              {randomId}
+            </span>
+          </CardContent>
+          <CardFooter className="gap-3">
+            <Button
+              variant="outline"
+              size="lg"
               onClick={() => router.push("/")}
-              className="rounded-xl border border-outline-variant bg-surface-container-low px-6 py-3 text-base font-semibold transition-colors hover:bg-surface-variant"
+              className="flex-1"
             >
               Zurück zur Startseite
-            </button>
-          </div>
-        </div>
+            </Button>
+            <Button size="lg" onClick={confirmRandom} className="flex-1">
+              Fortfahren
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-background text-on-surface">
-      <p className="label-caps text-on-surface-variant">Studie wird gestartet…</p>
+    <div className="flex h-screen w-screen items-center justify-center bg-background">
+      <p className="text-sm text-muted-foreground">Studie wird gestartet…</p>
     </div>
   )
 }

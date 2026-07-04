@@ -43,3 +43,6 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ignore folder (used to show claude external stuff)
+ignore

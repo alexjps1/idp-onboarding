@@ -1,9 +1,7 @@
 "use client"
 
-import { RadioGroup as RadioGroupPrimitive } from "radix-ui"
-
 import { cn } from "@/lib/utils"
-import { RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { AssistanceSystem } from "@/lib/assistance-systems"
 
 type LikertMatrixProps = {
@@ -23,9 +21,9 @@ type LikertMatrixProps = {
 
 /**
  * Survey matrix question: one row per assistance system, each with a single
- * choice across a shared N-point scale. Built on the shadcn/Radix RadioGroup so
- * every row is its own keyboard- and screen-reader-accessible radio group, with
- * the radios aligned beneath the column captions in the header.
+ * choice across a shared N-point scale. Built on the shadcn/Base UI RadioGroup
+ * so every row is its own keyboard- and screen-reader-accessible radio group,
+ * with the radios aligned beneath the column captions in the header.
  */
 export function LikertMatrix({
   scaleLabels,
@@ -45,23 +43,23 @@ export function LikertMatrix({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border border-outline-variant bg-surface-container-low",
+        "overflow-hidden rounded-xl border bg-card",
         fillHeight && "flex flex-col",
         className
       )}
     >
       {/* Column captions */}
       <div
-        className="grid shrink-0 items-end gap-1.5 border-b border-outline-variant bg-surface-container px-5 py-3"
+        className="grid shrink-0 items-end gap-1.5 border-b bg-muted px-5 py-3"
         style={template}
       >
-        <span className="label-caps text-xs text-on-surface-variant">
+        <span className="text-xs font-medium text-muted-foreground">
           Assistenzsystem
         </span>
         {scaleLabels.map((label) => (
           <span
             key={label}
-            className="text-center text-sm leading-tight font-bold text-on-surface"
+            className="text-center text-sm leading-tight font-medium text-foreground"
           >
             {label}
           </span>
@@ -73,27 +71,25 @@ export function LikertMatrix({
         <div
           key={system.name}
           className={cn(
-            "grid items-center gap-1.5 border-b border-outline-variant px-5 py-3 last:border-0",
+            "grid items-center gap-1.5 border-b px-5 py-3 last:border-0",
             fillHeight && "min-h-0 flex-1",
-            rowIndex % 2 === 1 && "bg-surface-container/40"
+            rowIndex % 2 === 1 && "bg-muted/40"
           )}
           style={template}
         >
           <div className="pr-3">
-            <p className="text-base font-semibold text-on-surface">
+            <p className="text-base font-semibold text-foreground">
               {system.name}
             </p>
-            <p className="text-[13px] leading-snug text-on-surface-variant">
+            <p className="text-[13px] leading-snug text-muted-foreground">
               {system.description}
             </p>
           </div>
-          <RadioGroupPrimitive.Root
+          <RadioGroup
             aria-label={system.name}
-            value={
-              answers[rowIndex] != null ? String(answers[rowIndex]) : undefined
-            }
+            value={answers[rowIndex] != null ? String(answers[rowIndex]) : ""}
             onValueChange={(value) => onChange(rowIndex, Number(value))}
-            className="grid gap-1.5"
+            className="gap-1.5"
             style={{
               gridColumn: `2 / span ${cols}`,
               gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`,
@@ -108,7 +104,7 @@ export function LikertMatrix({
                 />
               </div>
             ))}
-          </RadioGroupPrimitive.Root>
+          </RadioGroup>
         </div>
       ))}
     </div>

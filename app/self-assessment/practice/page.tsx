@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-import { getStepProgress, getAdjacentSteps } from "@/lib/study-steps"
+import { getAdjacentSteps } from "@/lib/study-steps"
 import { ASSISTANCE_SYSTEMS } from "@/lib/assistance-systems"
 import { useStudy } from "@/components/study/study-provider"
 import { StudyShell } from "@/components/study/study-shell"
@@ -37,7 +37,6 @@ export default function PracticeAssessmentPage() {
 
   return (
     <StudyShell
-      progress={getStepProgress("self-assessment-practice", mode)}
       footer={
         <StudyFooter
           prevHref={previous?.path}
@@ -48,11 +47,8 @@ export default function PracticeAssessmentPage() {
     >
       <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
         <header className="mb-5 shrink-0">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="label-caps tracking-[0.2em] text-primary">
-              Praktische Erfahrung
-            </span>
-            <span className="data-mono text-[14px] text-secondary">
+          <div className="mb-2 flex items-center justify-end">
+            <span className="text-sm text-muted-foreground">
               {answered} von {total} beantwortet
             </span>
           </div>
