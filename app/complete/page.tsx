@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { CheckCircle2, Info } from "lucide-react"
+import { CheckCircle2, Info, TriangleAlert } from "lucide-react"
 
 import { useStudy } from "@/components/study/study-provider"
 import { StudyTopBar } from "@/components/study/study-top-bar"
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 
 export default function CompletePage() {
   const router = useRouter()
-  const { participantId, mode, reset } = useStudy()
+  const { participantId, mode, adaptStatus, reset } = useStudy()
 
   function restart() {
     reset()
@@ -56,6 +56,22 @@ export default function CompletePage() {
               {participantId ?? "RAND0000"}
             </span>
           </div>
+
+          {adaptStatus === "baseline" ? (
+            <div className="mx-auto flex max-w-xl items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-left">
+              <TriangleAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-destructive">
+                  Achtung — LLM-Anpassung fehlgeschlagen
+                </p>
+                <p className="text-sm leading-relaxed text-destructive/80">
+                  Die KI-gestützte Personalisierung der Onboarding-Inhalte war
+                  nicht verfügbar. Dieser Proband hat die Baseline-Texte
+                  erhalten. Bitte in der Auswertung berücksichtigen.
+                </p>
+              </div>
+            </div>
+          ) : null}
 
           <p className="mx-auto max-w-xl text-lg leading-relaxed text-muted-foreground">
             Vielen Dank für deine Teilnahme. Bitte wende dich nun an die

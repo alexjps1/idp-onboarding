@@ -59,15 +59,14 @@ export default function GuidePage() {
         }
 
         // The route streams one newline-delimited JSON object per module as it
-        // is adapted. Apply each section the moment it arrives so the module
-        // swaps from baseline to the adapted version without waiting for the
-        // rest. Order in the index follows the baseline module order.
+        // is adapted. We collect all sections silently and only apply them once
+        // the full response has been received, so the user sees the loading
+        // screen until everything is ready — no flickering chapter swaps.
         const order = new Map(adaptable.map((m, i) => [m.id, i]))
         const collected: AdaptedSection[] = []
-        const apply = (section?: AdaptedSection) => {
+        const collect = (section?: AdaptedSection) => {
           if (!section) return
           collected.push(section)
-          setSections((prev) => new Map(prev).set(section.id, section))
         }
 
         const reader = res.body.getReader()
@@ -81,14 +80,21 @@ export default function GuidePage() {
           while ((nl = buffer.indexOf("\n")) !== -1) {
             const line = buffer.slice(0, nl).trim()
             buffer = buffer.slice(nl + 1)
-            if (line) apply(parseSection(line))
+            if (line) collect(parseSection(line))
           }
         }
-        if (buffer.trim()) apply(parseSection(buffer.trim()))
+        if (buffer.trim()) collect(parseSection(buffer.trim()))
 
         collected.sort(
           (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)
         )
+
+        // Apply all adapted sections at once so they are immediately available
+        // when we flip from the loading screen to the guide content.
+        const allSections = new Map<string, AdaptedSection>()
+        for (const s of collected) allSections.set(s.id, s)
+        setSections(allSections)
+
         setStatus("adapted")
         setAdaptedModules(collected, "adapted")
       } catch (err) {
@@ -141,6 +147,34 @@ export default function GuidePage() {
     scrollRef.current?.scrollTo({ top: 0 })
   }, [index])
 
+  // ── Loading screen ──────────────────────────────────────────────────
+  if (status === "loading") {
+    return (
+      <StudyShell mainClassName="justify-center pb-0">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-6 text-center">
+          <div className="relative flex size-16 items-center justify-center">
+            {/* Outer pulsing ring */}
+            <span className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
+            {/* Inner spinner container */}
+            <span className="relative flex size-16 items-center justify-center rounded-full bg-primary/10">
+              <Loader2 className="size-7 animate-spin text-primary" />
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+              Bitte warten
+            </h1>
+            <p className="text-[15px] leading-relaxed text-muted-foreground">
+              Personalisierte Inhalte werden für Sie vorbereitet&nbsp;…
+            </p>
+          </div>
+        </div>
+      </StudyShell>
+    )
+  }
+
+  // ── Guide content (shown after loading is complete) ─────────────────
   return (
     <StudyShell
       mainClassName="justify-start pb-0"
@@ -155,7 +189,7 @@ export default function GuidePage() {
         />
       }
     >
-      <div className="mx-auto flex h-full w-full max-w-3xl flex-col">
+      <div className="guide-fade-in mx-auto flex h-full w-full max-w-3xl flex-col">
         {/* Header */}
         <header className="mb-4 flex items-center gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
