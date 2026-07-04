@@ -51,14 +51,22 @@ export function StudyFooter({
       )}
     >
       {onPrev ? (
-        <Button variant="outline" size="lg" onClick={onPrev}>
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={onPrev}
+          className="h-14 px-6 text-xl [&_svg]:size-6"
+        >
           <ArrowLeft />
           {prevLabel}
         </Button>
       ) : prevHref ? (
         <Link
           href={prevHref}
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "h-14 px-6 text-xl [&_svg]:size-6"
+          )}
         >
           <ArrowLeft />
           {prevLabel}
@@ -72,17 +80,31 @@ export function StudyFooter({
       <div className="flex items-center gap-4">
         {nextAdornment}
         {!nextDisabled && onNext ? (
-          <Button size="lg" onClick={onNext}>
+          <Button
+            size="lg"
+            onClick={onNext}
+            className="h-14 px-6 text-xl [&_svg]:size-6"
+          >
             {nextLabel}
             {nextIcon}
           </Button>
         ) : !nextDisabled && nextHref ? (
-          <Link href={nextHref} className={cn(buttonVariants({ size: "lg" }))}>
+          <Link
+            href={nextHref}
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "h-14 px-6 text-xl [&_svg]:size-6"
+            )}
+          >
             {nextLabel}
             {nextIcon}
           </Link>
         ) : (
-          <Button size="lg" disabled>
+          <Button
+            size="lg"
+            disabled
+            className="h-14 px-6 text-xl [&_svg]:size-6"
+          >
             {nextLabel}
             {nextIcon}
           </Button>

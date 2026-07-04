@@ -48,11 +48,11 @@ export default function PracticeAssessmentPage() {
       <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
         <header className="mb-5 shrink-0">
           <div className="mb-2 flex items-center justify-end">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-lg text-muted-foreground">
               {answered} von {total} beantwortet
             </span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight">
+          <h1 className="text-4xl font-bold tracking-tight">
             Wie viel praktische Erfahrung haben Sie mit den folgenden
             Fahrerassistenzsystemen?
           </h1>

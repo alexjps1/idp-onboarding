@@ -183,6 +183,18 @@
   * {
     border-color: var(--border);
   }
+  html,
+  body {
+    /* Every screen is its own fixed h-screen layout with an internal
+       scroll region (or none at all), so the document itself never needs
+       to scroll. Locking it here removes iPadOS's elastic "rubber-band"
+       bounce on the outer page — overscroll-behavior alone isn't enough
+       on iPadOS, since it only suppresses the *chained* bounce onto a
+       parent, not the bounce on a non-scrolling document. */
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   body {
     background-color: var(--background);
     color: var(--on-surface);
@@ -273,6 +285,11 @@
 }
 
 /* Thin precision scrollbar used across scrollable study panels */
+.study-scrollbar {
+  /* Keeps this region's own bounce from chaining into a rubber-band on the
+     (non-scrolling) document once its content is scrolled past the edge. */
+  overscroll-behavior: contain;
+}
 .study-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
