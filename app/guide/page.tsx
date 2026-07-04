@@ -155,19 +155,16 @@ export default function GuidePage() {
         />
       }
     >
-      <div className="mx-auto flex h-full w-full max-w-3xl flex-col">
+      <div className="mx-auto flex h-full w-full max-w-4xl flex-col">
         {/* Header */}
         <header className="mb-4 flex items-center gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <BookOpen className="size-5" />
           </span>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground">
               Modulhandbuch
             </h1>
-            <p className="text-sm text-muted-foreground">
-              Teilautomatisiertes Fahren – Funktionen der Assistenzsysteme
-            </p>
           </div>
           <AdaptBadge status={status} />
         </header>
@@ -193,7 +190,7 @@ export default function GuidePage() {
                 aria-label={module.title}
                 title={module.title}
                 className={cn(
-                  "flex size-9 shrink-0 items-center justify-center rounded-full border text-[13px] font-medium transition-colors",
+                  "flex size-11 shrink-0 items-center justify-center rounded-full border text-lg font-medium transition-colors",
                   i === index
                     ? "border-primary bg-primary text-primary-foreground"
                     : i < index
@@ -236,29 +233,29 @@ export default function GuidePage() {
                 active.module.warning && "bg-destructive/5 ring-destructive/30"
               )}
             >
-              <CardContent>
+              <CardContent className="px-10">
                 <div className="mb-4 flex items-center gap-3">
                   <span
                     className={
                       active.module.warning
-                        ? "flex size-8 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive"
-                        : "flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[13px] font-medium text-primary"
+                        ? "flex size-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive"
+                        : "flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-lg font-medium text-primary"
                     }
                   >
                     {active.module.warning ? (
-                      <TriangleAlert className="size-4" />
+                      <TriangleAlert className="size-5" />
                     ) : (
                       index + 1
                     )}
                   </span>
-                  <h2 className="text-xl font-semibold text-foreground">
+                  <h2 className="text-3xl font-semibold text-foreground">
                     {active.module.title}
                   </h2>
-                  <span className="ml-auto text-[12px] text-muted-foreground">
+                  <span className="ml-auto text-lg text-muted-foreground">
                     {index + 1} / {visibleSections.length}
                   </span>
                 </div>
-                <div className="space-y-4 text-[15px] leading-relaxed text-muted-foreground">
+                <div className="space-y-4 text-xl leading-relaxed text-muted-foreground">
                   {active.paragraphs.map((para, i) => (
                     <div key={i}>
                       <p>{para.text}</p>
@@ -319,16 +316,16 @@ function parseSection(line: string): AdaptedSection | undefined {
 function AdaptBadge({ status }: { status: AdaptStatus }) {
   if (status === "loading") {
     return (
-      <span className="flex items-center gap-2 rounded-full border bg-muted px-3 py-1.5 text-[12px] text-muted-foreground">
-        <Loader2 className="size-3.5 animate-spin" />
+      <span className="flex items-center gap-2 rounded-full border bg-muted px-3 py-1.5 text-base text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
         Wird an Ihr Vorwissen angepasst…
       </span>
     )
   }
   if (status === "adapted") {
     return (
-      <span className="flex items-center gap-2 rounded-full border bg-muted px-3 py-1.5 text-[12px] text-primary">
-        <Sparkles className="size-3.5" />
+      <span className="flex items-center gap-2 rounded-full border bg-muted px-3 py-1.5 text-base text-primary">
+        <Sparkles className="size-4" />
         An Ihr Vorwissen angepasst
       </span>
     )

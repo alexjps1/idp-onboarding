@@ -61,7 +61,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-background p-6">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle>Onboarding-Studie Fahrassistenz</CardTitle>
           <CardDescription>
@@ -70,7 +70,7 @@ export default function Home() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-2">
+        <CardContent className="flex flex-col gap-3">
           <Label htmlFor="participant-id">Probanden-ID</Label>
           <Input
             id="participant-id"
@@ -81,10 +81,10 @@ export default function Home() {
             spellCheck={false}
             placeholder="Leer lassen für zufällige ID"
           />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Nur Großbuchstaben, Zahlen und Unterstriche, max. 8 Zeichen.
           </p>
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {error ? <p className="text-lg text-destructive">{error}</p> : null}
         </CardContent>
 
         <CardFooter className="gap-3">
@@ -93,7 +93,7 @@ export default function Home() {
             size="lg"
             onClick={() => start("/ohnetutor")}
             disabled={checking}
-            className="flex-1"
+            className="h-14 flex-1 text-xl"
           >
             Studie ohne Tutor starten
           </Button>
@@ -101,7 +101,7 @@ export default function Home() {
             size="lg"
             onClick={() => start("/mittutor")}
             disabled={checking}
-            className="flex-1"
+            className="h-14 flex-1 text-xl"
           >
             Studie mit Tutor starten
           </Button>

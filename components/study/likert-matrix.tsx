@@ -37,7 +37,7 @@ export function LikertMatrix({
   // Label column absorbs the extra width (so its text never clips); the scale
   // columns stay a fixed, snug width so the radios cluster rather than spread.
   const template = {
-    gridTemplateColumns: `minmax(240px,1fr) repeat(${cols}, 64px)`,
+    gridTemplateColumns: `minmax(240px,1fr) repeat(${cols}, 84px)`,
   }
 
   return (
@@ -53,13 +53,13 @@ export function LikertMatrix({
         className="grid shrink-0 items-end gap-1.5 border-b bg-muted px-5 py-3"
         style={template}
       >
-        <span className="text-xs font-medium text-muted-foreground">
+        <span className="text-lg font-medium text-muted-foreground">
           Assistenzsystem
         </span>
         {scaleLabels.map((label) => (
           <span
             key={label}
-            className="text-center text-sm leading-tight font-medium text-foreground"
+            className="text-center text-lg leading-tight font-medium text-foreground"
           >
             {label}
           </span>
@@ -78,10 +78,10 @@ export function LikertMatrix({
           style={template}
         >
           <div className="pr-3">
-            <p className="text-base font-semibold text-foreground">
+            <p className="text-2xl font-semibold text-foreground">
               {system.name}
             </p>
-            <p className="text-[13px] leading-snug text-muted-foreground">
+            <p className="text-lg leading-snug text-muted-foreground">
               {system.description}
             </p>
           </div>
@@ -100,7 +100,7 @@ export function LikertMatrix({
                 <RadioGroupItem
                   value={String(i + 1)}
                   aria-label={label}
-                  className="size-12"
+                  className="size-14"
                 />
               </div>
             ))}

@@ -69,7 +69,7 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
   if (randomId) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background p-6">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-2xl">
           <CardHeader>
             <CardTitle>Studie ohne Probanden-ID gestartet</CardTitle>
             <CardDescription>
@@ -79,7 +79,7 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <span className="font-mono text-3xl font-semibold tracking-wide">
+            <span className="font-mono text-5xl font-semibold tracking-wide">
               {randomId}
             </span>
           </CardContent>
@@ -88,11 +88,15 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
               variant="outline"
               size="lg"
               onClick={() => router.push("/")}
-              className="flex-1"
+              className="h-14 flex-1 text-xl"
             >
               Zurück zur Startseite
             </Button>
-            <Button size="lg" onClick={confirmRandom} className="flex-1">
+            <Button
+              size="lg"
+              onClick={confirmRandom}
+              className="h-14 flex-1 text-xl"
+            >
               Fortfahren
             </Button>
           </CardFooter>
@@ -103,7 +107,7 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-background">
-      <p className="text-sm text-muted-foreground">Studie wird gestartet…</p>
+      <p className="text-xl text-muted-foreground">Studie wird gestartet…</p>
     </div>
   )
 }
