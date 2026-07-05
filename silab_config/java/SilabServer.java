@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import de.wivw.silab.sys.*;
 import de.wivw.silab.mth.Vec2;
 import de.wivw.silab.mth.Vec3;
@@ -31,7 +32,7 @@ class SilabServer extends JPU
 
 
     @VarIn(def=4200) int Port;
-    @VarIn(def=1000) int CacheInterval;
+    @VarIn(def=500) int CacheInterval;
     @VarIn(def=0) int AutomationActive;
 	@VarIn(def=0) int AutomationStandstill;
 	// Availability of the automation (whether the framework will let it engage).
@@ -51,7 +52,7 @@ class SilabServer extends JPU
 
     private double timeSinceCache = 1000;
 	private double timeSinceFlank = 0;
-    private String trfCache;
+    private String simStateCache;
     private String scnCache;
     private String odbCache;
 
@@ -77,6 +78,148 @@ class SilabServer extends JPU
         return String.join("\n", logLines);
     }
 
+    // Debug output that doesn't depend on SILAB's own log surfacing anywhere
+    // useful: append a line straight to a file on the simulation PC's disk,
+    // which we can read directly now that we have keyboard/mouse on it.
+    private static final String DEBUG_LOG_PATH = "C:/Users/Simulator/Documents/silab-debug.txt";
+
+    private void writeDebugFile(String msg) {
+        String line = java.time.LocalDateTime.now() + " " + msg;
+        try (FileWriter fw = new FileWriter(DEBUG_LOG_PATH, true)) {
+            fw.write(line + System.lineSeparator());
+        } catch (IOException e) {
+            // Nowhere left to report this failure.
+        }
+    }
+
+    // Pushes the current ADAS + car state to the tutor server every
+    // CacheInterval tick (see trigger()). Plain HTTP, same reason as
+    // checkInternetAccess(): this JVM can't complete a TLS handshake with
+    // nginx. The secret only filters out stray/bot requests hitting a public
+    // endpoint - it isn't protecting anything confidential, so it's fine
+    // hardcoded here.
+    private static final String INGEST_URL = "http://alexjps.com/idp-app/api/silab-ingest";
+    private static final String INGEST_SECRET = "boltzmannstrasse13"; // must match SILAB_INGEST_SECRET on the server
+
+    // If a previous push hasn't finished yet (slow/hung network), skip this
+    // tick instead of piling up overlapping request threads.
+    private final AtomicBoolean pushInFlight = new AtomicBoolean(false);
+
+    private void pushState() {
+        if (!pushInFlight.compareAndSet(false, true)) {
+            return;
+        }
+
+        // Reuse the same string already built for the TCP "simstate" command
+        // this tick, so the two channels are guaranteed to carry identical
+        // content rather than each formatting their own copy.
+        String body = simStateCache;
+
+        new Thread(() -> {
+            try {
+                HttpURLConnection conn = (HttpURLConnection) new URL(INGEST_URL).openConnection();
+                conn.setConnectTimeout(4000);
+                conn.setReadTimeout(4000);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(body.getBytes("UTF-8"));
+                }
+
+                int code = conn.getResponseCode();
+                if (code < 200 || code >= 300) {
+                    writeDebugFile("silab-ingest push FAILED: HTTP " + code);
+                }
+            } catch (Exception e) {
+                writeDebugFile("silab-ingest push FAILED: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            } finally {
+                pushInFlight.set(false);
+            }
+        }).start();
+    }
+
+    // One-off check: does this machine have outbound internet access? We
+    // can't log into it or read its filesystem, so instead of trying to
+    // observe anything locally, we make it call a URL we control and check
+    // our own server's access log for the hit. Runs on its own thread so a
+    // hung DNS lookup/connection can't stall prepare().
+    private void checkInternetAccess() {
+        new Thread(() -> {
+            String javaVersion = System.getProperty("java.version");
+            try {
+                HttpURLConnection conn = (HttpURLConnection)
+                    new URL("http://alexjps.com/idp-app/api/test").openConnection();
+                // Don't silently chase a redirect back into HTTPS (and the
+                // same TLS wall) — if nginx redirects this path, we want to
+                // see that plainly instead of it looking like the same
+                // handshake failure again.
+                conn.setInstanceFollowRedirects(false);
+                conn.setConnectTimeout(4000);
+                conn.setReadTimeout(4000);
+                conn.setRequestMethod("GET");
+                int code = conn.getResponseCode();
+                String location = conn.getHeaderField("Location");
+                String msg = "internet check: reached alexjps.com/idp-app/api/test, HTTP "
+                    + code + (location != null ? " -> " + location : "") + " (java " + javaVersion + ")";
+                appendLog(msg);
+                writeDebugFile(msg);
+            } catch (Exception e) {
+                String msg = "internet check FAILED: " + e.getClass().getSimpleName() + ": " + e.getMessage()
+                    + " (java " + javaVersion + ")";
+                appendLog(msg);
+                writeDebugFile(msg);
+            }
+        }).start();
+    }
+
+    // Finds this machine's public-facing IP via an external echo service and
+    // writes it to its own file. We currently have no remote desktop access
+    // to this machine, only file transfer, so a dedicated, easy-to-find file
+    // is more useful here than burying it in the general debug log.
+    private static final String PUBLIC_IP_LOG_PATH = "C:/Users/Simulator/Documents/silab-public-ip.txt";
+
+    private void writePublicIp() {
+        new Thread(() -> {
+            try {
+                // Plain HTTP, on purpose: this ancient JVM can't complete a
+                // TLS handshake with most modern HTTPS servers (see
+                // checkInternetAccess), and checkip.amazonaws.com is one of
+                // the few well-known IP-echo services that still answers
+                // over plain HTTP without redirecting.
+                HttpURLConnection conn = (HttpURLConnection)
+                    new URL("http://checkip.amazonaws.com").openConnection();
+                conn.setConnectTimeout(4000);
+                conn.setReadTimeout(4000);
+                conn.setRequestMethod("GET");
+                String ip;
+                try (BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                    ip = reader.readLine();
+                }
+                try (FileWriter fw = new FileWriter(PUBLIC_IP_LOG_PATH, false)) {
+                    fw.write(ip + System.lineSeparator());
+                }
+                writeDebugFile("public IP: " + ip);
+            } catch (Exception e) {
+                writeDebugFile("public IP lookup FAILED: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
+        }).start();
+    }
+
+    // Visual proof the JPU is actually loaded and executing on the
+    // simulation PC, independent of any network check: pop open Notepad.
+    // If Notepad never appears, this code isn't running at all (a
+    // loading/config problem, not a network problem).
+    private void openNotepad() {
+        try {
+            new ProcessBuilder("notepad.exe").start();
+            appendLog("opened notepad");
+        } catch (Exception e) {
+            appendLog("failed to open notepad: " + e.getMessage());
+        }
+    }
+
 	public SilabServer(long peer) {
 		super(peer);
         timeSinceCache = CacheInterval;
@@ -89,6 +232,9 @@ class SilabServer extends JPU
 	}
 
 	public int start(int step) {
+        openNotepad();
+        checkInternetAccess();
+        writePublicIp();
         startServer(Port);
         init();
         return step;
@@ -99,9 +245,10 @@ class SilabServer extends JPU
         if (timeSinceCache >= CacheInterval) {
             timeSinceCache = 0;
             scnCache = makePositionMessage();
-            trfCache = makeTrafficMessage();
+            simStateCache = makeSimStateMessage();
             odbCache = makeODBMessage();
 			SILAB.logErr(odbCache);
+            pushState();
         }
 
 		timeSinceFlank += time;
@@ -284,9 +431,9 @@ class SilabServer extends JPU
 						continue;
                     }
 
-                    if ("trf".equals(inputLine)) {
-                        appendLog("received trf command");
-                        sendMessage(s.trfCache);
+                    if ("simstate".equals(inputLine)) {
+                        appendLog("received simstate command");
+                        sendMessage(s.simStateCache);
 						continue;
                     }
 
@@ -307,12 +454,6 @@ class SilabServer extends JPU
                         sendMessage(s.stopAutomation());
 						continue;
                     }
-
-					if ("automation".equals(inputLine)) {
-                        appendLog("received automation command");
-						sendMessage(s.makeAutomationMessage());
-						continue;
-					}
 
 					if ("log".equals(inputLine)) {
                         sendMessage(getLog());
@@ -338,67 +479,48 @@ class SilabServer extends JPU
         }
     }
 
-    private String makeTrafficMessage() {
-        if (trf == null) {
-            return makeError(1, "trf interface not initialized");
-        }
-
-        try {
-            JsonArray objects = new JsonArray();
-
+    // We only ever care about the ego vehicle (the "simcar" entry) - not the
+    // other ~350 mostly-inactive TRF slots SILAB always allocates - so this
+    // returns just that car's speed/acceleration/position/orientation
+    // instead of the full traffic object list.
+    private JsonObject makeCarState() {
+        if (trf != null) {
             for (int i = 0; i < trf.getCount(); i++) {
                 TRFObject obj = trf.get(i);
-                if (obj == null) {
-                    continue;
+                if (obj != null && "simcar".equals(mapObjectType(obj.getType()))) {
+                    return new JsonObject()
+                        .putDouble("speed", obj.getSpeed())
+                        .putDouble("acceleration", obj.getAcceleration())
+                        .putVec3("refPoint", obj.getRefPoint())
+                        .putDouble("yaw", obj.getYaw())
+                        .putDouble("pitch", obj.getPitch())
+                        .putDouble("roll", obj.getRoll());
                 }
-
-                JsonObject o = new JsonObject();
-                o.putInt("id", obj.getTRFID())
-                    .putDouble("acceleration", obj.getAcceleration())
-                    .putDouble("speed", obj.getSpeed())
-                    .putDouble("dFront", obj.getDFront())
-                    .putDouble("dLeft", obj.getDLeft())
-                    .putDouble("dRear", obj.getDRear())
-                    .putDouble("dRight", obj.getDRight())
-                    .putVec3("lFront", obj.getLFront())
-                    .putVec3("mFront", obj.getMFront())
-                    .putVec3("rFront", obj.getRFront())
-                    .putVec3("lRear", obj.getLRear())
-                    .putVec3("mRear", obj.getMRear())
-                    .putVec3("rRear", obj.getRRear())
-                    .putDouble("pitch", obj.getPitch())
-                    .putDouble("pitchRoad", obj.getPitchRoad())
-                    .putVec3("refPoint", obj.getRefPoint())
-                    .putDouble("scnd", obj.getSCND())
-                    .putInt("scnLaneId", obj.getSCNLaneID())
-                    .putInt("scnNodeId", obj.getSCNNodeID())
-                    .putInt("scnNodeInstanceId", obj.getSCNNodeInstanceID())
-                    .putDouble("scns", obj.getSCNS())
-                    .putDouble("scnsLane", obj.getSCNSLane())
-                    .putInt("userId", obj.getUserID())
-                    .putDouble("roll", obj.getRoll())
-                    .putDouble("yaw", obj.getYaw())
-                    .putObject("lightState", makeLightState(obj))
-                    .putBoolean("isActive", obj.isActive());
-
-                TRFObjectType type = obj.getType();
-                o.putString("objectType", mapObjectType(type));
-
-                objects.add(o);
             }
+        }
 
-            JsonObject data = new JsonObject();
-            data.putArray("trfObjects", objects);
+        return new JsonObject()
+            .putDouble("speed", 0)
+            .putDouble("acceleration", 0)
+            .putVec3("refPoint", new Vec3(0, 0, 0))
+            .putDouble("yaw", 0)
+            .putDouble("pitch", 0)
+            .putDouble("roll", 0);
+    }
 
-            JsonObject msg = new JsonObject();
-            msg.putString("type", "trf")
-                .putString("version", "0.0")
-                .putObject("data", data);
-
-            return msg.toString();
+    // Single builder shared by the TCP "simstate" command and the HTTP push
+    // to alexjps.com, so both channels always carry exactly the same shape
+    // and content - no separate per-channel formatting to keep in sync.
+    private String makeSimStateMessage() {
+        try {
+            return new JsonObject()
+                .putString("secret", INGEST_SECRET)
+                .putObject("adas", makeAutomationData())
+                .putObject("trf", makeCarState())
+                .toString();
         } catch (Exception e) {
-            SILAB.logErr("trf query failed: " + e.getMessage());
-            return "{ 'error': { 'code': 501, 'message': 'failed to query trf: " + e.getMessage() + "' } }";
+            SILAB.logErr("simstate query failed: " + e.getMessage());
+            return "{ 'error': { 'code': 501, 'message': 'failed to query simstate: " + e.getMessage() + "' } }";
         }
     }
 
@@ -577,23 +699,17 @@ class SilabServer extends JPU
         return msg.toString();
     }
 
-    private String makeAutomationMessage() {
-        // AutomationActive is a VarIn connected to
-        // ~Automation_Framework_LfE.active_lat_and_long (see Server_config.inc),
-        // so it reflects whether the driving automation (ADAS) is currently on.
+    // AutomationActive is a VarIn connected to
+    // ~Automation_Framework_LfE.active_lat_and_long (see Server_config.inc),
+    // so it reflects whether the driving automation (ADAS) is currently on.
+    private JsonObject makeAutomationData() {
         JsonObject data = new JsonObject();
         data.putBoolean("active", AutomationActive != 0)
             .putInt("automationActive", AutomationActive)
             .putInt("automationStandstill", AutomationStandstill)
             .putBoolean("available", AutomationAvailable != 0)
             .putInt("availability", AutomationAvailable);
-
-        JsonObject msg = new JsonObject();
-        msg.putString("type", "automation")
-            .putString("version", "0.0")
-            .putObject("data", data);
-
-        return msg.toString();
+        return data;
     }
 
 	private void checkForStandStill() {
@@ -644,27 +760,6 @@ class SilabServer extends JPU
             .putObject("data", data);
 
         return msg.toString();
-    }
-
-    private JsonObject makeLightState(TRFObject obj) {
-        JsonObject out = new JsonObject();
-        out.putBoolean("backLight", obj.getLightState(TRFLightState.BackLight))
-            .putBoolean("brakeLight", obj.getLightState(TRFLightState.BrakeLight))
-            .putBoolean("frontLight", obj.getLightState(TRFLightState.FrontLight))
-            .putBoolean("greenLight", obj.getLightState(TRFLightState.GreenLight))
-            .putBoolean("leftBackLight", obj.getLightState(TRFLightState.LeftBackLight))
-            .putBoolean("leftBrakeLight", obj.getLightState(TRFLightState.LeftBrakeLight))
-            .putBoolean("leftFrontLight", obj.getLightState(TRFLightState.LeftFrontLight))
-            .putBoolean("leftIndicator", obj.getLightState(TRFLightState.LeftIndicator))
-            .putBoolean("redLight", obj.getLightState(TRFLightState.RedLight))
-            .putBoolean("rightBackLight", obj.getLightState(TRFLightState.RightBackLight))
-            .putBoolean("rightBrakeLight", obj.getLightState(TRFLightState.RightBrakeLight))
-            .putBoolean("rightFrontLight", obj.getLightState(TRFLightState.RightFrontLight))
-            .putBoolean("rightIndicator", obj.getLightState(TRFLightState.RightIndicator))
-            .putBoolean("yellowIndicatorLight", obj.getLightState(TRFLightState.YellowIndicatorLight))
-            .putBoolean("yellowLight", obj.getLightState(TRFLightState.YellowLight));
-
-        return out;
     }
 
     private String mapObjectType(TRFObjectType type) {
