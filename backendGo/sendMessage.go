@@ -13,7 +13,7 @@ func main() {
 	addr := flag.String("addr", "10.152.238.2:4200", "Address to connect to")
 	// addr := flag.String("addr", "localhost:4200", "Address to connect to")
 	// msg := flag.String("msg", "start\n", "Message to send")
-	msg := flag.String("msg", "trf", "Message to send")
+	msg := flag.String("msg", "simstate", "Message to send")
 
 	flag.Parse()
 
