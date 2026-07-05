@@ -16,9 +16,9 @@ type AdasMonitorOptions = {
 }
 
 /**
- * Polls the SILAB driving-automation (ADAS) state via /api/adas every 2 seconds
- * and fires `onActivate` exactly once — the first time it observes the
- * automation flip from inactive to active.
+ * Polls the SILAB driving-automation (ADAS) state via /api/simstate every 2
+ * seconds and fires `onActivate` exactly once — the first time it observes
+ * the automation flip from inactive to active.
  *
  * The transition must be *observed*: the first successful poll only records a
  * baseline, so an already-active state at mount does not trigger. If
@@ -48,9 +48,12 @@ export function useAdasMonitor({
 
     const poll = async () => {
       try {
-        const res = await fetch(withBasePath("/api/adas"), { cache: "no-store" })
+        const res = await fetch(withBasePath("/api/simstate"), {
+          cache: "no-store",
+        })
         if (!res.ok) return
-        const { active } = (await res.json()) as { active?: boolean }
+        const data = (await res.json()) as { adas?: { active?: boolean } }
+        const active = data.adas?.active
         if (cancelled || typeof active !== "boolean") return
 
         const wasInactive = prevActive === false
