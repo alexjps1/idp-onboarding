@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev --turbopack --experimental-https",
     "build": "next build",
+    "postbuild": "cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
