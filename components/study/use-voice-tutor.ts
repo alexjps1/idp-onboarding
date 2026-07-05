@@ -532,7 +532,7 @@ export function useVoiceTutor(
         dcRef.current?.send(
           JSON.stringify({
             type: "session.update",
-            session: { instructions },
+            session: { type: "realtime", instructions },
           })
         )
         patch({
