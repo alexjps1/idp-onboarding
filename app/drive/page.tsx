@@ -41,6 +41,21 @@ import {
   REALTIME_TEXT_INPUT,
 } from "@/components/study/use-voice-tutor"
 import { useAdasMonitor } from "@/components/study/use-adas-monitor"
+import { useIntroTrigger } from "@/components/study/use-intro-trigger"
+import { useZoneTriggers, type ZoneOutcome } from "@/components/study/use-zone-triggers"
+
+/** Delay before the tutor's one-time self-introduction, in milliseconds. */
+const INTRO_DELAY_MS = 5000
+
+/** Maps a nudge-zone index (0-based, "Stelle 1"–"Stelle 6") to its triggerStates key. */
+const ZONE_NUDGE_IDS = [
+  "zoneNudge1",
+  "zoneNudge2",
+  "zoneNudge3",
+  "zoneNudge4",
+  "zoneNudge5",
+  "zoneNudge6",
+] as const
 
 const SIDEBAR_APPS = [
   { icon: Navigation, label: "Karte" },
@@ -74,6 +89,7 @@ export default function DrivePage() {
     practice,
     startVoiceConversation,
     appendVoiceMessage,
+    setTriggerState,
   } = useStudy()
   const { previous, next } = getAdjacentSteps("drive", mode)
   const router = useRouter()
@@ -103,15 +119,74 @@ export default function DrivePage() {
 
   // Proactive trigger: the first time the driving automation is switched on,
   // open the assistant on its own and have it greet (unless already open).
-  const openAssistantProactively = React.useCallback(() => {
-    setAssistantOpen(true)
-    startVoiceConversation("proactive")
-    void tutor.start({ proactive: true, theory, practice })
-  }, [tutor, theory, practice, startVoiceConversation])
+  // Always records the diagnostic outcome to the study session so a missed
+  // trigger can be explained from the saved data (see lib/study-data.ts).
+  const openAssistantProactively = React.useCallback(
+    (outcome: "suppressed" | "fired") => {
+      setTriggerState("adasOn", outcome)
+      if (outcome !== "fired") return
+      setAssistantOpen(true)
+      startVoiceConversation("proactive")
+      void tutor.start({ proactiveKind: "adas_on", theory, practice })
+    },
+    [tutor, theory, practice, startVoiceConversation, setTriggerState]
+  )
 
   useAdasMonitor({
     enabled: withTutor,
     onActivate: openAssistantProactively,
+    shouldSuppress: () => assistantOpen,
+  })
+
+  // Proactive trigger: a one-time self-introduction shortly after the drive
+  // view loads, regardless of ADAS state.
+  const openAssistantForIntro = React.useCallback(
+    (outcome: "suppressed" | "fired") => {
+      setTriggerState("intro", outcome)
+      if (outcome !== "fired") return
+      setAssistantOpen(true)
+      startVoiceConversation("proactive_intro")
+      void tutor.start({ proactiveKind: "intro" })
+    },
+    [tutor, startVoiceConversation, setTriggerState]
+  )
+
+  useIntroTrigger({
+    enabled: withTutor,
+    delayMs: INTRO_DELAY_MS,
+    onTrigger: openAssistantForIntro,
+    shouldSuppress: () => assistantOpen,
+  })
+
+  // Proactive triggers: fixed track zones — nudge the driver to turn ADAS on
+  // if it's off there, and explain the DHL-van takeover afterwards if ADAS
+  // was on beforehand.
+  const openAssistantForZoneNudge = React.useCallback(
+    (index: number, outcome: ZoneOutcome) => {
+      setTriggerState(ZONE_NUDGE_IDS[index], outcome)
+      if (outcome !== "fired") return
+      setAssistantOpen(true)
+      startVoiceConversation("proactive_zone_nudge")
+      void tutor.start({ proactiveKind: "zone_nudge" })
+    },
+    [tutor, startVoiceConversation, setTriggerState]
+  )
+
+  const openAssistantForSystemLimit = React.useCallback(
+    (outcome: ZoneOutcome) => {
+      setTriggerState("systemLimit", outcome)
+      if (outcome !== "fired") return
+      setAssistantOpen(true)
+      startVoiceConversation("proactive_system_limit")
+      void tutor.start({ proactiveKind: "system_limit" })
+    },
+    [tutor, startVoiceConversation, setTriggerState]
+  )
+
+  useZoneTriggers({
+    enabled: withTutor,
+    onZoneNudge: openAssistantForZoneNudge,
+    onSystemLimitExplain: openAssistantForSystemLimit,
     shouldSuppress: () => assistantOpen,
   })
 

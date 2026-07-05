@@ -2,10 +2,12 @@
 
 import * as React from "react"
 
-import { saveSession } from "@/lib/study-data"
+import { saveSession, INITIAL_TRIGGER_STATES } from "@/lib/study-data"
 import type {
   AdaptStatus,
   AdaptedSection,
+  ProactiveTriggerState,
+  ProactiveTriggerStates,
   StudySession,
   VoiceConversation,
   VoiceConversationTrigger,
@@ -32,6 +34,8 @@ type StudyState = {
   adaptedModules: AdaptedSection[] | null
   /** One entry per time the voice tutor was opened during the drive. */
   voiceConversations: VoiceConversation[]
+  /** Diagnostic state of each proactive trigger over the drive (see ProactiveTriggerState). */
+  triggerStates: ProactiveTriggerStates
 }
 
 type StudyContextValue = StudyState & {
@@ -45,6 +49,10 @@ type StudyContextValue = StudyState & {
   ) => void
   startVoiceConversation: (trigger?: VoiceConversationTrigger) => void
   appendVoiceMessage: (message: VoiceMessage) => void
+  setTriggerState: (
+    id: keyof ProactiveTriggerStates,
+    state: ProactiveTriggerState
+  ) => void
   reset: () => void
 }
 
@@ -58,6 +66,7 @@ const SERVER_SNAPSHOT: StudyState = {
   adaptStatus: null,
   adaptedModules: null,
   voiceConversations: [],
+  triggerStates: INITIAL_TRIGGER_STATES,
 }
 
 const StudyContext = React.createContext<StudyContextValue | null>(null)
@@ -87,6 +96,7 @@ function createStudyStore() {
         adaptStatus: parsed.adaptStatus ?? null,
         adaptedModules: parsed.adaptedModules ?? null,
         voiceConversations: parsed.voiceConversations ?? [],
+        triggerStates: { ...INITIAL_TRIGGER_STATES, ...parsed.triggerStates },
       }
     } catch {
       return SERVER_SNAPSHOT
@@ -173,6 +183,13 @@ function createStudyStore() {
         ],
       })
     },
+    setTriggerState: (
+      id: keyof ProactiveTriggerStates,
+      triggerState: ProactiveTriggerState
+    ) =>
+      set({
+        triggerStates: { ...getSnapshot().triggerStates, [id]: triggerState },
+      }),
     reset: () =>
       set({
         participantId: null,
@@ -183,6 +200,7 @@ function createStudyStore() {
         adaptStatus: null,
         adaptedModules: null,
         voiceConversations: [],
+        triggerStates: INITIAL_TRIGGER_STATES,
       }),
   }
 }
@@ -206,6 +224,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       setAdaptedModules: store.setAdaptedModules,
       startVoiceConversation: store.startVoiceConversation,
       appendVoiceMessage: store.appendVoiceMessage,
+      setTriggerState: store.setTriggerState,
       reset: store.reset,
     }),
     [state]

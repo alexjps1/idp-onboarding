@@ -3,19 +3,52 @@
 import * as React from "react"
 
 import { withBasePath } from "@/lib/base-path"
-import { buildProactiveInstructions } from "@/lib/prompts"
+import {
+  buildProactiveInstructions,
+  buildIntroInstructions,
+  buildZoneNudgeInstructions,
+  buildSystemLimitInstructions,
+} from "@/lib/prompts"
 import type { VoiceMessage } from "@/lib/study-data"
 import type { Ratings } from "@/components/study/study-provider"
 
 /**
- * Options for {@link useVoiceTutor.start}. When `proactive` is set the session
- * is opened in proactive mode (the tutor speaks first), and the self-assessment
- * ratings are forwarded so the server can tailor the opening offer.
+ * Which proactive moment is being opened. "adas_on" = the driving automation
+ * was just switched on for the first time (uses the self-assessment ratings
+ * to pick a system to offer); "intro" = the one-time self-introduction
+ * shortly after the drive view loads; "zone_nudge" = the car entered a fixed
+ * track zone with ADAS off; "system_limit" = the car passed the DHL-van
+ * takeover with ADAS having been on beforehand.
+ */
+export type ProactiveKind = "adas_on" | "intro" | "zone_nudge" | "system_limit"
+
+/**
+ * Options for {@link useVoiceTutor.start}. When `proactiveKind` is set the
+ * session is opened in proactive mode (the tutor speaks first); the
+ * self-assessment ratings are only used by the "adas_on" kind.
  */
 export type StartOptions = {
-  proactive?: boolean
+  proactiveKind?: ProactiveKind
   theory?: Ratings
   practice?: Ratings
+}
+
+/** Picks the instructions for a given proactive kind (client-side use). */
+function buildInstructionsForKind(
+  kind: ProactiveKind,
+  theory: Ratings,
+  practice: Ratings
+): string {
+  switch (kind) {
+    case "adas_on":
+      return buildProactiveInstructions(theory, practice)
+    case "intro":
+      return buildIntroInstructions()
+    case "zone_nudge":
+      return buildZoneNudgeInstructions()
+    case "system_limit":
+      return buildSystemLimitInstructions()
+  }
 }
 
 /**
@@ -304,7 +337,8 @@ export function useVoiceTutor(
    */
   const runConnect = React.useCallback(
     async (mode: "warm" | "live", opts?: StartOptions) => {
-      const proactive = mode === "live" && (opts?.proactive ?? false)
+      const proactiveKind =
+        mode === "live" ? opts?.proactiveKind : undefined
       connectModeRef.current = mode
       try {
         patch({
@@ -360,11 +394,11 @@ export function useVoiceTutor(
 
         const tokenRes = await fetch(withBasePath("/api/realtime"), {
           method: "POST",
-          ...(proactive
+          ...(proactiveKind
             ? {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  proactive: true,
+                  proactiveKind,
                   theory: opts?.theory ?? {},
                   practice: opts?.practice ?? {},
                 }),
@@ -424,7 +458,7 @@ export function useVoiceTutor(
           // In proactive mode the user hasn't said anything, so ask the model to
           // generate the opening turn itself (it follows the proactive session
           // instructions and greets first).
-          if (proactive) {
+          if (proactiveKind) {
             patch({ status: "responding" })
             dc.send(JSON.stringify({ type: "response.create" }))
           }
@@ -524,8 +558,9 @@ export function useVoiceTutor(
         t.enabled = true
       })
       connectModeRef.current = "live"
-      if (opts?.proactive) {
-        const instructions = buildProactiveInstructions(
+      if (opts?.proactiveKind) {
+        const instructions = buildInstructionsForKind(
+          opts.proactiveKind,
           opts.theory ?? {},
           opts.practice ?? {}
         )

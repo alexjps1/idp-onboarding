@@ -189,3 +189,43 @@ Die Fahrautomatisierung wurde gerade zum ersten Mal aktiviert. Eröffne das Gesp
 
 ${selfAssessment}${nonOfferable}`
 }
+
+/**
+ * Instructions for the proactive session opened automatically a few seconds
+ * after the drive view loads, before anything else has happened. A one-time
+ * self-introduction so the driver knows the tutor exists and how to reach it.
+ */
+export function buildIntroInstructions(): string {
+  return `${REALTIME_INSTRUCTIONS}
+
+# Proaktive Eröffnung: Begrüßung
+Die Fahrt beginnt gerade und die Person hat dich noch nicht kennengelernt. Eröffne das Gespräch von dir aus mit ein bis zwei kurzen Sätzen: Stelle dich kurz als Assistent für die Fahrerassistenzsysteme vor und weise darauf hin, dass die Person jederzeit den Assistenten-Knopf drücken kann, um dir Fragen zu den Fahrerassistenzsystemen zu stellen. Warte danach auf eine Reaktion der Person.`
+}
+
+/**
+ * Instructions for the proactive session opened when the car enters one of
+ * the fixed track zones (see lib/track-zones.ts) while ADAS is off. Nudges
+ * the driver toward turning the automation on, without pressuring them.
+ */
+export function buildZoneNudgeInstructions(): string {
+  return `${REALTIME_INSTRUCTIONS}
+
+# Proaktive Eröffnung: Hinweis auf inaktive Automatisierung
+Die Fahrautomatisierung ist gerade nicht aktiv. Eröffne das Gespräch von dir aus mit ein bis zwei kurzen Sätzen: Erwähne, dass dir aufgefallen ist, dass die Fahrerassistenzsysteme momentan nicht aktiv sind, und dass die Person sie mit der Aktivierungstaste am Lenkrad einschalten kann, wenn sie möchte. Biete außerdem an, gerne Fragen dazu zu beantworten. Übe dabei keinen Druck aus – es ist völlig in Ordnung, wenn die Person die Systeme nicht aktivieren möchte.`
+}
+
+/**
+ * Instructions for the proactive session opened shortly after the car passes
+ * the parked DHL delivery van that forces a manual takeover. Only used when
+ * ADAS was confirmed active just before the takeover (see use-zone-triggers).
+ * Grounds the explanation in the concrete event so the model doesn't have to
+ * invent what happened.
+ */
+export function buildSystemLimitInstructions(): string {
+  return `${REALTIME_INSTRUCTIONS}
+
+# Proaktive Eröffnung: Erklärung der Systemgrenze
+Die Fahrautomatisierung hat sich soeben von selbst abgeschaltet, weil auf der Fahrspur ein haltendes Fahrzeug stand (ein geparkter Lieferwagen), das die Automatisierung nicht eigenständig sicher umfahren konnte. Das ist eine Systemgrenze: Die Person musste kurz manuell übernehmen und ist inzwischen sicher daran vorbeigefahren.
+
+Eröffne das Gespräch von dir aus mit ein bis zwei kurzen Sätzen: Erkläre, dass sich die Automatisierung wegen des haltenden Fahrzeugs auf der Fahrspur abgeschaltet hat, weil das eine Grenze des Systems war und deshalb eine kurze manuelle Übernahme nötig wurde. Frage anschließend, ob die Person mehr dazu wissen möchte, und warte auf die Antwort.`
+}

@@ -20,9 +20,18 @@ export type VoiceMessage = {
 /**
  * Why a voice conversation was started. "user_initiated" = the participant
  * tapped the assistant button; "proactive" = the assistant opened itself when
- * the driving automation was first switched on (see use-adas-monitor).
+ * the driving automation was first switched on (see use-adas-monitor);
+ * "proactive_intro" = the one-time self-introduction shortly after the drive
+ * view loads (see use-intro-trigger); "proactive_zone_nudge" /
+ * "proactive_system_limit" = the fixed-zone triggers on the track (see
+ * use-zone-triggers).
  */
-export type VoiceConversationTrigger = "user_initiated" | "proactive"
+export type VoiceConversationTrigger =
+  | "user_initiated"
+  | "proactive"
+  | "proactive_intro"
+  | "proactive_zone_nudge"
+  | "proactive_system_limit"
 
 /**
  * One run of the voice tutor. The participant can open and close the assistant
@@ -33,6 +42,48 @@ export type VoiceConversation = {
   /** ISO timestamp of when the assistant was opened. */
   startedAt: string
   messages: VoiceMessage[]
+}
+
+/**
+ * Diagnostic state of one proactive trigger over the course of a drive, so a
+ * "why didn't it fire" report can be answered from the saved session data
+ * instead of live logs. Semantics per trigger, decided the moment its
+ * condition (zone entry / timer elapsed / ADAS transition) is first met:
+ * - "waiting": condition not yet met.
+ * - "detected": condition met, but no tutor action was needed (ADAS already
+ *   on for a zone nudge; ADAS was off beforehand for the system-limit
+ *   explanation — never used by "intro"/"adas_on", which always need action
+ *   once met).
+ * - "suppressed": condition met, action needed, but the assistant was already
+ *   open — dropped permanently, never retried (see use-adas-monitor.ts,
+ *   use-intro-trigger.ts, use-zone-triggers.ts).
+ * - "fired": condition met, action needed, tutor opened and spoke.
+ */
+export type ProactiveTriggerState = "waiting" | "detected" | "suppressed" | "fired"
+
+/** One entry per proactive trigger tracked over the drive (see ProactiveTriggerState). */
+export type ProactiveTriggerStates = {
+  intro: ProactiveTriggerState
+  adasOn: ProactiveTriggerState
+  zoneNudge1: ProactiveTriggerState
+  zoneNudge2: ProactiveTriggerState
+  zoneNudge3: ProactiveTriggerState
+  zoneNudge4: ProactiveTriggerState
+  zoneNudge5: ProactiveTriggerState
+  zoneNudge6: ProactiveTriggerState
+  systemLimit: ProactiveTriggerState
+}
+
+export const INITIAL_TRIGGER_STATES: ProactiveTriggerStates = {
+  intro: "waiting",
+  adasOn: "waiting",
+  zoneNudge1: "waiting",
+  zoneNudge2: "waiting",
+  zoneNudge3: "waiting",
+  zoneNudge4: "waiting",
+  zoneNudge5: "waiting",
+  zoneNudge6: "waiting",
+  systemLimit: "waiting",
 }
 
 /** A module section after the guide adapted it to the participant's knowledge. */
@@ -56,6 +107,7 @@ export type StudySession = {
   adaptStatus: AdaptStatus | null
   adaptedModules: AdaptedSection[] | null
   voiceConversations: VoiceConversation[]
+  triggerStates: ProactiveTriggerStates
 }
 
 /**

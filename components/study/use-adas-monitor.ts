@@ -6,24 +6,28 @@ import { withBasePath } from "@/lib/base-path"
 
 const POLL_INTERVAL_MS = 2000
 
+/** "suppressed" = the edge was observed but the assistant was already open; "fired" = it actually opened. */
+export type AdasActivateOutcome = "suppressed" | "fired"
+
 type AdasMonitorOptions = {
   /** Gate polling — e.g. only in mit-Tutor mode while the drive view is open. */
   enabled: boolean
-  /** Fired once, the first time an inactive→active transition is observed. */
-  onActivate: () => void
+  /** Called once, the first time an inactive→active transition is observed, with the outcome. */
+  onActivate: (outcome: AdasActivateOutcome) => void
   /** Return true to drop the trigger (e.g. a conversation is already open). */
   shouldSuppress: () => boolean
 }
 
 /**
  * Polls the SILAB driving-automation (ADAS) state via /api/simstate every 2
- * seconds and fires `onActivate` exactly once — the first time it observes
+ * seconds and calls `onActivate` exactly once — the first time it observes
  * the automation flip from inactive to active.
  *
  * The transition must be *observed*: the first successful poll only records a
  * baseline, so an already-active state at mount does not trigger. If
- * `shouldSuppress()` is true at the moment of the edge, the trigger is dropped
- * permanently (it will not fire on a later activation).
+ * `shouldSuppress()` is true at the moment of the edge, the outcome is
+ * "suppressed" and the trigger is dropped permanently (it will not fire on a
+ * later activation) — otherwise it's "fired".
  */
 export function useAdasMonitor({
   enabled,
@@ -60,8 +64,10 @@ export function useAdasMonitor({
         prevActive = active
 
         if (fired || !wasInactive || !active) return
-        fired = true // fire (or drop) at most once
-        if (!shouldSuppressRef.current()) onActivateRef.current()
+        fired = true // resolve (fired or suppressed) at most once
+        onActivateRef.current(
+          shouldSuppressRef.current() ? "suppressed" : "fired"
+        )
       } catch {
         // Network/parse error → treat as no change and keep polling.
       }
