@@ -52,6 +52,9 @@ const SIDEBAR_APPS = [
 const STATUS_LABEL: Record<VoiceTutorStatus, string> = {
   idle: "Mikrofon aus",
   connecting: "Verbinde…",
+  // Pre-warmed but no conversation yet — indistinguishable from idle for the
+  // driver, the overlay isn't even open while this is the status.
+  ready: "Mikrofon aus",
   listening: "Ich höre zu…",
   speaking: "Ich höre Sie…",
   responding: "Ich antworte…",
@@ -111,6 +114,18 @@ export default function DrivePage() {
     onActivate: openAssistantProactively,
     shouldSuppress: () => assistantOpen,
   })
+
+  // Pre-warm a muted Realtime connection as soon as the drive view mounts, so
+  // opening the assistant later (manually or proactively) can unmute and talk
+  // instantly instead of waiting out a fresh WebRTC handshake. Relies on mic
+  // permission already having been granted on the entry page.
+  React.useEffect(() => {
+    if (withTutor) tutor.prewarm()
+    // Depend on tutor.prewarm (stable for the hook's lifetime), not the whole
+    // tutor object — that's a fresh object literal every render and would
+    // re-fire this effect (and re-call prewarm) on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withTutor, tutor.prewarm])
 
   function closeAssistant() {
     tutor.stop()
