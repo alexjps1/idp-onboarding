@@ -2,6 +2,8 @@
 
 import * as React from "react"
 
+import { withBasePath } from "@/lib/base-path"
+
 const POLL_INTERVAL_MS = 2000
 
 type AdasMonitorOptions = {
@@ -46,7 +48,7 @@ export function useAdasMonitor({
 
     const poll = async () => {
       try {
-        const res = await fetch("/api/adas", { cache: "no-store" })
+        const res = await fetch(withBasePath("/api/adas"), { cache: "no-store" })
         if (!res.ok) return
         const { active } = (await res.json()) as { active?: boolean }
         if (cancelled || typeof active !== "boolean") return

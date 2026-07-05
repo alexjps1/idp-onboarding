@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PARTICIPANT_ID_PATTERN, isParticipantIdTaken } from "@/lib/participant"
+import { REALTIME_TEXT_INPUT } from "@/components/study/use-voice-tutor"
 
 // Participants receive a direct link (/mittutor or /ohnetutor). This root page
 // lets the study team assign a Probanden-ID before starting: a custom id (up to
@@ -25,6 +26,44 @@ export default function Home() {
   const [id, setId] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
   const [checking, setChecking] = React.useState(false)
+
+  // Mic-permission gate: the tutor needs microphone access once the run
+  // reaches /drive, and requesting it there for the first time risks Safari
+  // suppressing the permission prompt if it isn't tied to a fresh tap (see
+  // useVoiceTutor's start()). Requesting it here instead, on a real click,
+  // means the grant is already in place by the time /drive asks again — that
+  // later getUserMedia call resolves instantly with no prompt. In text-input
+  // debug mode no real mic is ever used, so the gate is skipped entirely.
+  const [micGranted, setMicGranted] = React.useState(REALTIME_TEXT_INPUT)
+  const [micRequesting, setMicRequesting] = React.useState(false)
+  const [micError, setMicError] = React.useState<string | null>(null)
+
+  async function requestMic() {
+    if (micRequesting || micGranted) return
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMicError(
+        "Mikrofon nur über HTTPS verfügbar – bitte die Seite über https:// öffnen."
+      )
+      return
+    }
+    setMicRequesting(true)
+    setMicError(null)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      })
+      // Only the permission grant is needed here — release the device
+      // immediately so nothing keeps the mic reserved until /drive opens it.
+      stream.getTracks().forEach((t) => t.stop())
+      setMicGranted(true)
+    } catch {
+      setMicError(
+        "Mikrofonzugriff wurde verweigert. Bitte in den Browser-/Systemeinstellungen erlauben und erneut versuchen."
+      )
+    } finally {
+      setMicRequesting(false)
+    }
+  }
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     // Auto-uppercase and drop anything outside the allowed charset as they type,
@@ -85,6 +124,33 @@ export default function Home() {
             Nur Großbuchstaben, Zahlen und Unterstriche, max. 8 Zeichen.
           </p>
           {error ? <p className="text-lg text-destructive">{error}</p> : null}
+
+          {!REALTIME_TEXT_INPUT ? (
+            <div className="mt-3 flex flex-col gap-2 border-t pt-4">
+              <Label>Mikrofonzugriff</Label>
+              <Button
+                type="button"
+                variant={micGranted ? "secondary" : "default"}
+                size="lg"
+                onClick={requestMic}
+                disabled={micRequesting || micGranted}
+                className="h-14 text-xl"
+              >
+                {micGranted
+                  ? "Mikrofon aktiviert ✓"
+                  : micRequesting
+                    ? "Warte auf Freigabe…"
+                    : "Mikrofon aktivieren"}
+              </Button>
+              <p className="text-lg text-muted-foreground">
+                Vor Studienbeginn muss der Mikrofonzugriff einmal freigegeben
+                werden.
+              </p>
+              {micError ? (
+                <p className="text-lg text-destructive">{micError}</p>
+              ) : null}
+            </div>
+          ) : null}
         </CardContent>
 
         <CardFooter className="gap-3">
@@ -92,7 +158,7 @@ export default function Home() {
             variant="outline"
             size="lg"
             onClick={() => start("/ohnetutor")}
-            disabled={checking}
+            disabled={checking || !micGranted}
             className="h-14 flex-1 text-xl"
           >
             Studie ohne Tutor starten
@@ -100,7 +166,7 @@ export default function Home() {
           <Button
             size="lg"
             onClick={() => start("/mittutor")}
-            disabled={checking}
+            disabled={checking || !micGranted}
             className="h-14 flex-1 text-xl"
           >
             Studie mit Tutor starten

@@ -3,6 +3,7 @@
 import * as React from "react"
 
 import { withBasePath } from "@/lib/base-path"
+import { buildProactiveInstructions } from "@/lib/prompts"
 import type { VoiceMessage } from "@/lib/study-data"
 import type { Ratings } from "@/components/study/study-provider"
 
@@ -30,6 +31,7 @@ export const REALTIME_TEXT_INPUT =
 export type VoiceTutorStatus =
   | "idle" // no session
   | "connecting" // minting token + WebRTC handshake
+  | "ready" // pre-warmed: connected, mic muted, no conversation yet
   | "listening" // session live, waiting for speech
   | "speaking" // user is talking
   | "responding" // tutor is answering (audio is playing)
@@ -51,6 +53,11 @@ const INITIAL: VoiceTutorState = {
   error: null,
 }
 
+// Backoff schedule (ms) for a failed pre-warm attempt. Exhausted silently —
+// start() always falls back to an on-demand connect, so a stuck pre-warm is
+// never user-visible.
+const PREWARM_RETRY_DELAYS_MS = [2000, 5000, 15000]
+
 // Server events arriving on the data channel. Only the fields we read.
 type RealtimeEvent = {
   type: string
@@ -66,11 +73,20 @@ type RealtimeEvent = {
 /**
  * Live voice conversation with the tutor via the OpenAI Realtime API.
  *
- * start() fetches an ephemeral client secret from /api/realtime and opens a
- * WebRTC session: the mic track streams up, the tutor's voice streams back
+ * The connection is pre-warmed in the background (see {@link prewarm}): a
+ * session opens on mount with the mic muted, so start() can just unmute and
+ * begin talking instantly instead of waiting out a fresh WebRTC handshake.
+ * Each conversation still starts fresh — once it ends, the connection is
+ * closed and a new one is pre-warmed for next time, rather than kept alive
+ * (that would let the tutor remember earlier turns and let per-turn cost
+ * creep up over the drive — see the session's design discussion).
+ *
+ * start() either activates an already-warm session or, if none is ready yet,
+ * fetches an ephemeral client secret from /api/realtime and opens a WebRTC
+ * session itself: the mic track streams up, the tutor's voice streams back
  * into a hidden <audio> element, and JSON events on the "oai-events" data
- * channel drive the status/transcript display. Turn-taking (VAD) and barge-in
- * are handled server-side, so the session stays open until stop().
+ * channel drive the status/transcript display. Turn-taking (VAD) and
+ * barge-in are handled server-side, so the session stays open until stop().
  */
 export function useVoiceTutor(
   options: {
@@ -93,9 +109,18 @@ export function useVoiceTutor(
     onEndRef.current = options.onEnd
   }, [options.onEnd])
 
+  // Mirrors state.status synchronously — state updates are async, but event
+  // handlers created mid-connect (e.g. the ICE state handler below) need to
+  // read the *current* status.
+  const statusRef = React.useRef<VoiceTutorStatus>(INITIAL.status)
+
   const patch = React.useCallback(
     (partial: Partial<VoiceTutorState>) =>
-      setState((prev) => ({ ...prev, ...partial })),
+      setState((prev) => {
+        const next = { ...prev, ...partial }
+        statusRef.current = next.status
+        return next
+      }),
     []
   )
 
@@ -108,13 +133,27 @@ export function useVoiceTutor(
   // spoken goodbye has finished playing (or a fallback timer fires).
   const endRequestedRef = React.useRef(false)
   const endTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  // "warm" while pre-warming/pre-warmed, "live" once a real conversation has
+  // started — lets start() tell a still-connecting pre-warm apart from an
+  // already-active conversation.
+  const connectModeRef = React.useRef<"warm" | "live" | null>(null)
+  // Pre-warm retry bookkeeping (reset on every fresh prewarm() call).
+  const prewarmAttemptsRef = React.useRef(0)
+  const retryTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
 
   const teardown = React.useCallback(() => {
     if (endTimerRef.current) {
       clearTimeout(endTimerRef.current)
       endTimerRef.current = null
     }
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = null
+    }
     endRequestedRef.current = false
+    connectModeRef.current = null
     dcRef.current?.close()
     dcRef.current = null
     pcRef.current?.close()
@@ -129,9 +168,21 @@ export function useVoiceTutor(
     audioCtxRef.current = null
   }, [])
 
+  // prewarm()/runConnect() are defined lower down but need to call each other
+  // and be called from finishEnd/handleEvent above them — forwarded through
+  // refs, same pattern as onMessageRef/onEndRef above, to avoid a dependency
+  // cycle between the callbacks.
+  const prewarmRef = React.useRef<() => void>(() => {})
+  // Internal retry-only warm connect — unlike prewarm(), does not reset the
+  // attempt counter, so the backoff schedule actually escalates.
+  const retryWarmRef = React.useRef<() => void>(() => {})
+
   const stop = React.useCallback(() => {
     teardown()
     patch({ status: "idle", currentGif: null })
+    // Ready for the next interaction: each open still starts a fresh
+    // conversation, just with the connection already sitting open.
+    prewarmRef.current()
   }, [teardown, patch])
 
   // Finalise a tutor-initiated end: tear down and notify the parent so the
@@ -142,6 +193,7 @@ export function useVoiceTutor(
     teardown()
     patch({ status: "idle", currentGif: null })
     onEndRef.current?.()
+    prewarmRef.current()
   }, [teardown, patch])
 
   const handleEvent = React.useCallback(
@@ -243,136 +295,281 @@ export function useVoiceTutor(
     [patch, finishEnd]
   )
 
-  const start = React.useCallback(async (opts?: StartOptions) => {
-    if (pcRef.current) return
-    const proactive = opts?.proactive ?? false
-    try {
-      patch({ status: "connecting", error: null, transcript: "", answer: "" })
+  /**
+   * Shared connect implementation for both a full start() and a background
+   * prewarm(). In "warm" mode the mic track is added but immediately
+   * disabled (silence only — VAD filters it out, so a muted pre-warmed
+   * connection costs nothing while it waits) and the data channel's open
+   * handler stops at status "ready" instead of unmuting/greeting.
+   */
+  const runConnect = React.useCallback(
+    async (mode: "warm" | "live", opts?: StartOptions) => {
+      const proactive = mode === "live" && (opts?.proactive ?? false)
+      connectModeRef.current = mode
+      try {
+        patch({
+          status: "connecting",
+          error: null,
+          transcript: "",
+          answer: "",
+        })
 
-      // Acquire the audio stream first, while the user's tap is still the active
-      // gesture. iOS Safari drops that activation across an awaited network
-      // request, which would otherwise suppress the mic-permission prompt.
-      let stream: MediaStream
-      if (REALTIME_TEXT_INPUT) {
-        // Produce a silent audio track so the WebRTC offer has a valid audio
-        // m-line without requesting microphone permission.
-        const ctx = new AudioContext()
-        audioCtxRef.current = ctx
-        const oscillator = ctx.createOscillator()
-        const gain = ctx.createGain()
-        gain.gain.value = 0
-        const dst = ctx.createMediaStreamDestination()
-        oscillator.connect(gain)
-        gain.connect(dst)
-        oscillator.start()
-        stream = dst.stream
-      } else {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          // getUserMedia only exists in a secure context (HTTPS or localhost).
+        // Acquire the audio stream first, while the user's tap is still the active
+        // gesture. iOS Safari drops that activation across an awaited network
+        // request, which would otherwise suppress the mic-permission prompt. (Not
+        // a concern in "warm" mode: pre-warming only ever runs after the entry
+        // page's mic-permission gate has already been granted, so this call needs
+        // no gesture there.)
+        let stream: MediaStream
+        if (REALTIME_TEXT_INPUT) {
+          // Produce a silent audio track so the WebRTC offer has a valid audio
+          // m-line without requesting microphone permission.
+          const ctx = new AudioContext()
+          audioCtxRef.current = ctx
+          const oscillator = ctx.createOscillator()
+          const gain = ctx.createGain()
+          gain.gain.value = 0
+          const dst = ctx.createMediaStreamDestination()
+          oscillator.connect(gain)
+          gain.connect(dst)
+          oscillator.start()
+          stream = dst.stream
+        } else {
+          if (!navigator.mediaDevices?.getUserMedia) {
+            // getUserMedia only exists in a secure context (HTTPS or localhost).
+            throw new Error(
+              "Mikrofon nur über HTTPS verfügbar – bitte die Seite über https:// öffnen."
+            )
+          }
+          // Echo cancellation keeps the tutor's own voice from re-entering the
+          // mic; noise suppression prevents background sounds from triggering VAD.
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+            },
+          })
+        }
+        if (mode === "warm") {
+          stream.getAudioTracks().forEach((t) => {
+            t.enabled = false
+          })
+        }
+        streamRef.current = stream
+
+        const tokenRes = await fetch(withBasePath("/api/realtime"), {
+          method: "POST",
+          ...(proactive
+            ? {
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  proactive: true,
+                  theory: opts?.theory ?? {},
+                  practice: opts?.practice ?? {},
+                }),
+              }
+            : {}),
+        })
+        if (!tokenRes.ok) {
           throw new Error(
-            "Mikrofon nur über HTTPS verfügbar – bitte die Seite über https:// öffnen."
+            (await tokenRes.json()).error ??
+              "Sprachsitzung konnte nicht erstellt werden"
           )
         }
-        // Echo cancellation keeps the tutor's own voice from re-entering the
-        // mic; noise suppression prevents background sounds from triggering VAD.
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          },
-        })
-      }
-      streamRef.current = stream
+        const { clientSecret, model } = (await tokenRes.json()) as {
+          clientSecret: string
+          model: string
+        }
 
-      const tokenRes = await fetch(withBasePath("/api/realtime"), {
-        method: "POST",
-        ...(proactive
-          ? {
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                proactive: true,
-                theory: opts?.theory ?? {},
-                practice: opts?.practice ?? {},
-              }),
-            }
-          : {}),
-      })
-      if (!tokenRes.ok) {
-        throw new Error(
-          (await tokenRes.json()).error ??
-            "Sprachsitzung konnte nicht erstellt werden"
+        const pc = new RTCPeerConnection()
+        pcRef.current = pc
+
+        // While pre-warmed and unused, an unexpected drop (network blip, a
+        // Realtime-side idle/session limit) should repair itself silently —
+        // nobody is watching a "ready" connection. Once a real conversation
+        // is live, statusRef is no longer "ready" and this is a no-op.
+        pc.oniceconnectionstatechange = () => {
+          if (pcRef.current !== pc) return
+          const st = pc.iceConnectionState
+          if (
+            (st === "failed" || st === "disconnected" || st === "closed") &&
+            statusRef.current === "ready"
+          ) {
+            teardown()
+            patch({ status: "idle" })
+            prewarmRef.current()
+          }
+        }
+
+        // The tutor's voice arrives as a remote audio track.
+        const audioEl = document.createElement("audio")
+        audioEl.autoplay = true
+        audioRef.current = audioEl
+        pc.ontrack = (e) => {
+          audioEl.srcObject = e.streams[0]
+        }
+
+        pc.addTrack(stream.getAudioTracks()[0], stream)
+
+        const dc = pc.createDataChannel("oai-events")
+        dcRef.current = dc
+        dc.onopen = () => {
+          if (mode === "warm") {
+            prewarmAttemptsRef.current = 0
+            patch({ status: "ready" })
+            return
+          }
+          patch({ status: "listening" })
+          // In proactive mode the user hasn't said anything, so ask the model to
+          // generate the opening turn itself (it follows the proactive session
+          // instructions and greets first).
+          if (proactive) {
+            patch({ status: "responding" })
+            dc.send(JSON.stringify({ type: "response.create" }))
+          }
+        }
+        dc.onmessage = (e) => {
+          try {
+            handleEvent(JSON.parse(e.data) as RealtimeEvent)
+          } catch {
+            // Ignore malformed events.
+          }
+        }
+
+        const offer = await pc.createOffer()
+        await pc.setLocalDescription(offer)
+
+        const sdpRes = await fetch(
+          `https://api.openai.com/v1/realtime/calls?model=${encodeURIComponent(model)}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${clientSecret}`,
+              "Content-Type": "application/sdp",
+            },
+            body: offer.sdp,
+          }
         )
-      }
-      const { clientSecret, model } = (await tokenRes.json()) as {
-        clientSecret: string
-        model: string
-      }
+        if (!sdpRes.ok) throw new Error("Realtime-Verbindung fehlgeschlagen")
+        const answerSdp = await sdpRes.text()
 
-      const pc = new RTCPeerConnection()
-      pcRef.current = pc
-
-      // The tutor's voice arrives as a remote audio track.
-      const audioEl = document.createElement("audio")
-      audioEl.autoplay = true
-      audioRef.current = audioEl
-      pc.ontrack = (e) => {
-        audioEl.srcObject = e.streams[0]
-      }
-
-      pc.addTrack(stream.getAudioTracks()[0], stream)
-
-      const dc = pc.createDataChannel("oai-events")
-      dcRef.current = dc
-      dc.onopen = () => {
-        patch({ status: "listening" })
-        // In proactive mode the user hasn't said anything, so ask the model to
-        // generate the opening turn itself (it follows the proactive session
-        // instructions and greets first).
-        if (proactive) {
-          patch({ status: "responding" })
-          dc.send(JSON.stringify({ type: "response.create" }))
+        // stop() may have run while we were waiting on the network.
+        if (pcRef.current !== pc) return
+        await pc.setRemoteDescription({ type: "answer", sdp: answerSdp })
+      } catch (err) {
+        teardown()
+        if (mode === "warm") {
+          // Pre-warming is a latency optimisation, not a correctness
+          // requirement — start() falls back to an on-demand connect
+          // regardless, so a failed pre-warm never needs to be user-visible.
+          console.error("Realtime pre-warm failed", err)
+          patch({ status: "idle" })
+          const attempt = prewarmAttemptsRef.current
+          if (attempt < PREWARM_RETRY_DELAYS_MS.length) {
+            prewarmAttemptsRef.current += 1
+            retryTimerRef.current = setTimeout(
+              () => retryWarmRef.current(),
+              PREWARM_RETRY_DELAYS_MS[attempt]
+            )
+          }
+        } else {
+          patch({
+            status: "error",
+            error:
+              err instanceof Error
+                ? `Sprachassistent nicht verfügbar: ${err.message}`
+                : "Sprachassistent nicht verfügbar",
+          })
         }
       }
-      dc.onmessage = (e) => {
-        try {
-          handleEvent(JSON.parse(e.data) as RealtimeEvent)
-        } catch {
-          // Ignore malformed events.
-        }
-      }
+    },
+    [patch, handleEvent, teardown]
+  )
 
-      const offer = await pc.createOffer()
-      await pc.setLocalDescription(offer)
-
-      const sdpRes = await fetch(
-        `https://api.openai.com/v1/realtime/calls?model=${encodeURIComponent(model)}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${clientSecret}`,
-            "Content-Type": "application/sdp",
-          },
-          body: offer.sdp,
-        }
-      )
-      if (!sdpRes.ok) throw new Error("Realtime-Verbindung fehlgeschlagen")
-      const answerSdp = await sdpRes.text()
-
-      // stop() may have run while we were waiting on the network.
-      if (pcRef.current !== pc) return
-      await pc.setRemoteDescription({ type: "answer", sdp: answerSdp })
-    } catch (err) {
-      teardown()
-      patch({
-        status: "error",
-        error:
-          err instanceof Error
-            ? `Sprachassistent nicht verfügbar: ${err.message}`
-            : "Sprachassistent nicht verfügbar",
-      })
+  /**
+   * Opens a muted, pre-warmed session in the background so start() can
+   * activate it instantly later. No-op if a connect (warm or live) is
+   * already in flight or a session is already open.
+   */
+  const prewarm = React.useCallback(() => {
+    if (pcRef.current) return
+    prewarmAttemptsRef.current = 0
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = null
     }
-  }, [patch, handleEvent, teardown])
+    void runConnect("warm")
+  }, [runConnect])
+
+  React.useEffect(() => {
+    prewarmRef.current = prewarm
+  }, [prewarm])
+
+  React.useEffect(() => {
+    retryWarmRef.current = () => {
+      if (!pcRef.current) void runConnect("warm")
+    }
+  }, [runConnect])
+
+  /**
+   * Fast path: unmute an already-"ready" pre-warmed session and, for a
+   * proactive open, swap in the proactive instructions (a partial
+   * session.update — everything else, tools included, stays as configured)
+   * before asking the model to greet.
+   */
+  const activate = React.useCallback(
+    (opts?: StartOptions) => {
+      streamRef.current?.getAudioTracks().forEach((t) => {
+        t.enabled = true
+      })
+      connectModeRef.current = "live"
+      if (opts?.proactive) {
+        const instructions = buildProactiveInstructions(
+          opts.theory ?? {},
+          opts.practice ?? {}
+        )
+        dcRef.current?.send(
+          JSON.stringify({
+            type: "session.update",
+            session: { instructions },
+          })
+        )
+        patch({
+          status: "responding",
+          error: null,
+          transcript: "",
+          answer: "",
+        })
+        dcRef.current?.send(JSON.stringify({ type: "response.create" }))
+      } else {
+        patch({ status: "listening", error: null, transcript: "", answer: "" })
+      }
+    },
+    [patch]
+  )
+
+  const start = React.useCallback(
+    async (opts?: StartOptions) => {
+      if (statusRef.current === "ready" && pcRef.current) {
+        activate(opts)
+        return
+      }
+      if (pcRef.current) {
+        if (connectModeRef.current === "warm") {
+          // A pre-warm is still connecting — abandon it and connect fresh
+          // rather than leaving the caller waiting on a session that will
+          // come up muted. Same "Verbinden…" experience as before
+          // pre-warming existed.
+          teardown()
+        } else {
+          return // already connecting/live — ignore a duplicate call
+        }
+      }
+      await runConnect("live", opts)
+    },
+    [runConnect, activate, teardown]
+  )
 
   const sendText = React.useCallback(
     (text: string) => {
@@ -393,8 +590,9 @@ export function useVoiceTutor(
     [patch]
   )
 
-  // Tear down on unmount.
+  // Tear down on unmount — no re-arm: leaving /drive means there is no next
+  // interaction to prepare for.
   React.useEffect(() => () => teardown(), [teardown])
 
-  return { ...state, start, stop, sendText }
+  return { ...state, start, stop, sendText, prewarm }
 }
