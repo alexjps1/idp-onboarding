@@ -119,7 +119,10 @@ type RealtimeEvent = {
  * session itself: the mic track streams up, the tutor's voice streams back
  * into a hidden <audio> element, and JSON events on the "oai-events" data
  * channel drive the status/transcript display. Turn-taking (VAD) and
- * barge-in are handled server-side, so the session stays open until stop().
+ * barge-in are handled server-side, so the session stays open until stop() —
+ * except the mic is muted client-side whenever the tutor itself is talking
+ * (see the status-driven effect near the bottom of this hook), so its own
+ * voice can never be picked up and misread as the driver interrupting.
  */
 export function useVoiceTutor(
   options: {
@@ -624,6 +627,28 @@ export function useVoiceTutor(
     },
     [patch]
   )
+
+  // Mute the mic while the tutor is talking, and only it — never while the
+  // driver might be. This is the actual fix for self-interruption: the
+  // tutor's own voice, played through car speakers and picked up again by
+  // the mic, is genuine speech, so no VAD sensitivity/eagerness setting can
+  // reliably tell it apart from the driver interrupting (browser echo
+  // cancellation alone isn't reliable in a cabin with external speakers and
+  // reverb). Muting the track means the API only ever sees silence during
+  // the tutor's own turn, so it structurally cannot mistake its own audio
+  // for a barge-in. "error" also unmutes as a safety net so a mid-response
+  // error can't leave the mic stuck muted; other statuses (idle/connecting/
+  // ready/speaking) are left alone — they're already correctly set by
+  // runConnect()/activate() (e.g. "ready" must stay muted during pre-warm).
+  React.useEffect(() => {
+    const track = streamRef.current?.getAudioTracks()[0]
+    if (!track) return
+    if (state.status === "responding") {
+      track.enabled = false
+    } else if (state.status === "listening" || state.status === "error") {
+      track.enabled = true
+    }
+  }, [state.status])
 
   // Tear down on unmount — no re-arm: leaving /drive means there is no next
   // interaction to prepare for.
