@@ -71,7 +71,7 @@ const STATUS_LABEL: Record<VoiceTutorStatus, string> = {
   // driver, the overlay isn't even open while this is the status.
   ready: "Mikrofon aus",
   listening: "Ich höre zu…",
-  speaking: "Ich höre Sie…",
+  speaking: "Ich höre dich…",
   responding: "Ich antworte…",
   error: "Fehler",
 }
@@ -419,32 +419,32 @@ export default function DrivePage() {
                       type="button"
                       onClick={closeAssistant}
                       aria-label="Sprachassistent schließen"
-                      className="relative flex size-64 cursor-pointer items-center justify-center"
+                      className="relative flex size-44 cursor-pointer items-center justify-center"
                     >
                       {voiceActive ? (
                         <>
                           <span className="absolute inset-0 animate-ping rounded-full bg-[#a953da]/15" />
-                          <span className="absolute inset-6 animate-pulse rounded-full bg-[#39c9f6]/25" />
+                          <span className="absolute inset-4 animate-pulse rounded-full bg-[#39c9f6]/25" />
                         </>
                       ) : null}
                       <div
                         className={cn(
-                          "relative flex size-40 items-center justify-center rounded-full bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)] transition-all",
+                          "relative flex size-28 items-center justify-center rounded-full bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)] transition-all",
                           voiceActive
                             ? "shadow-[0_0_60px_rgba(169,83,218,0.45)]"
                             : "opacity-70"
                         )}
                       >
-                        <div className="flex h-14 items-end gap-1.5">
+                        <div className="flex h-10 items-end gap-1">
                           {[0.1, 0.35, 0.2, 0.5, 0.3].map((delay, i) => (
                             <span
                               key={i}
                               className={cn(
-                                "w-1.5 rounded-full bg-white",
+                                "w-1 rounded-full bg-white",
                                 tutor.status === "speaking" ||
                                   tutor.status === "responding"
                                   ? "wave-bar"
-                                  : "h-3 opacity-60"
+                                  : "h-2 opacity-60"
                               )}
                               style={{ animationDelay: `${delay}s` }}
                             />
@@ -455,22 +455,22 @@ export default function DrivePage() {
                     <div className="max-w-xl text-center">
                       <p
                         className={cn(
-                          "label-caps tracking-[0.2em]",
+                          "label-caps text-2xl tracking-[0.2em]",
                           tutor.status === "error" ? "text-error" : "text-[#a953da]"
                         )}
                       >
                         {STATUS_LABEL[tutor.status]}
                       </p>
                       {tutor.error ? (
-                        <p className="mt-2 text-sm text-error">{tutor.error}</p>
+                        <p className="mt-2 text-base text-error">{tutor.error}</p>
                       ) : null}
                       {tutor.transcript ? (
-                        <p className="mt-2 text-lg italic text-black/60">
+                        <p className="mt-2 text-3xl italic text-black/60">
                           &quot;{tutor.transcript}&quot;
                         </p>
                       ) : null}
                       {tutor.answer ? (
-                        <p className="mt-4 text-base leading-relaxed text-black/70">
+                        <p className="mt-4 text-3xl leading-relaxed text-black/70">
                           {tutor.answer}
                         </p>
                       ) : null}
@@ -480,9 +480,9 @@ export default function DrivePage() {
                   /* ── Bubble + GIF layout (agent has replied) ── */
                   <>
                     {/* Single persistent bubble — no key so it's never remounted */}
-                    <div className="slide-up-anim w-full max-w-2xl">
+                    <div className="slide-up-anim w-full">
                       {tutor.transcript ? (
-                        <p className="mb-4 text-right text-[17px] italic text-black/60">
+                        <p className="mb-4 text-right text-3xl italic text-black/60">
                           &quot;{tutor.transcript}&quot;
                         </p>
                       ) : null}
@@ -493,8 +493,8 @@ export default function DrivePage() {
                           {voiceActive ? (
                             <span className="absolute inset-0 animate-ping rounded-full bg-[#a953da]/20" />
                           ) : null}
-                          <div className="relative flex size-16 items-center justify-center rounded-full bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)]">
-                            <div className="flex h-8 items-end gap-1">
+                          <div className="relative flex size-12 items-center justify-center rounded-full bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)]">
+                            <div className="flex h-6 items-end gap-1">
                               {[0.1, 0.35, 0.2, 0.5, 0.3].map((delay, i) => (
                                 <span
                                   key={i}
@@ -503,7 +503,7 @@ export default function DrivePage() {
                                     tutor.status === "speaking" ||
                                       tutor.status === "responding"
                                       ? "wave-bar"
-                                      : "h-3 opacity-60"
+                                      : "h-2 opacity-60"
                                   )}
                                   style={{ animationDelay: `${delay}s` }}
                                 />
@@ -514,15 +514,15 @@ export default function DrivePage() {
 
                         {/* Answer + status */}
                         <div className="min-w-0 flex-1">
-                          <p className="text-[17px] leading-relaxed text-black/80">
+                          <p className="text-3xl leading-relaxed text-black/80">
                             {tutor.answer}
                           </p>
                           {tutor.error ? (
-                            <p className="mt-1 text-[16px] text-error">{tutor.error}</p>
+                            <p className="mt-1 text-[18px] text-error">{tutor.error}</p>
                           ) : null}
                           <p
                             className={cn(
-                              "mt-3 text-[12px] font-medium uppercase tracking-[0.15em]",
+                              "mt-3 text-2xl font-medium uppercase tracking-[0.15em]",
                               tutor.status === "error" ? "text-error" : "text-[#a953da]"
                             )}
                           >
