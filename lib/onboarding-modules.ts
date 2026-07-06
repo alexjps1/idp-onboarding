@@ -10,8 +10,11 @@
 
 export type OnboardingParagraph = {
   text: string
-  /** 1–3 paths relative to /public/gifs/. Multiple gifs must be referenced
-   *  with (links) / (rechts) / (Mitte) labels in the text. */
+  /** 1–3 paths relative to /public/gifs/. Each must be referenced in the text
+   *  with a matching [GIF1]/[GIF2]/[GIF3] placeholder (see app/api/onboarding/
+   *  route.ts, which resolves these to (unten)/(links)/(rechts)/(Mitte) for
+   *  LLM-adapted modules — this baseline text is rendered verbatim for
+   *  alwaysKeep modules and used as source material for adapted ones). */
   gifs?: string[]
 }
 
@@ -134,7 +137,7 @@ export const ONBOARDING_MODULES: OnboardingModule[] = [
         gifs: ["spurhaltungsassistent/spurhaltung-automatisch.gif"],
       },
       {
-        text: "Automatische Spurwechsel sind nicht möglich. Drücken Sie die Aktivierungstaste (links), um das teilautomatisierte Fahren zu deaktivieren und den Spurwechsel manuell auszuführen (rechts).",
+        text: "Automatische Spurwechsel sind nicht möglich. Drücken Sie die Aktivierungstaste [GIF1], um das teilautomatisierte Fahren zu deaktivieren und den Spurwechsel manuell auszuführen [GIF2].",
         gifs: [
           "aktivierung-deaktivierung/aktivierungstaste.gif",
           "spurhaltungsassistent/spurwechsel-manuell-deaktivierung.gif",

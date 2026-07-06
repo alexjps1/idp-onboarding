@@ -168,6 +168,9 @@ export default function GuidePage() {
             <p className="text-xl leading-relaxed text-muted-foreground">
               Personalisierte Inhalte werden für Sie vorbereitet&nbsp;…
             </p>
+            <p className="text-base text-muted-foreground/80">
+              Dies kann bis zu einer Minute dauern.
+            </p>
           </div>
         </div>
       </StudyShell>
