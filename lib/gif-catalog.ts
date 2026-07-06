@@ -164,6 +164,11 @@ export const GIF_CATALOG: GifEntry[] = [
 /** Flat list of GIF names — used as enum values in the show_gif tool schema. */
 export const GIF_NAMES = GIF_CATALOG.map((g) => g.name)
 
+/** GIFs whose name lives under the given /public/gifs/ subfolder. */
+export function gifsForFolder(folder: string): GifEntry[] {
+  return GIF_CATALOG.filter((g) => g.name.startsWith(`${folder}/`))
+}
+
 /** Builds the tool description with the full catalog embedded for the model. */
 export function buildShowGifDescription(): string {
   const entries = GIF_CATALOG.map((g) => `- ${g.name}: ${g.description}`).join(
