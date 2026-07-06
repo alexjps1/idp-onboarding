@@ -14,8 +14,31 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 import { PARTICIPANT_ID_PATTERN, isParticipantIdTaken } from "@/lib/participant"
 import { REALTIME_TEXT_INPUT } from "@/components/study/use-voice-tutor"
+
+/** The selectable study flows, in display order. */
+const FLOW_OPTIONS = [
+  {
+    route: "/ohnetutor",
+    label: "Nur Onboarding",
+    description: "Selbsteinschätzung und Onboarding-Guide, ohne Fahrt.",
+    disabled: true,
+  },
+  {
+    route: "/nurfahrt",
+    label: "Nur Fahrt",
+    description: "Direkt in die Fahrtansicht mit KI-Tutor.",
+    disabled: false,
+  },
+  {
+    route: "/mittutor",
+    label: "Onboarding und Fahrt",
+    description: "Kompletter Ablauf: Onboarding und anschließende Fahrt.",
+    disabled: false,
+  },
+] as const
 
 // Participants receive a direct link (/mittutor or /ohnetutor). This root page
 // lets the study team assign a Probanden-ID before starting: a custom id (up to
@@ -26,6 +49,7 @@ export default function Home() {
   const [id, setId] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
   const [checking, setChecking] = React.useState(false)
+  const [flowOpen, setFlowOpen] = React.useState(false)
 
   // Mic-permission gate: the tutor needs microphone access once the run
   // reaches /drive, and requesting it there for the first time risks Safari
@@ -153,26 +177,81 @@ export default function Home() {
           ) : null}
         </CardContent>
 
-        <CardFooter className="gap-3">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => start("/ohnetutor")}
-            disabled={checking || !micGranted}
-            className="h-14 flex-1 text-xl"
-          >
-            Studie ohne Tutor starten
-          </Button>
+        <CardFooter>
           <Button
             size="lg"
-            onClick={() => start("/mittutor")}
+            onClick={() => setFlowOpen(true)}
             disabled={checking || !micGranted}
-            className="h-14 flex-1 text-xl"
+            className="h-14 w-full text-xl"
           >
-            Studie mit Tutor starten
+            Studie starten
           </Button>
         </CardFooter>
       </Card>
+
+      {/* Flow picker — opened by "Studie starten" so the card stays compact and
+          on a single screen. Selecting an enabled flow starts it immediately. */}
+      {flowOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm"
+          onClick={() => setFlowOpen(false)}
+        >
+          <Card
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="flow-dialog-title"
+            className="w-full max-w-lg"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader>
+              <CardTitle id="flow-dialog-title">Ablauf wählen</CardTitle>
+              <CardDescription>
+                Welchen Teil der Studie möchten Sie starten?
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="flex flex-col gap-2">
+              {FLOW_OPTIONS.map((option) => (
+                <button
+                  key={option.route}
+                  type="button"
+                  disabled={option.disabled || checking}
+                  onClick={() => start(option.route)}
+                  className={cn(
+                    "flex flex-col items-start gap-1 rounded-lg border-2 px-5 py-4 text-left transition-colors",
+                    option.disabled
+                      ? "cursor-not-allowed border-border bg-muted/40 opacity-50"
+                      : "border-border hover:border-primary hover:bg-primary/5"
+                  )}
+                >
+                  <span className="flex items-center gap-2 text-xl font-medium">
+                    {option.label}
+                    {option.disabled ? (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                        bald verfügbar
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="text-base text-muted-foreground">
+                    {option.description}
+                  </span>
+                </button>
+              ))}
+            </CardContent>
+
+            <CardFooter>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setFlowOpen(false)}
+                className="h-12 w-full text-lg"
+              >
+                Abbrechen
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      ) : null}
     </div>
   )
 }

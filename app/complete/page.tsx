@@ -22,7 +22,9 @@ export default function CompletePage() {
       ? "Probandengruppe „Onboarding + Tutor“"
       : mode === "onboarding-only"
         ? "Probandengruppe „nur Onboarding“"
-        : null
+        : mode === "drive-only"
+          ? "Probandengruppe „nur Fahrt“"
+          : null
 
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">

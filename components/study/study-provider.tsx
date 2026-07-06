@@ -14,7 +14,7 @@ import type {
   VoiceMessage,
 } from "@/lib/study-data"
 
-export type StudyMode = "onboarding-only" | "onboarding-drive"
+export type StudyMode = "onboarding-only" | "drive-only" | "onboarding-drive"
 
 /** Self-assessment ratings (1–7 scale) keyed by assistance-system name. */
 export type Ratings = Record<string, number>
@@ -22,7 +22,12 @@ export type Ratings = Record<string, number>
 type StudyState = {
   participantId: string | null
   mode: StudyMode | null
-  /** ISO timestamp of when the participant id was first assigned. */
+  /**
+   * ISO timestamp of when the participant began the study — set when they press
+   * "Anpassung starten" on the welcome screen, falling back to the moment the
+   * run's participant id was assigned (e.g. the drive-only flow, which has no
+   * welcome screen).
+   */
   startedAt: string | null
   /** Theoretical-knowledge ratings from the self-assessment Fragebogen. */
   theory: Ratings
@@ -41,6 +46,8 @@ type StudyState = {
 type StudyContextValue = StudyState & {
   setParticipantId: (id: string | null) => void
   setMode: (mode: StudyMode | null) => void
+  /** Stamp the study-begin time (the welcome screen's "Anpassung starten"). */
+  markStarted: () => void
   setTheory: (system: string, value: number) => void
   setPractice: (system: string, value: number) => void
   setAdaptedModules: (
@@ -147,6 +154,7 @@ function createStudyStore() {
           : { participantId }
       ),
     setMode: (mode: StudyMode | null) => set({ mode }),
+    markStarted: () => set({ startedAt: new Date().toISOString() }),
     setTheory: (system: string, value: number) =>
       set({ theory: { ...getSnapshot().theory, [system]: value } }),
     setPractice: (system: string, value: number) =>
@@ -219,6 +227,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       ...state,
       setParticipantId: store.setParticipantId,
       setMode: store.setMode,
+      markStarted: store.markStarted,
       setTheory: store.setTheory,
       setPractice: store.setPractice,
       setAdaptedModules: store.setAdaptedModules,

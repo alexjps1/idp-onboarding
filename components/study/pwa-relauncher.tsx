@@ -9,6 +9,7 @@ import { withBasePath } from "@/lib/base-path"
 function entryPathForMode(mode: StudyMode | null): string | null {
   if (mode === "onboarding-drive") return "/mittutor"
   if (mode === "onboarding-only") return "/ohnetutor"
+  if (mode === "drive-only") return "/nurfahrt"
   return null
 }
 

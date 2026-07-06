@@ -17,7 +17,7 @@ import {
   PARTICIPANT_ID_PATTERN,
   generateUniqueParticipantId,
 } from "@/lib/participant"
-import { STUDY_STEPS } from "@/lib/study-steps"
+import { getStudySteps } from "@/lib/study-steps"
 
 /**
  * Headless entry point for a study run. The study is run by many participants on
@@ -46,10 +46,13 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
     reset()
     setMode(mode)
 
+    // The first step depends on the mode: drive-only skips straight to /drive.
+    const firstStep = getStudySteps(mode)[0].path
+
     const custom = pid?.toUpperCase()
     if (custom && PARTICIPANT_ID_PATTERN.test(custom)) {
       setParticipantId(custom)
-      router.replace(STUDY_STEPS[0].path)
+      router.replace(firstStep)
       return
     }
 
@@ -63,7 +66,7 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
   function confirmRandom() {
     if (!randomId) return
     setParticipantId(randomId)
-    router.replace(STUDY_STEPS[0].path)
+    router.replace(getStudySteps(mode)[0].path)
   }
 
   if (randomId) {
