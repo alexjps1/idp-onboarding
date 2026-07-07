@@ -59,6 +59,17 @@ export function setPushedState(adas: Partial<AdasState>, trf: Partial<CarState>)
 }
 
 /**
+ * Server-side time (Date.now()) of the most recent push to /api/silab-ingest,
+ * or null if none received yet. Exposed (unlike getSilabState's throw-on-stale
+ * behavior) so a client can detect "a new packet just arrived" by watching for
+ * this to change, regardless of staleness. Only meaningful in "api" mode —
+ * "tcp" mode has no push/receivedAt concept.
+ */
+export function getPushedReceivedAt(): number | null {
+  return pushed?.receivedAt ?? null
+}
+
+/**
  * Returns the current SILAB state via whichever channel
  * SILAB_COMMUNICATION_MODE selects:
  *  - "tcp": poll FS-SCENERY directly over its TCP socket (SILAB_ADDR),

@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server"
-import { getSilabState, DEFAULT_ADAS, DEFAULT_TRF } from "@/lib/silab-state"
+import {
+  getSilabState,
+  getPushedReceivedAt,
+  DEFAULT_ADAS,
+  DEFAULT_TRF,
+} from "@/lib/silab-state"
 
 export const runtime = "nodejs"
 // Every poll must hit SILAB live; never serve a cached simulation state.
@@ -15,15 +20,22 @@ export const dynamic = "force-dynamic"
  * Never throws: any failure (no connection, timeout, stale/missing push
  * data) resolves to default/zeroed state with an `error` field, so the
  * client poll can treat it as "no change".
+ *
+ * Also always includes `receivedAt` — the server-side time of the most
+ * recent /api/silab-ingest push (null in "tcp" mode, or if none yet) — so a
+ * client can detect "a new packet just arrived" independent of adas/trf
+ * (see use-simulation-start.ts).
  */
 export async function GET() {
+  const receivedAt = getPushedReceivedAt()
   try {
     const state = await getSilabState()
-    return NextResponse.json(state)
+    return NextResponse.json({ ...state, receivedAt })
   } catch (err) {
     return NextResponse.json({
       adas: DEFAULT_ADAS,
       trf: DEFAULT_TRF,
+      receivedAt,
       error: err instanceof Error ? err.message : "unknown error",
     })
   }

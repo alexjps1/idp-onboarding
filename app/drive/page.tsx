@@ -43,6 +43,7 @@ import {
 import { useAdasMonitor } from "@/components/study/use-adas-monitor"
 import { useIntroTrigger } from "@/components/study/use-intro-trigger"
 import { useZoneTriggers, type ZoneOutcome } from "@/components/study/use-zone-triggers"
+import { useSimulationStart } from "@/components/study/use-simulation-start"
 
 /** Delay before the tutor's one-time self-introduction, in milliseconds. */
 const INTRO_DELAY_MS = 5000
@@ -93,6 +94,8 @@ export default function DrivePage() {
     startVoiceConversation,
     appendVoiceMessage,
     setTriggerState,
+    markDriveStarted,
+    markSimulationStarted,
   } = useStudy()
   const { next } = getAdjacentSteps("drive", mode)
   const router = useRouter()
@@ -195,6 +198,13 @@ export default function DrivePage() {
     shouldSuppress: () => assistantOpen,
   })
 
+  // Records when the simulation itself actually started (first SILAB packet
+  // after "Fahrt starten"), distinct from driveStartedAt (the button press).
+  useSimulationStart({
+    enabled: driveActive,
+    onDetected: markSimulationStarted,
+  })
+
   // Pre-warm a muted Realtime connection as soon as the drive view mounts, so
   // opening the assistant later (manually or proactively) can unmute and talk
   // instantly instead of waiting out a fresh WebRTC handshake. Relies on mic
@@ -276,7 +286,10 @@ export default function DrivePage() {
             {!driveStarted ? (
               <button
                 type="button"
-                onClick={() => setDriveStarted(true)}
+                onClick={() => {
+                  markDriveStarted()
+                  setDriveStarted(true)
+                }}
                 className="flex items-center gap-2 rounded-full bg-black px-7 py-2.5 text-[16px] font-semibold text-white shadow-sm transition-colors hover:bg-black/80"
               >
                 <Play className="size-5 fill-current" />

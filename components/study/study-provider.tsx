@@ -37,6 +37,19 @@ type StudyState = {
    * drive (see StudyProvider.markOnboardingEnded).
    */
   onboardingEndedAt: string | null
+  /**
+   * ISO timestamp of when the participant pressed "Fahrt starten" on /drive,
+   * leaving the Eingewöhnungsumgebung. This is the UI action, not the
+   * simulation itself starting — see simulationStartedAt for that (see
+   * StudyProvider.markDriveStarted).
+   */
+  driveStartedAt: string | null
+  /**
+   * ISO timestamp of the first SILAB packet received after driveStartedAt —
+   * i.e. when the simulation itself actually started (see
+   * StudyProvider.markSimulationStarted / use-simulation-start.ts).
+   */
+  simulationStartedAt: string | null
   /** Theoretical-knowledge ratings from the self-assessment Fragebogen. */
   theory: Ratings
   /** Practical-experience ratings from the self-assessment Fragebogen. */
@@ -60,6 +73,10 @@ type StudyContextValue = StudyState & {
   markStarted: () => void
   /** Stamp the onboarding-end time (the post-quiz congratulations "OK"). */
   markOnboardingEnded: () => void
+  /** Stamp the drive-start time ("Fahrt starten", leaving the Eingewöhnungsumgebung). */
+  markDriveStarted: () => void
+  /** Stamp the simulation-start time (first SILAB packet after markDriveStarted). */
+  markSimulationStarted: (at: string) => void
   setTheory: (system: string, value: number) => void
   setPractice: (system: string, value: number) => void
   setAdaptedModules: (
@@ -86,6 +103,8 @@ const SERVER_SNAPSHOT: StudyState = {
   mode: null,
   startedAt: null,
   onboardingEndedAt: null,
+  driveStartedAt: null,
+  simulationStartedAt: null,
   theory: {},
   practice: {},
   adaptStatus: null,
@@ -118,6 +137,8 @@ function createStudyStore() {
         mode: parsed.mode ?? null,
         startedAt: parsed.startedAt ?? null,
         onboardingEndedAt: parsed.onboardingEndedAt ?? null,
+        driveStartedAt: parsed.driveStartedAt ?? null,
+        simulationStartedAt: parsed.simulationStartedAt ?? null,
         theory: parsed.theory ?? {},
         practice: parsed.practice ?? {},
         adaptStatus: parsed.adaptStatus ?? null,
@@ -178,6 +199,8 @@ function createStudyStore() {
     markStarted: () => set({ startedAt: new Date().toISOString() }),
     markOnboardingEnded: () =>
       set({ onboardingEndedAt: new Date().toISOString() }),
+    markDriveStarted: () => set({ driveStartedAt: new Date().toISOString() }),
+    markSimulationStarted: (at: string) => set({ simulationStartedAt: at }),
     setTheory: (system: string, value: number) =>
       set({ theory: { ...getSnapshot().theory, [system]: value } }),
     setPractice: (system: string, value: number) =>
@@ -245,6 +268,8 @@ function createStudyStore() {
         mode: null,
         startedAt: null,
         onboardingEndedAt: null,
+        driveStartedAt: null,
+        simulationStartedAt: null,
         theory: {},
         practice: {},
         adaptStatus: null,
@@ -272,6 +297,8 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       setMode: store.setMode,
       markStarted: store.markStarted,
       markOnboardingEnded: store.markOnboardingEnded,
+      markDriveStarted: store.markDriveStarted,
+      markSimulationStarted: store.markSimulationStarted,
       setTheory: store.setTheory,
       setPractice: store.setPractice,
       setAdaptedModules: store.setAdaptedModules,

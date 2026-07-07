@@ -143,6 +143,24 @@ export type StudySession = {
    * drive. Null for the drive-only condition, which has no onboarding.
    */
   onboardingEndedAt: string | null
+  /**
+   * ISO timestamp of when the participant pressed "Fahrt starten" on /drive,
+   * leaving the Eingewöhnungsumgebung (the pre-drive practice phase where the
+   * tutor can be tried manually with no proactive triggers and the car isn't
+   * driving yet). Null until that point. This is the UI action, not the
+   * simulation itself starting — see simulationStartedAt for that. See
+   * StudyProvider.markDriveStarted.
+   */
+  driveStartedAt: string | null
+  /**
+   * ISO timestamp of the first SILAB packet received at /api/silab-ingest
+   * after driveStartedAt — i.e. when the simulation itself actually started,
+   * as opposed to driveStartedAt (when the participant pressed the button).
+   * Null until observed (and always null in SILAB_COMMUNICATION_MODE="tcp",
+   * which has no push/receivedAt concept). See
+   * StudyProvider.markSimulationStarted / use-simulation-start.ts.
+   */
+  simulationStartedAt: string | null
   theory: Ratings
   practice: Ratings
   adaptStatus: AdaptStatus | null
