@@ -26,6 +26,11 @@ export const STUDY_STEPS: StudyStep[] = [
   { slug: "guide", path: "/guide", title: "Onboarding-Guide" },
   { slug: "quiz", path: "/quiz", title: "Wissenstest" },
   { slug: "quiz-done", path: "/quiz/done", title: "Geschafft" },
+  {
+    slug: "drive-welcome",
+    path: "/drive/welcome",
+    title: "Willkommen im Fahrzeug",
+  },
   { slug: "drive", path: "/drive", title: "Fahrtansicht" },
   { slug: "complete", path: "/complete", title: "Abschluss" },
 ]
@@ -34,13 +39,15 @@ export const STUDY_STEPS: StudyStep[] = [
  * The steps for a given run.
  * - "onboarding-only" (the /ohnetutor condition) has no tutor and therefore no
  *   drive: after the onboarding guide it goes straight to the end screen, so the
- *   drive (Fahrtansicht) step is dropped.
+ *   drive (Fahrtansicht) and its "Willkommen im Fahrzeug" lead-in are dropped.
  * - "drive-only" (the /nurfahrt condition) skips the self-assessment and guide,
  *   keeping the welcome screen, the drive and the end screen.
  */
 export function getStudySteps(mode?: StudyMode | null): StudyStep[] {
   if (mode === "onboarding-only") {
-    return STUDY_STEPS.filter((step) => step.slug !== "drive")
+    return STUDY_STEPS.filter(
+      (step) => step.slug !== "drive" && step.slug !== "drive-welcome"
+    )
   }
   if (mode === "drive-only") {
     return STUDY_STEPS.filter(

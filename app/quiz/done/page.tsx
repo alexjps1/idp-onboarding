@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
-import { ArrowRight, Car, PartyPopper } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ArrowRight, Check, PartyPopper } from "lucide-react"
 
 import { getAdjacentSteps } from "@/lib/study-steps"
 import { useStudy } from "@/components/study/study-provider"
@@ -9,30 +9,34 @@ import { StudyShell } from "@/components/study/study-shell"
 import { StudyFooter } from "@/components/study/study-footer"
 
 /**
- * Congratulation screen shown once the quiz has been fully answered. When a
- * drive follows it doubles as the "Willkommen im Fahrzeug" lead-in to the drive;
- * for the onboarding-only condition it simply hands off to the final screen.
+ * Congratulation screen shown once the quiz has been fully answered. Pressing
+ * the button stamps the onboarding-end timestamp (see
+ * StudyProvider.markOnboardingEnded) and hands off to the next step — the
+ * "Willkommen im Fahrzeug" drive lead-in when a drive follows, or the final
+ * screen in the onboarding-only condition.
  */
 export default function QuizDonePage() {
-  const { mode } = useStudy()
+  const router = useRouter()
+  const { mode, markOnboardingEnded } = useStudy()
   const { next } = getAdjacentSteps("quiz-done", mode)
-  const toDrive = next?.slug === "drive"
+  const driveFollows = next?.slug === "drive-welcome"
 
-  const heading = toDrive ? "Willkommen im Fahrzeug!" : "Herzlichen Glückwunsch!"
-  const paragraphs = toDrive
-    ? [
-        "Herzlichen Glückwunsch – Sie haben alle Fragen richtig beantwortet!",
-        "Testen Sie nun das teilautomatisierte Fahren für mehr Sicherheit und Komfort. Viel Spaß!",
-      ]
-    : ["Sie haben alle Fragen richtig beantwortet."]
+  const paragraph = driveFollows
+    ? "Sie haben nun alle Fragen richtig beantwortet! Testen Sie nun das teilautomatisierte Fahren für mehr Sicherheit und Komfort. Viel Spaß!"
+    : "Sie haben alle Fragen richtig beantwortet."
+
+  function handleContinue() {
+    markOnboardingEnded()
+    if (next) router.push(next.path)
+  }
 
   return (
     <StudyShell
       footer={
         <StudyFooter
-          nextHref={next?.path}
-          nextLabel={toDrive ? "Zur Fahrt wechseln" : "Zum Abschluss"}
-          nextIcon={toDrive ? <Car /> : <ArrowRight />}
+          nextLabel={driveFollows ? "OK" : "Zum Abschluss"}
+          nextIcon={driveFollows ? <Check /> : <ArrowRight />}
+          onNext={handleContinue}
         />
       }
     >
@@ -43,13 +47,11 @@ export default function QuizDonePage() {
 
         <div className="space-y-4">
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            {heading}
+            Herzlichen Glückwunsch!
           </h1>
-          <div className="space-y-3 text-xl leading-relaxed text-muted-foreground">
-            {paragraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
+          <p className="text-xl leading-relaxed text-muted-foreground">
+            {paragraph}
+          </p>
         </div>
       </div>
     </StudyShell>
