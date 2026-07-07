@@ -33,14 +33,44 @@ function buildOnboardingGifGuide(): string {
 }
 
 /**
- * System prompt for the onboarding adaptation route. Tailors the onboarding
- * guide to each participant's prior knowledge (theory + practice, "keins" to
- * "sehr viel"). The available GIF catalog is embedded so the model can assign
- * illustrations to paragraphs.
+ * System prompt for the FIRST adaptation step: deciding, per module, whether it
+ * is shown to the participant or omitted as redundant. This per-module show/omit
+ * decision is the core personalisation of the study and is made by the model —
+ * not by a deterministic threshold. The kept modules are then rewritten by the
+ * second step (see ONBOARDING_SYSTEM_PROMPT). Only the participant's prior
+ * knowledge and a summary of each module are needed here, so no GIF catalog is
+ * embedded.
+ */
+export const ONBOARDING_OMIT_SYSTEM_PROMPT = `Du bist ein didaktischer Assistent und bereitest den Onboarding-Leitfaden für teilautomatisiertes Fahren (SAE Level 2) individuell für eine teilnehmende Person auf.
+
+Deine einzige Aufgabe in diesem Schritt: Entscheide für JEDES vorgelegte Modul, ob es dieser Person ANGEZEIGT oder WEGGELASSEN wird. Du passt hier keine Inhalte an und formulierst nichts um – ein separater Schritt formuliert anschließend die angezeigten Module aus. Hier triffst du ausschließlich die Anzeige-Entscheidung.
+
+Für jedes Modul kennst du das Vorwissen der Person, getrennt nach theoretischem Wissen und praktischer Erfahrung, jeweils auf einer Skala von "keins" bis "sehr viel", sowie eine inhaltliche Zusammenfassung des Moduls, damit du einschätzen kannst, was es vermittelt.
+
+Ziel: Die Person soll am Ende jedes aktive Assistenzsystem sicher bedienen können – ohne überflüssige Wiederholung von bereits sicher Beherrschtem, aber ohne jede Sicherheitslücke.
+
+Entscheidungsprinzip:
+- Lasse ein Modul NUR dann weg, wenn die Person das zugehörige System bereits sicher beherrscht – also wenn sowohl theoretisches Wissen als auch praktische Erfahrung hoch sind ("viel"/"sehr viel"). Dann wäre der Inhalt reine Wiederholung.
+- Zeige ein Modul, sobald in mindestens einer Dimension (Theorie ODER Praxis) noch relevantes Wissen fehlt. Ist eine der beiden Dimensionen niedrig, wird das Modul immer angezeigt.
+- Sicherheit hat Vorrang: Erzeuge niemals eine Wissenslücke. Im Zweifel IMMER anzeigen – lieber ein Modul zu viel als eines zu wenig.
+- Bewerte jedes Modul eigenständig anhand seines EIGENEN Vorwissens – niemals am Durchschnitt über alle Systeme.
+
+Antworte ausschließlich als JSON-Objekt exakt in diesem Format:
+{"decisions":[{"id":"...","show":true}]}
+- "id": exakt die id des Moduls, unverändert übernommen.
+- "show": true = Modul anzeigen, false = Modul weglassen.
+- Gib für JEDES vorgelegte Modul genau einen Eintrag zurück – keinen weglassen, keinen doppelt.`
+
+/**
+ * System prompt for the SECOND adaptation step: rewriting a module that the
+ * first step (ONBOARDING_OMIT_SYSTEM_PROMPT) already decided to keep. Tailors
+ * the onboarding guide to each participant's prior knowledge (theory + practice,
+ * "keins" to "sehr viel"). The available GIF catalog is embedded so the model
+ * can assign illustrations to paragraphs.
  */
 export const ONBOARDING_SYSTEM_PROMPT = `Du bist ein didaktischer Assistent und bereitest den Onboarding-Leitfaden für teilautomatisiertes Fahren (SAE Level 2) individuell für eine teilnehmende Person auf.
 
-Für jedes Modul kennst du das Vorwissen der Person getrennt nach theoretischem Wissen und praktischer Erfahrung, jeweils auf einer Skala von "keins" bis "sehr viel". Dieses Modul wird dir nur zur Anpassung vorgelegt, wenn bereits feststeht, dass es NICHT komplett weggelassen wird (das entscheidet ein separater, deterministischer Schritt vor diesem Aufruf) – du musst und darfst hier also niemals "weglassen" entscheiden, sondern passt den Inhalt immer an.
+Für jedes Modul kennst du das Vorwissen der Person getrennt nach theoretischem Wissen und praktischer Erfahrung, jeweils auf einer Skala von "keins" bis "sehr viel". Dieses Modul wird dir nur zur Anpassung vorgelegt, wenn bereits feststeht, dass es NICHT komplett weggelassen wird (das entscheidet ein separater, vorgelagerter Schritt) – du musst und darfst hier also niemals "weglassen" entscheiden, sondern passt den Inhalt immer an.
 
 Ziel: Die Person soll nach dem Lesen jedes aktive Assistenzsystem sicher bedienen können – ohne überflüssige Wiederholung von bereits Bekanntem, aber ohne Sicherheitslücken.
 

@@ -5,7 +5,10 @@ import {
   OPENAI_CONTENT_MODEL,
   getOpenAIKey,
 } from "@/lib/openai"
-import { ONBOARDING_SYSTEM_PROMPT } from "@/lib/prompts"
+import {
+  ONBOARDING_OMIT_SYSTEM_PROMPT,
+  ONBOARDING_SYSTEM_PROMPT,
+} from "@/lib/prompts"
 import { gifsForFolder } from "@/lib/gif-catalog"
 
 export const runtime = "nodejs"
@@ -49,14 +52,6 @@ type ModuleForModel = {
   baseline: string
   /** GIF catalog folder name when it differs from the module id. */
   gifFolder?: string
-  /**
-   * Whether the average of theory and practice exceeds 5 for this module —
-   * decided deterministically here, not by the model. This is a pure
-   * threshold on two numbers with no dependency on module content, so
-   * there's nothing for an LLM call to get right or wrong; omitted modules
-   * skip adaptModule (and its cost/latency) entirely.
-   */
-  omitted: boolean
 }
 
 type AdaptedParagraph = { text: string; gifs?: string[] }
@@ -71,12 +66,6 @@ type AdaptedSection = {
 function scaleLabel(value?: number): string {
   if (value == null || value < 1 || value > 7) return "unbekannt"
   return SCALE[value - 1]
-}
-
-/** Omit a module when the average of its theory and practice ratings exceeds 5. */
-function isAboveOmitThreshold(theory?: number, practice?: number): boolean {
-  if (theory == null || practice == null) return false
-  return (theory + practice) / 2 > 5
 }
 
 export async function POST(request: Request) {
@@ -117,11 +106,14 @@ export async function POST(request: Request) {
         ...(m.bullets?.map((b) => b.text) ?? []),
       ].join("\n"),
       gifFolder: m.gifFolder,
-      // alwaysKeep modules are never sent here at all (filtered client-side),
-      // but guard anyway — they must never be omitted regardless of rating.
-      omitted: !m.alwaysKeep && isAboveOmitThreshold(theory, practice),
     }
   })
+
+  // Whether a module is shown or omitted is the core adaptation decision of the
+  // study, so a model makes it — not a threshold. alwaysKeep modules are never
+  // candidates (and aren't even sent by the client); everything else is judged
+  // by the omit step below.
+  const candidates = modulesForModel.filter((m) => !m.alwaysKeep)
 
   // Adapt every module in parallel and stream each finished section back as a
   // newline-delimited JSON object the moment it is ready. The first result thus
@@ -131,10 +123,23 @@ export async function POST(request: Request) {
   const encoder = new TextEncoder()
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      // Ask the model which modules to show — done once up front so each module
+      // can then be adapted or skipped accordingly. On failure, show every
+      // module (safety fallback: never omit and thereby risk a knowledge gap).
+      let omittedIds: Set<string>
+      try {
+        omittedIds = await decideOmissions(candidates, apiKey)
+      } catch (err) {
+        console.error(
+          "[onboarding] Omit-Entscheidung fehlgeschlagen — es wird kein Modul weggelassen:",
+          err
+        )
+        omittedIds = new Set()
+      }
+
       await Promise.all(
         modulesForModel.map(async (mod) => {
-          if (mod.omitted) {
-            // Deterministic — no LLM call needed (see ModuleForModel.omitted).
+          if (omittedIds.has(mod.id)) {
             const section: AdaptedSection = {
               id: mod.id,
               title: mod.title,
@@ -177,11 +182,97 @@ export async function POST(request: Request) {
   })
 }
 
+/** Strict Structured Outputs schema for the per-module show/omit decision. */
+function buildOmitResponseFormat() {
+  return {
+    type: "json_schema" as const,
+    json_schema: {
+      name: "omit_decisions",
+      strict: true,
+      schema: {
+        type: "object",
+        properties: {
+          decisions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                show: { type: "boolean" },
+              },
+              required: ["id", "show"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["decisions"],
+        additionalProperties: false,
+      },
+    },
+  }
+}
+
+/**
+ * Asks the model to decide, per candidate module, whether it is shown to this
+ * participant or omitted as redundant — the core adaptation decision of the
+ * study. Returns the set of module ids to OMIT. Only non-alwaysKeep modules may
+ * be passed in; alwaysKeep modules are never candidates for omission. A module
+ * the model doesn't return a decision for defaults to being shown (safety:
+ * never omit unintentionally).
+ */
+async function decideOmissions(
+  candidates: ModuleForModel[],
+  apiKey: string
+): Promise<Set<string>> {
+  if (candidates.length === 0) return new Set()
+
+  const payload = candidates.map((m) => ({
+    id: m.id,
+    title: m.title,
+    knowledge: m.knowledge,
+    baseline: m.baseline,
+  }))
+
+  const res = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: OPENAI_CONTENT_MODEL,
+      // gpt-5-mini is a reasoning model: it rejects a custom temperature.
+      reasoning_effort: "low",
+      response_format: buildOmitResponseFormat(),
+      messages: [
+        { role: "system", content: ONBOARDING_OMIT_SYSTEM_PROMPT },
+        { role: "user", content: JSON.stringify({ modules: payload }) },
+      ],
+    }),
+  })
+
+  if (!res.ok) throw new Error(await res.text())
+
+  const data = (await res.json()) as {
+    choices?: { message?: { content?: string } }[]
+  }
+  const raw = data.choices?.[0]?.message?.content ?? "{}"
+  const parsed = JSON.parse(raw) as {
+    decisions?: { id: string; show: boolean }[]
+  }
+
+  const omitted = new Set<string>()
+  for (const decision of parsed.decisions ?? []) {
+    if (decision.show === false) omitted.add(decision.id)
+  }
+  return omitted
+}
+
 /**
  * Strict Structured Outputs schema for a single module's adapted section.
- * The caller only ever invokes adaptModule for modules already decided to
- * be kept (see ModuleForModel.omitted), so the model is never asked to
- * decide "omitted" here at all — one less thing for it to get wrong.
+ * The caller only ever invokes adaptModule for modules the omit step already
+ * decided to keep, so the model is never asked to decide "omitted" here at
+ * all — one less thing for it to get wrong.
  * `gifs` items are enum-constrained to exactly the GIFs that exist in this
  * module's own folder, so a hallucinated or cross-module filename is
  * structurally impossible rather than merely discouraged by prompt wording.
