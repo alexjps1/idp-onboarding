@@ -304,23 +304,28 @@ export default function DrivePage() {
               )
             })}
 
-            {/* Assistent — gradient, wired to the voice tutor (mit-Tutor only) */}
+            {/* Tutor — gradient, wired to the voice tutor (mit-Tutor only); grays out with an X while open */}
             {withTutor ? (
               <button
                 type="button"
-                aria-label="Assistent"
+                aria-label={assistantOpen ? "Tutor schließen" : "Tutor"}
                 aria-pressed={assistantOpen}
                 onClick={toggleAssistant}
                 className={cn(
-                  "flex size-[88px] flex-col items-center justify-center gap-2 rounded-2xl text-white transition-transform",
-                  "bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)]",
+                  "flex size-[88px] flex-col items-center justify-center gap-2 rounded-2xl transition-transform",
                   assistantOpen
-                    ? "scale-105 shadow-lg shadow-[#a953da]/30"
-                    : "hover:scale-105"
+                    ? "scale-105 bg-[#d8d8d8] text-[#5f5f61] shadow-lg"
+                    : "bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)] text-white hover:scale-105"
                 )}
               >
-                <Sparkles className="size-7" />
-                <span className="text-[15px] font-semibold">Assistent</span>
+                {assistantOpen ? (
+                  <X className="size-7" />
+                ) : (
+                  <Sparkles className="size-7" />
+                )}
+                <span className="text-[17px] font-semibold">
+                  {assistantOpen ? "Schließen" : "Tutor"}
+                </span>
               </button>
             ) : null}
           </aside>
@@ -452,7 +457,7 @@ export default function DrivePage() {
                         </div>
                       </div>
                     </button>
-                    <div className="max-w-xl text-center">
+                    <div className="w-full text-center">
                       <p
                         className={cn(
                           "label-caps text-2xl tracking-[0.2em]",
