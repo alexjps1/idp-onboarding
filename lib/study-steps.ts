@@ -25,6 +25,7 @@ export const STUDY_STEPS: StudyStep[] = [
   },
   { slug: "guide", path: "/guide", title: "Onboarding-Guide" },
   { slug: "quiz", path: "/quiz", title: "Wissenstest" },
+  { slug: "quiz-done", path: "/quiz/done", title: "Geschafft" },
   { slug: "drive", path: "/drive", title: "Fahrtansicht" },
   { slug: "complete", path: "/complete", title: "Abschluss" },
 ]

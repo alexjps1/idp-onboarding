@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Car, Check, ClipboardList, RotateCcw, X } from "lucide-react"
+import { ArrowRight, Check, ClipboardList, RotateCcw, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { getAdjacentSteps } from "@/lib/study-steps"
@@ -95,11 +95,6 @@ export default function QuizPage() {
   // Once the queue empties we navigate away; render nothing during that tick.
   if (!question) return null
 
-  // Answering the last remaining question correctly ends the quiz and continues
-  // to the next study step (the drive, or the final screen).
-  const finishing = isCorrect && queue.length === 1
-  const toDrive = next?.slug === "drive"
-
   return (
     <StudyShell
       footer={
@@ -112,10 +107,8 @@ export default function QuizPage() {
           />
         ) : (
           <StudyFooter
-            nextLabel={
-              finishing ? (toDrive ? "Zur Fahrt wechseln" : "Zum Abschluss") : "Weiter"
-            }
-            nextIcon={finishing && toDrive ? <Car /> : <ArrowRight />}
+            nextLabel="Weiter"
+            nextIcon={<ArrowRight />}
             onNext={advance}
           />
         )
