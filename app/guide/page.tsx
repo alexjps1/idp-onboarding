@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BookOpen, Car, Loader2, Sparkles, TriangleAlert } from "lucide-react"
+import { BookOpen, ClipboardList, Loader2, Sparkles, TriangleAlert } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { withBasePath } from "@/lib/base-path"
@@ -187,8 +187,8 @@ export default function GuidePage() {
           onPrev={isFirst ? undefined : () => setCurrent(index - 1)}
           nextHref={isLast ? next?.path : undefined}
           onNext={isLast ? undefined : () => setCurrent(index + 1)}
-          nextLabel={isLast ? "Zur Fahrt wechseln" : "Weiter"}
-          nextIcon={isLast ? <Car /> : undefined}
+          nextLabel={isLast ? "Zum Wissenstest" : "Weiter"}
+          nextIcon={isLast ? <ClipboardList /> : undefined}
         />
       }
     >

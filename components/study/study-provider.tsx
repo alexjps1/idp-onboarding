@@ -2,12 +2,14 @@
 
 import * as React from "react"
 
-import { saveSession, INITIAL_TRIGGER_STATES } from "@/lib/study-data"
+import { saveSession, INITIAL_TRIGGER_STATES, INITIAL_QUIZ } from "@/lib/study-data"
 import type {
   AdaptStatus,
   AdaptedSection,
   ProactiveTriggerState,
   ProactiveTriggerStates,
+  QuizAnswer,
+  QuizRecord,
   StudySession,
   VoiceConversation,
   VoiceConversationTrigger,
@@ -37,6 +39,8 @@ type StudyState = {
   adaptStatus: AdaptStatus | null
   /** The modules as adapted to the participant's prior knowledge (null = baseline). */
   adaptedModules: AdaptedSection[] | null
+  /** The post-onboarding knowledge-check quiz (timestamps + answers). */
+  quiz: QuizRecord
   /** One entry per time the voice tutor was opened during the drive. */
   voiceConversations: VoiceConversation[]
   /** Diagnostic state of each proactive trigger over the drive (see ProactiveTriggerState). */
@@ -54,6 +58,11 @@ type StudyContextValue = StudyState & {
     sections: AdaptedSection[] | null,
     status: AdaptStatus
   ) => void
+  /** Begin the quiz: stamps the start time and clears any prior answers. */
+  startQuiz: () => void
+  recordQuizAnswer: (answer: QuizAnswer) => void
+  /** Stamp the quiz end time (after the last question is answered). */
+  finishQuiz: () => void
   startVoiceConversation: (trigger?: VoiceConversationTrigger) => void
   appendVoiceMessage: (message: VoiceMessage) => void
   setTriggerState: (
@@ -72,6 +81,7 @@ const SERVER_SNAPSHOT: StudyState = {
   practice: {},
   adaptStatus: null,
   adaptedModules: null,
+  quiz: INITIAL_QUIZ,
   voiceConversations: [],
   triggerStates: INITIAL_TRIGGER_STATES,
 }
@@ -102,6 +112,7 @@ function createStudyStore() {
         practice: parsed.practice ?? {},
         adaptStatus: parsed.adaptStatus ?? null,
         adaptedModules: parsed.adaptedModules ?? null,
+        quiz: parsed.quiz ?? INITIAL_QUIZ,
         voiceConversations: parsed.voiceConversations ?? [],
         triggerStates: { ...INITIAL_TRIGGER_STATES, ...parsed.triggerStates },
       }
@@ -163,6 +174,21 @@ function createStudyStore() {
       adaptedModules: AdaptedSection[] | null,
       adaptStatus: AdaptStatus
     ) => set({ adaptedModules, adaptStatus }),
+    startQuiz: () =>
+      set({
+        quiz: { startedAt: new Date().toISOString(), endedAt: null, answers: [] },
+      }),
+    recordQuizAnswer: (answer: QuizAnswer) =>
+      set({
+        quiz: {
+          ...getSnapshot().quiz,
+          answers: [...getSnapshot().quiz.answers, answer],
+        },
+      }),
+    finishQuiz: () =>
+      set({
+        quiz: { ...getSnapshot().quiz, endedAt: new Date().toISOString() },
+      }),
     startVoiceConversation: (
       trigger: VoiceConversationTrigger = "user_initiated"
     ) =>
@@ -207,6 +233,7 @@ function createStudyStore() {
         practice: {},
         adaptStatus: null,
         adaptedModules: null,
+        quiz: INITIAL_QUIZ,
         voiceConversations: [],
         triggerStates: INITIAL_TRIGGER_STATES,
       }),
@@ -231,6 +258,9 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       setTheory: store.setTheory,
       setPractice: store.setPractice,
       setAdaptedModules: store.setAdaptedModules,
+      startQuiz: store.startQuiz,
+      recordQuizAnswer: store.recordQuizAnswer,
+      finishQuiz: store.finishQuiz,
       startVoiceConversation: store.startVoiceConversation,
       appendVoiceMessage: store.appendVoiceMessage,
       setTriggerState: store.setTriggerState,

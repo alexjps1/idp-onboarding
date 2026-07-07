@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"
  */
 export default function WelcomePage() {
   const router = useRouter()
-  const { participantId, mode, markStarted } = useStudy()
+  const { mode, markStarted } = useStudy()
   const { next } = getAdjacentSteps("welcome", mode)
 
   // Drive-only (Nur Fahrt) has no self-assessment or adaptation — it goes
@@ -31,7 +31,7 @@ export default function WelcomePage() {
         "Dieses Tutorial zeigt Ihnen, wie Sie die wichtigsten Assistenzsysteme dieses teilautomatisierten Fahrzeugs sicher und effizient nutzen – kompakt, praxisnah und direkt im Fahrzeug.",
         "Damit Sie nur die Informationen erhalten, die für Sie relevant sind, wird dieses Tutorial an Ihren Wissensstand angepasst. Geben Sie dazu im nächsten Schritt bitte eine kurze Einschätzung ab.",
       ]
-  const buttonLabel = isDriveOnly ? "Fahrt starten" : "Anpassung starten"
+  const buttonLabel = isDriveOnly ? "Zur Fahrt" : "Anpassung starten"
 
   function handleStart() {
     markStarted()
@@ -51,21 +51,12 @@ export default function WelcomePage() {
           ))}
         </div>
 
-        <div className="inline-flex items-center rounded-full border bg-card px-6 py-2 shadow-sm">
-          <span className="mr-3 text-base text-muted-foreground">
-            Probanden-ID:
-          </span>
-          <span className="font-mono text-lg text-foreground">
-            {participantId ?? "—"}
-          </span>
-        </div>
-
         <Button
           size="lg"
           onClick={handleStart}
           className="mt-2 h-14 px-10 text-xl [&_svg]:size-6"
         >
-          Anpassung starten
+          {buttonLabel}
           <ArrowRight />
         </Button>
       </div>

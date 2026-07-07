@@ -97,6 +97,32 @@ export type AdaptedSection = {
 /** Whether the guide content was personalised or fell back to the baseline. */
 export type AdaptStatus = "adapted" | "baseline"
 
+/** A single answered quiz question. */
+export type QuizAnswer = {
+  /** Category key of the question (see lib/quiz-questions.ts). */
+  category: string
+  /** Index of the question within the flat QUIZ_QUESTIONS list. */
+  questionIndex: number
+  /** Index of the option the participant selected. */
+  selectedIndex: number
+  correct: boolean
+}
+
+/** The post-onboarding knowledge-check quiz, with begin/end timestamps. */
+export type QuizRecord = {
+  /** ISO timestamp of when the quiz was opened. */
+  startedAt: string | null
+  /** ISO timestamp of when the last question was answered. */
+  endedAt: string | null
+  answers: QuizAnswer[]
+}
+
+export const INITIAL_QUIZ: QuizRecord = {
+  startedAt: null,
+  endedAt: null,
+  answers: [],
+}
+
 /** The complete record persisted per participant. */
 export type StudySession = {
   participantId: string
@@ -106,6 +132,7 @@ export type StudySession = {
   practice: Ratings
   adaptStatus: AdaptStatus | null
   adaptedModules: AdaptedSection[] | null
+  quiz: QuizRecord
   voiceConversations: VoiceConversation[]
   triggerStates: ProactiveTriggerStates
 }
