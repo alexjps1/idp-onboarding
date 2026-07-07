@@ -128,6 +128,12 @@ export type StudySession = {
   participantId: string
   mode: StudyMode | null
   startedAt: string | null
+  /**
+   * ISO timestamp of when the participant finished the onboarding — set when
+   * they press "OK" on the post-quiz congratulations screen, right before the
+   * drive. Null for the drive-only condition, which has no onboarding.
+   */
+  onboardingEndedAt: string | null
   theory: Ratings
   practice: Ratings
   adaptStatus: AdaptStatus | null

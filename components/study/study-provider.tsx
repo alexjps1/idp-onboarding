@@ -31,6 +31,12 @@ type StudyState = {
    * welcome screen).
    */
   startedAt: string | null
+  /**
+   * ISO timestamp of when the participant finished the onboarding — set when
+   * they press "OK" on the post-quiz congratulations screen, right before the
+   * drive (see StudyProvider.markOnboardingEnded).
+   */
+  onboardingEndedAt: string | null
   /** Theoretical-knowledge ratings from the self-assessment Fragebogen. */
   theory: Ratings
   /** Practical-experience ratings from the self-assessment Fragebogen. */
@@ -52,6 +58,8 @@ type StudyContextValue = StudyState & {
   setMode: (mode: StudyMode | null) => void
   /** Stamp the study-begin time (the welcome screen's "Anpassung starten"). */
   markStarted: () => void
+  /** Stamp the onboarding-end time (the post-quiz congratulations "OK"). */
+  markOnboardingEnded: () => void
   setTheory: (system: string, value: number) => void
   setPractice: (system: string, value: number) => void
   setAdaptedModules: (
@@ -77,6 +85,7 @@ const SERVER_SNAPSHOT: StudyState = {
   participantId: null,
   mode: null,
   startedAt: null,
+  onboardingEndedAt: null,
   theory: {},
   practice: {},
   adaptStatus: null,
@@ -108,6 +117,7 @@ function createStudyStore() {
         participantId: parsed.participantId ?? null,
         mode: parsed.mode ?? null,
         startedAt: parsed.startedAt ?? null,
+        onboardingEndedAt: parsed.onboardingEndedAt ?? null,
         theory: parsed.theory ?? {},
         practice: parsed.practice ?? {},
         adaptStatus: parsed.adaptStatus ?? null,
@@ -166,6 +176,8 @@ function createStudyStore() {
       ),
     setMode: (mode: StudyMode | null) => set({ mode }),
     markStarted: () => set({ startedAt: new Date().toISOString() }),
+    markOnboardingEnded: () =>
+      set({ onboardingEndedAt: new Date().toISOString() }),
     setTheory: (system: string, value: number) =>
       set({ theory: { ...getSnapshot().theory, [system]: value } }),
     setPractice: (system: string, value: number) =>
@@ -229,6 +241,7 @@ function createStudyStore() {
         participantId: null,
         mode: null,
         startedAt: null,
+        onboardingEndedAt: null,
         theory: {},
         practice: {},
         adaptStatus: null,
@@ -255,6 +268,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       setParticipantId: store.setParticipantId,
       setMode: store.setMode,
       markStarted: store.markStarted,
+      markOnboardingEnded: store.markOnboardingEnded,
       setTheory: store.setTheory,
       setPractice: store.setPractice,
       setAdaptedModules: store.setAdaptedModules,
