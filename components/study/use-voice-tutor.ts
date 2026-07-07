@@ -297,6 +297,41 @@ export function useVoiceTutor(
             endTimerRef.current = setTimeout(finishEnd, 8000)
             break
           }
+          if (name === "get_adas_state") {
+            // Resolved asynchronously against the same live SILAB state the
+            // proactive triggers poll (see use-adas-monitor.ts/
+            // use-zone-triggers.ts) — the model gets the actual current
+            // values, not a guess, so it can tell the driver a concrete fact
+            // ("Sie erkennen das daran, dass …") instead of "look at the
+            // display yourself".
+            void (async () => {
+              let output: string
+              try {
+                const res = await fetch(withBasePath("/api/simstate"), {
+                  cache: "no-store",
+                })
+                const data = (await res.json()) as {
+                  adas?: { active?: boolean; available?: boolean }
+                }
+                output = JSON.stringify({
+                  active: data.adas?.active ?? false,
+                  available: data.adas?.available ?? false,
+                })
+              } catch {
+                output = JSON.stringify({
+                  error: "Fahrzeugstatus aktuell nicht abrufbar.",
+                })
+              }
+              dcRef.current?.send(
+                JSON.stringify({
+                  type: "conversation.item.create",
+                  item: { type: "function_call_output", call_id, output },
+                })
+              )
+              dcRef.current?.send(JSON.stringify({ type: "response.create" }))
+            })()
+            break
+          }
           if (name === "show_gif") {
             const gifName = (JSON.parse(argsStr ?? "{}") as { name?: string })
               .name

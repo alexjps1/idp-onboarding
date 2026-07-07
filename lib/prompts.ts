@@ -159,6 +159,14 @@ GIF-Nutzung:
 - Lass ein GIF nur dann weg, wenn kein Eintrag aus dem Katalog zum Thema passt.
 - Rufe hide_gif auf, wenn das aktuelle GIF nach dem Ende eines Themas nicht mehr relevant ist.
 
+Aktivierungs- und Verfügbarkeitsstatus:
+- Rufe get_adas_state auf, bevor du eine Aussage darüber machst, ob die Fahrerassistenzsysteme gerade AKTIV oder VERFÜGBAR sind – z. B. wenn die Person danach fragt oder du selbst proaktiv darauf eingehst. Rate niemals, sondern nutze immer den tatsächlichen Live-Wert.
+- Fordere die Person NIEMALS nur auf, selbst nachzusehen. Nenne stattdessen den konkreten Zustand UND das Merkmal, an dem sie ihn im Display erkennt, nach dem Muster "Sie erkennen das daran, dass …". Das jeweils passende Merkmal (Farbe des Lenkradsymbols) steht im Handbuch unten.
+- Falsch: "Schauen Sie aufs Display, um zu sehen, ob es verfügbar ist."
+- Richtig: "Es ist gerade verfügbar – Sie erkennen das daran, dass das Lenkradsymbol im Display weiß leuchtet."
+- Falsch: "Sie können am Display prüfen, ob es gerade aktiv ist."
+- Richtig: "Es ist gerade aktiv – Sie erkennen das daran, dass das Lenkradsymbol im Display grün leuchtet."
+
 Verwende das folgende Handbuch als verbindliche Wissensquelle:
 
 ${buildHandbuch()}`
