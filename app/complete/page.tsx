@@ -9,7 +9,14 @@ import { Button } from "@/components/ui/button"
 
 export default function CompletePage() {
   const router = useRouter()
-  const { participantId, mode, adaptStatus, reset } = useStudy()
+  const { mode, adaptStatus, reset } = useStudy()
+
+  // The drive modes finish with the drive; only the onboarding-only condition
+  // ends after the onboarding itself.
+  const heading =
+    mode === "onboarding-only"
+      ? "Onboarding erfolgreich abgeschlossen"
+      : "Fahrt erfolgreich abgeschlossen"
 
   function restart() {
     reset()
@@ -47,17 +54,8 @@ export default function CompletePage() {
 
         <div className="space-y-6">
           <h1 className="text-[32px] leading-10 font-bold tracking-tight text-foreground">
-            Onboarding erfolgreich abgeschlossen
+            {heading}
           </h1>
-
-          <div className="inline-flex items-center rounded-full border bg-card px-6 py-2 shadow-sm">
-            <span className="mr-3 text-sm text-muted-foreground">
-              Probanden-ID:
-            </span>
-            <span className="font-mono text-foreground">
-              {participantId ?? "RAND0000"}
-            </span>
-          </div>
 
           {adaptStatus === "baseline" ? (
             <div className="mx-auto flex max-w-xl items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-left">
