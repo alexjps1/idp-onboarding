@@ -168,9 +168,6 @@ export default function GuidePage() {
             <p className="text-xl leading-relaxed text-muted-foreground">
               Personalisierte Inhalte werden für Sie vorbereitet&nbsp;…
             </p>
-            <p className="text-base text-muted-foreground/80">
-              Dies kann bis zu einer Minute dauern.
-            </p>
           </div>
         </div>
       </StudyShell>
@@ -292,7 +289,7 @@ export default function GuidePage() {
                     {index + 1} / {visibleSections.length}
                   </span>
                 </div>
-                <div className="space-y-4 text-xl leading-relaxed text-muted-foreground">
+                <div className="space-y-4 text-[22px] leading-relaxed text-muted-foreground">
                   {active.paragraphs.map((para, i) => (
                     <div key={i}>
                       <p>{para.text}</p>
