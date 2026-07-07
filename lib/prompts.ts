@@ -165,6 +165,7 @@ Gespräch beenden:
 
 GIF-Nutzung:
 - Rufe show_gif bei nahezu jeder Antwort auf, wenn ein passendes GIF das Gesagte veranschaulichen kann. Im Zweifel lieber ein GIF zeigen als keins.
+- Das GIF ist eine unterstützende Illustration, kein Zitat: Du musst es NICHT verbal ankündigen oder erwähnen (nicht nötig sind Sätze wie "wie Sie hier sehen" oder "das sieht dann so aus"). Rufe show_gif auch dann auf, wenn dein gesprochener Text nirgends direkt auf das GIF verweist – sobald du über ein Thema sprichst, zu dem ein Katalogeintrag passt, zeige ihn automatisch dazu.
 - Lass ein GIF nur dann weg, wenn kein Eintrag aus dem Katalog zum Thema passt.
 - Rufe hide_gif auf, wenn das aktuelle GIF nach dem Ende eines Themas nicht mehr relevant ist.
 
