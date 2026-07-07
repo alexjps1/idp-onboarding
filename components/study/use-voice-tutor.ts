@@ -165,6 +165,14 @@ export function useVoiceTutor(
   const streamRef = React.useRef<MediaStream | null>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const audioCtxRef = React.useRef<AudioContext | null>(null)
+  // Turn-taking chimes — created once and reused for the hook's whole
+  // lifetime, independent of the WebRTC connection/session lifecycle.
+  const userTurnAudioRef = React.useRef<HTMLAudioElement | null>(null)
+  const tutorTurnAudioRef = React.useRef<HTMLAudioElement | null>(null)
+  React.useEffect(() => {
+    userTurnAudioRef.current = new Audio(withBasePath("/audio/user_turn.mp3"))
+    tutorTurnAudioRef.current = new Audio(withBasePath("/audio/tutor_turn.mp3"))
+  }, [])
   // Set when the tutor calls end_session; the session is torn down once the
   // spoken goodbye has finished playing (or a fallback timer fires).
   const endRequestedRef = React.useRef(false)
@@ -274,11 +282,23 @@ export function useVoiceTutor(
           }
           break
         case "response.done":
-          patch({ status: "listening" })
+          // Deliberately not a status transition: this fires once the model
+          // is done *generating*, but the audio it just produced can still
+          // be streaming/playing on the client for a while after — using it
+          // for "listening" let the driver's turn (and the unmute/chime
+          // effects tied to that status) start before the tutor had
+          // actually finished being heard. output_audio_buffer.stopped
+          // below is the real "done talking" signal.
           break
         case "output_audio_buffer.stopped":
-          // The spoken goodbye has finished playing — safe to close now.
-          if (endRequestedRef.current) finishEnd()
+          if (endRequestedRef.current) {
+            // The spoken goodbye has finished playing — safe to close now.
+            finishEnd()
+          } else {
+            // The tutor's speech has genuinely finished playing — only now
+            // does it become the driver's turn.
+            patch({ status: "listening" })
+          }
           break
         case "response.function_call_arguments.done": {
           const { name, arguments: argsStr, call_id } = event
@@ -682,6 +702,24 @@ export function useVoiceTutor(
       track.enabled = false
     } else if (state.status === "listening" || state.status === "error") {
       track.enabled = true
+    }
+  }, [state.status])
+
+  // Turn-taking chimes: a short audible cue for who's expected to talk next,
+  // so the driver doesn't need to glance at the display to tell. Fires on
+  // every turn switch, proactive opens included (proactive sessions enter
+  // "responding" directly, same as a reactive one after speech ends).
+  React.useEffect(() => {
+    if (state.status === "responding") {
+      const audio = tutorTurnAudioRef.current
+      if (!audio) return
+      audio.currentTime = 0
+      void audio.play().catch(() => {})
+    } else if (state.status === "listening") {
+      const audio = userTurnAudioRef.current
+      if (!audio) return
+      audio.currentTime = 0
+      void audio.play().catch(() => {})
     }
   }, [state.status])
 
