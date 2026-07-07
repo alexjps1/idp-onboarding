@@ -53,7 +53,7 @@ Entscheidungsprinzip:
 - Lasse ein Modul NUR dann weg, wenn die Person das zugehörige System bereits sicher beherrscht – also wenn sowohl theoretisches Wissen als auch praktische Erfahrung hoch sind ("viel"/"sehr viel"). Dann wäre der Inhalt reine Wiederholung.
 - Zeige ein Modul, sobald in mindestens einer Dimension (Theorie ODER Praxis) noch relevantes Wissen fehlt. Ist eine der beiden Dimensionen niedrig, wird das Modul immer angezeigt.
 - Sicherheit hat Vorrang: Erzeuge niemals eine Wissenslücke. Im Zweifel IMMER anzeigen – lieber ein Modul zu viel als eines zu wenig.
-- Bewerte jedes Modul eigenständig anhand seines EIGENEN Vorwissens – niemals am Durchschnitt über alle Systeme.
+- Nutze für jede Entscheidung ALLE vorliegenden Informationen gemeinsam: Dir liegen die Vorwissenswerte zu allen Modulen gleichzeitig vor. Ziehe neben dem Vorwissen zum jeweiligen System bewusst auch das Gesamtbild der Person heran – etwa ein insgesamt sehr hohes oder sehr niedriges Kompetenzniveau, die Konsistenz der Angaben oder auffällige Muster über die Systeme hinweg –, um treffsicher einzuschätzen, was für genau diese Person überflüssig wäre.
 
 Antworte ausschließlich als JSON-Objekt exakt in diesem Format:
 {"decisions":[{"id":"...","show":true}]}
