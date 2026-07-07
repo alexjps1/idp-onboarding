@@ -173,10 +173,10 @@ export function useVoiceTutor(
     userTurnAudioRef.current = new Audio(withBasePath("/audio/user_turn.mp3"))
     tutorTurnAudioRef.current = new Audio(withBasePath("/audio/tutor_turn.mp3"))
   }, [])
-  // Set when the tutor calls end_session; the session is torn down once the
-  // spoken goodbye has finished playing (or a fallback timer fires).
+  // Set when the tutor calls end_session — the session is torn down
+  // immediately (see the tool-call handler below); the model is instructed
+  // to say nothing beforehand, so there's no goodbye audio to wait out.
   const endRequestedRef = React.useRef(false)
-  const endTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   // "warm" while pre-warming/pre-warmed, "live" once a real conversation has
   // started — lets start() tell a still-connecting pre-warm apart from an
   // already-active conversation.
@@ -188,10 +188,6 @@ export function useVoiceTutor(
   )
 
   const teardown = React.useCallback(() => {
-    if (endTimerRef.current) {
-      clearTimeout(endTimerRef.current)
-      endTimerRef.current = null
-    }
     if (retryTimerRef.current) {
       clearTimeout(retryTimerRef.current)
       retryTimerRef.current = null
@@ -230,8 +226,8 @@ export function useVoiceTutor(
   }, [teardown, patch])
 
   // Finalise a tutor-initiated end: tear down and notify the parent so the
-  // assistant overlay closes. Guarded so it runs once even if both the
-  // audio-finished event and the fallback timer fire.
+  // assistant overlay closes. Guarded by endRequestedRef so a stray repeat
+  // call is a no-op.
   const finishEnd = React.useCallback(() => {
     if (!endRequestedRef.current) return
     teardown()
@@ -291,22 +287,18 @@ export function useVoiceTutor(
           // below is the real "done talking" signal.
           break
         case "output_audio_buffer.stopped":
-          if (endRequestedRef.current) {
-            // The spoken goodbye has finished playing — safe to close now.
-            finishEnd()
-          } else {
-            // The tutor's speech has genuinely finished playing — only now
-            // does it become the driver's turn.
-            patch({ status: "listening" })
-          }
+          // The tutor's speech has genuinely finished playing — only now
+          // does it become the driver's turn. (end_session never reaches
+          // here: it closes immediately, before any audio would play.)
+          patch({ status: "listening" })
           break
         case "response.function_call_arguments.done": {
           const { name, arguments: argsStr, call_id } = event
           if (name === "end_session") {
-            // The driver asked to end the conversation. Acknowledge the call,
-            // let the goodbye spoken in this same response play out, then tear
-            // down on output_audio_buffer.stopped. The timer is a safety net in
-            // case that event never arrives (e.g. a goodbye-less response).
+            // The driver asked to end the conversation. Per
+            // REALTIME_INSTRUCTIONS the model says nothing and calls this
+            // immediately, so close right away instead of waiting for a
+            // goodbye that shouldn't exist — no audio to wait out.
             endRequestedRef.current = true
             dcRef.current?.send(
               JSON.stringify({
@@ -314,7 +306,7 @@ export function useVoiceTutor(
                 item: { type: "function_call_output", call_id, output: "ok" },
               })
             )
-            endTimerRef.current = setTimeout(finishEnd, 8000)
+            finishEnd()
             break
           }
           if (name === "get_adas_state") {
