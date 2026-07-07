@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
-import { PARTICIPANT_ID_PATTERN, isParticipantIdTaken } from "@/lib/participant"
+import { PARTICIPANT_ID_PATTERN } from "@/lib/participant"
 import { REALTIME_TEXT_INPUT } from "@/components/study/use-voice-tutor"
 
 /** The selectable study flows, in display order. */
@@ -48,7 +48,6 @@ export default function Home() {
   const router = useRouter()
   const [id, setId] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
-  const [checking, setChecking] = React.useState(false)
   const [flowOpen, setFlowOpen] = React.useState(false)
 
   // Mic-permission gate: the tutor needs microphone access once the run
@@ -100,8 +99,7 @@ export default function Home() {
     setError(null)
   }
 
-  async function start(route: string) {
-    if (checking) return
+  function start(route: string) {
     // Empty field: hand off without an id — the entry screen generates a random
     // one and shows it in a dialog.
     if (id === "") {
@@ -112,13 +110,9 @@ export default function Home() {
       setError("Ungültige Probanden-ID.")
       return
     }
-    setChecking(true)
-    const taken = await isParticipantIdTaken(id)
-    setChecking(false)
-    if (taken) {
-      setError(`Die Probanden-ID „${id}“ wurde bereits verwendet.`)
-      return
-    }
+    // Whether this id is already taken is checked on the entry screen (see
+    // StudyEntry), which shows a confirm-to-overwrite dialog if so — checking
+    // here too would just be the same network request thrown away.
     router.push(`${route}?pid=${encodeURIComponent(id)}`)
   }
 
@@ -181,7 +175,7 @@ export default function Home() {
           <Button
             size="lg"
             onClick={() => setFlowOpen(true)}
-            disabled={checking || !micGranted}
+            disabled={!micGranted}
             className="h-14 w-full text-xl"
           >
             Studie starten
@@ -215,7 +209,7 @@ export default function Home() {
                 <button
                   key={option.route}
                   type="button"
-                  disabled={option.disabled || checking}
+                  disabled={option.disabled}
                   onClick={() => start(option.route)}
                   className={cn(
                     "flex flex-col items-start gap-1 rounded-lg border-2 px-5 py-4 text-left transition-colors",

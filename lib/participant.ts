@@ -8,6 +8,8 @@
  * Auto-generated ids carry a `RAND` prefix so they are recognisable as such.
  */
 
+import { withBasePath } from "@/lib/base-path"
+
 /** Allowed participant-id shape: uppercase letters, digits, underscore, max 8. */
 export const PARTICIPANT_ID_PATTERN = /^[A-Z0-9_]{1,8}$/
 
@@ -25,9 +27,10 @@ export function generateParticipantId(): string {
 /** Whether a session file already exists on the server for this id. */
 export async function isParticipantIdTaken(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`/api/study-data?id=${encodeURIComponent(id)}`, {
-      cache: "no-store",
-    })
+    const res = await fetch(
+      withBasePath(`/api/study-data?id=${encodeURIComponent(id)}`),
+      { cache: "no-store" }
+    )
     if (!res.ok) return false
     const data = (await res.json()) as { exists?: boolean }
     return data.exists === true

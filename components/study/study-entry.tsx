@@ -16,8 +16,12 @@ import { useStudy, type StudyMode } from "@/components/study/study-provider"
 import {
   PARTICIPANT_ID_PATTERN,
   generateUniqueParticipantId,
+  isParticipantIdTaken,
 } from "@/lib/participant"
 import { getStudySteps } from "@/lib/study-steps"
+
+/** How long the "use it anyway" button stays disabled on the duplicate-id dialog. */
+const OVERWRITE_CONFIRM_DELAY_MS = 5000
 
 /**
  * Headless entry point for a study run. The study is run by many participants on
@@ -37,6 +41,8 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
   const { setMode, setParticipantId, reset } = useStudy()
   const started = React.useRef(false)
   const [randomId, setRandomId] = React.useState<string | null>(null)
+  const [duplicateId, setDuplicateId] = React.useState<string | null>(null)
+  const [overwriteEnabled, setOverwriteEnabled] = React.useState(false)
 
   React.useEffect(() => {
     if (started.current) return
@@ -51,8 +57,17 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
 
     const custom = pid?.toUpperCase()
     if (custom && PARTICIPANT_ID_PATTERN.test(custom)) {
-      setParticipantId(custom)
-      router.replace(firstStep)
+      // A custom id that's already in use would silently overwrite that
+      // participant's saved session — surface a confirmation dialog instead
+      // of committing straight away (mirrors the random-id dialog below).
+      void isParticipantIdTaken(custom).then((taken) => {
+        if (taken) {
+          setDuplicateId(custom)
+        } else {
+          setParticipantId(custom)
+          router.replace(firstStep)
+        }
+      })
       return
     }
 
@@ -63,10 +78,71 @@ export function StudyEntry({ mode, pid }: { mode: StudyMode; pid?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // The "use it anyway" button only becomes clickable after a short delay,
+  // so overwriting an existing participant's data is never a single misclick.
+  React.useEffect(() => {
+    if (!duplicateId) return
+    const id = setTimeout(
+      () => setOverwriteEnabled(true),
+      OVERWRITE_CONFIRM_DELAY_MS
+    )
+    return () => clearTimeout(id)
+  }, [duplicateId])
+
   function confirmRandom() {
     if (!randomId) return
     setParticipantId(randomId)
     router.replace(getStudySteps(mode)[0].path)
+  }
+
+  function confirmOverwrite() {
+    if (!duplicateId) return
+    setParticipantId(duplicateId)
+    router.replace(getStudySteps(mode)[0].path)
+  }
+
+  if (duplicateId) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background p-6">
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <CardTitle>Probanden-ID bereits vergeben</CardTitle>
+            <CardDescription>
+              Unter dieser ID wurden bereits Daten gespeichert. Wenn du sie
+              trotzdem vewendest, werden die vorhandenen Daten überschrieben.
+              <br />
+              Verwende stattdessen eine neue ID, um Datenverlust zu vermeiden.
+              Läuft ein Durchlauf versehentlich unter zwei verschiedenen
+              Probanden-IDs, lassen sich die Daten später zusammenführen — kein
+              Beinbruch.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <span className="font-mono text-5xl font-semibold tracking-wide">
+              {duplicateId}
+            </span>
+          </CardContent>
+          <CardFooter className="gap-3">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => router.push("/")}
+              className="h-14 flex-1 text-xl"
+            >
+              Zurück zur Startseite
+            </Button>
+            <Button
+              size="lg"
+              disabled={!overwriteEnabled}
+              onClick={confirmOverwrite}
+              className="h-14 flex-1 bg-error text-xl text-on-error hover:bg-error/90"
+            >
+              Trotzdem diese ID benutzen
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    )
   }
 
   if (randomId) {
