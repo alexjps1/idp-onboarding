@@ -161,6 +161,13 @@ export type StudySession = {
    * StudyProvider.markSimulationStarted / use-simulation-start.ts.
    */
   simulationStartedAt: string | null
+  /**
+   * ISO timestamp of when the participant ended the drive — set when they
+   * confirm "Fahrt beenden" in the confirmation dialog on /drive, right before
+   * navigating to the study's closing screen. Null until confirmed. See
+   * StudyProvider.markDriveEnded.
+   */
+  driveEndedAt: string | null
   theory: Ratings
   practice: Ratings
   adaptStatus: AdaptStatus | null

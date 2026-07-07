@@ -50,6 +50,12 @@ type StudyState = {
    * StudyProvider.markSimulationStarted / use-simulation-start.ts).
    */
   simulationStartedAt: string | null
+  /**
+   * ISO timestamp of when the participant confirmed "Fahrt beenden" on /drive,
+   * right before leaving for the study's closing screen (see
+   * StudyProvider.markDriveEnded).
+   */
+  driveEndedAt: string | null
   /** Theoretical-knowledge ratings from the self-assessment Fragebogen. */
   theory: Ratings
   /** Practical-experience ratings from the self-assessment Fragebogen. */
@@ -77,6 +83,8 @@ type StudyContextValue = StudyState & {
   markDriveStarted: () => void
   /** Stamp the simulation-start time (first SILAB packet after markDriveStarted). */
   markSimulationStarted: (at: string) => void
+  /** Stamp the drive-end time (confirming "Fahrt beenden" in the dialog). */
+  markDriveEnded: () => void
   setTheory: (system: string, value: number) => void
   setPractice: (system: string, value: number) => void
   setAdaptedModules: (
@@ -105,6 +113,7 @@ const SERVER_SNAPSHOT: StudyState = {
   onboardingEndedAt: null,
   driveStartedAt: null,
   simulationStartedAt: null,
+  driveEndedAt: null,
   theory: {},
   practice: {},
   adaptStatus: null,
@@ -139,6 +148,7 @@ function createStudyStore() {
         onboardingEndedAt: parsed.onboardingEndedAt ?? null,
         driveStartedAt: parsed.driveStartedAt ?? null,
         simulationStartedAt: parsed.simulationStartedAt ?? null,
+        driveEndedAt: parsed.driveEndedAt ?? null,
         theory: parsed.theory ?? {},
         practice: parsed.practice ?? {},
         adaptStatus: parsed.adaptStatus ?? null,
@@ -201,6 +211,7 @@ function createStudyStore() {
       set({ onboardingEndedAt: new Date().toISOString() }),
     markDriveStarted: () => set({ driveStartedAt: new Date().toISOString() }),
     markSimulationStarted: (at: string) => set({ simulationStartedAt: at }),
+    markDriveEnded: () => set({ driveEndedAt: new Date().toISOString() }),
     setTheory: (system: string, value: number) =>
       set({ theory: { ...getSnapshot().theory, [system]: value } }),
     setPractice: (system: string, value: number) =>
@@ -270,6 +281,7 @@ function createStudyStore() {
         onboardingEndedAt: null,
         driveStartedAt: null,
         simulationStartedAt: null,
+        driveEndedAt: null,
         theory: {},
         practice: {},
         adaptStatus: null,
@@ -299,6 +311,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
       markOnboardingEnded: store.markOnboardingEnded,
       markDriveStarted: store.markDriveStarted,
       markSimulationStarted: store.markSimulationStarted,
+      markDriveEnded: store.markDriveEnded,
       setTheory: store.setTheory,
       setPractice: store.setPractice,
       setAdaptedModules: store.setAdaptedModules,
