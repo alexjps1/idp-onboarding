@@ -71,7 +71,7 @@ const STATUS_LABEL: Record<VoiceTutorStatus, string> = {
   // driver, the overlay isn't even open while this is the status.
   ready: "Mikrofon aus",
   listening: "Ich höre zu…",
-  speaking: "Ich höre dich…",
+  speaking: "Ich höre Sie…",
   responding: "Ich antworte…",
   error: "Fehler",
 }
