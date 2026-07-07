@@ -29,7 +29,7 @@ import {
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowRight, Square, TriangleAlert } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { withBasePath } from "@/lib/base-path"
@@ -80,6 +80,9 @@ export default function DrivePage() {
   const [assistantOpen, setAssistantOpen] = React.useState(false)
   const [playing, setPlaying] = React.useState(true)
   const [endConfirmOpen, setEndConfirmOpen] = React.useState(false)
+  // The drive doesn't run until the participant taps "Fahrt starten": only then
+  // do the tutor, its greeting and the proactive triggers become active.
+  const [driveStarted, setDriveStarted] = React.useState(false)
   const [textDraft, setTextDraft] = React.useState("")
   const [textInputVisible, setTextInputVisible] = React.useState(false)
   const {
@@ -91,9 +94,11 @@ export default function DrivePage() {
     appendVoiceMessage,
     setTriggerState,
   } = useStudy()
-  const { previous, next } = getAdjacentSteps("drive", mode)
+  const { next } = getAdjacentSteps("drive", mode)
   const router = useRouter()
   const withTutor = mode !== "onboarding-only"
+  // Realtime tutor + proactive triggers only run once the drive has started.
+  const driveActive = withTutor && driveStarted
   const tutor = useVoiceTutor({
     onMessage: appendVoiceMessage,
     // The tutor ended the conversation itself (driver asked to stop) — close
@@ -133,7 +138,7 @@ export default function DrivePage() {
   )
 
   useAdasMonitor({
-    enabled: withTutor,
+    enabled: driveActive,
     onActivate: openAssistantProactively,
     shouldSuppress: () => assistantOpen,
   })
@@ -152,7 +157,7 @@ export default function DrivePage() {
   )
 
   useIntroTrigger({
-    enabled: withTutor,
+    enabled: driveActive,
     delayMs: INTRO_DELAY_MS,
     onTrigger: openAssistantForIntro,
     shouldSuppress: () => assistantOpen,
@@ -184,7 +189,7 @@ export default function DrivePage() {
   )
 
   useZoneTriggers({
-    enabled: withTutor,
+    enabled: driveActive,
     onZoneNudge: openAssistantForZoneNudge,
     onSystemLimitExplain: openAssistantForSystemLimit,
     shouldSuppress: () => assistantOpen,
@@ -195,12 +200,12 @@ export default function DrivePage() {
   // instantly instead of waiting out a fresh WebRTC handshake. Relies on mic
   // permission already having been granted on the entry page.
   React.useEffect(() => {
-    if (withTutor) tutor.prewarm()
+    if (driveActive) tutor.prewarm()
     // Depend on tutor.prewarm (stable for the hook's lifetime), not the whole
     // tutor object — that's a fresh object literal every render and would
     // re-fire this effect (and re-call prewarm) on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withTutor, tutor.prewarm])
+  }, [driveActive, tutor.prewarm])
 
   function closeAssistant() {
     tutor.stop()
@@ -256,27 +261,27 @@ export default function DrivePage() {
             <User className="size-5" />
             <span className="text-[15px]">18°C</span>
 
-            {/* Study navigation */}
+            {/* Drive control: start the drive, then end it (with a warning). */}
             <span className="h-7 w-px bg-[#d8d8d8]" />
-            {previous ? (
-              <Link
-                href={previous.path}
-                className="flex items-center gap-1.5 rounded-full border border-[#d8d8d8] bg-white px-4 py-1.5 text-[14px] text-[#5f5f61] transition-colors hover:bg-black/5"
+            {!driveStarted ? (
+              <button
+                type="button"
+                onClick={() => setDriveStarted(true)}
+                className="flex items-center gap-2 rounded-full bg-black px-7 py-2.5 text-[16px] font-semibold text-white shadow-sm transition-colors hover:bg-black/80"
               >
-                <ArrowLeft className="size-4" />
-                Zurück
-              </Link>
-            ) : null}
-            {next ? (
+                <Play className="size-5 fill-current" />
+                Fahrt starten
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={() => setEndConfirmOpen(true)}
-                className="flex items-center gap-1.5 rounded-full bg-[#1973f7] px-4 py-1.5 text-[14px] font-medium text-white transition-colors hover:bg-[#1565d8]"
+                className="flex items-center gap-2 rounded-full bg-[#d13438] px-7 py-2.5 text-[16px] font-semibold text-white shadow-sm transition-colors hover:bg-[#b52b2f]"
               >
-                Weiter
-                <ArrowRight className="size-4" />
+                <Square className="size-5 fill-current" />
+                Fahrt beenden
               </button>
-            ) : null}
+            )}
           </div>
         </div>
 
@@ -304,8 +309,9 @@ export default function DrivePage() {
               )
             })}
 
-            {/* Tutor — gradient, wired to the voice tutor (mit-Tutor only); grays out with an X while open */}
-            {withTutor ? (
+            {/* Tutor — gradient, wired to the voice tutor (only once the drive
+                has started); grays out with an X while open */}
+            {driveActive ? (
               <button
                 type="button"
                 aria-label={assistantOpen ? "Tutor schließen" : "Tutor"}
@@ -624,7 +630,7 @@ export default function DrivePage() {
         </div>
       ) : null}
 
-      {/* "Studie beenden?" confirmation before the final step */}
+      {/* Short warning before ending the drive */}
       {endConfirmOpen && next ? (
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-8 backdrop-blur-sm"
@@ -637,15 +643,20 @@ export default function DrivePage() {
             className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2
-              id="end-confirm-title"
-              className="text-2xl font-semibold text-black"
-            >
-              Studie beenden?
-            </h2>
-            <p className="mt-2 text-base text-black/60">
-              Möchten Sie die Fahrtansicht verlassen und zum Abschluss der
-              Studie fortfahren?
+            <div className="flex items-center gap-3">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#d13438]/10 text-[#d13438]">
+                <TriangleAlert className="size-6" />
+              </span>
+              <h2
+                id="end-confirm-title"
+                className="text-2xl font-semibold text-black"
+              >
+                Fahrt beenden?
+              </h2>
+            </div>
+            <p className="mt-3 text-base text-black/60">
+              Die Fahrt wird beendet und kann nicht fortgesetzt werden. Sie
+              gelangen anschließend zum Abschluss der Studie.
             </p>
             <div className="mt-8 flex justify-end gap-3">
               <button
@@ -657,9 +668,9 @@ export default function DrivePage() {
               </button>
               <Link
                 href={next.path}
-                className="flex items-center gap-1.5 rounded-full bg-[#1973f7] px-6 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#1565d8]"
+                className="flex items-center gap-1.5 rounded-full bg-[#d13438] px-6 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#b52b2f]"
               >
-                Studie beenden
+                Fahrt beenden
                 <ArrowRight className="size-4" />
               </Link>
             </div>
