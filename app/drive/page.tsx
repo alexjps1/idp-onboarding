@@ -104,6 +104,7 @@ export default function DrivePage() {
     setTriggerState,
     markDriveStarted,
     markSimulationStarted,
+    markDriveEnded,
   } = useStudy()
   const { next } = getAdjacentSteps("drive", mode)
   const router = useRouter()
@@ -739,6 +740,7 @@ export default function DrivePage() {
               </button>
               <Link
                 href={next.path}
+                onClick={() => markDriveEnded()}
                 className="flex items-center gap-1.5 rounded-full bg-[#d13438] px-6 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-[#b52b2f]"
               >
                 Fahrt beenden
