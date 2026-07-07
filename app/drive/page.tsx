@@ -253,6 +253,14 @@ export default function DrivePage() {
               {participantId ?? "—"}
             </span>
           </div>
+          {/* Before the drive starts this is the warm-up/practice area — label
+              it prominently on the left so participants know the tutor can be
+              tried out here first. */}
+          {!driveStarted ? (
+            <span className="ml-5 rounded-full bg-[#d13438] px-5 py-1.5 text-[18px] font-bold uppercase tracking-wide text-white shadow-sm">
+              Eingewöhnungsumgebung
+            </span>
+          ) : null}
           <span className="absolute left-1/2 -translate-x-1/2 text-[15px] tabular-nums text-[#7e7f7f]">
             {time ?? "--:--"}
           </span>
