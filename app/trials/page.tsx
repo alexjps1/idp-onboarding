@@ -7,6 +7,17 @@ import { cn } from "@/lib/utils"
 import { withBasePath } from "@/lib/base-path"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 /** How often (ms) the viewer polls for data changes. */
 const POLL_INTERVAL = 5_000
@@ -20,11 +31,19 @@ function useTrials() {
   const [trials, setTrials] = React.useState<TrialEntry[]>([])
   const [loading, setLoading] = React.useState(true)
   const [lastRefresh, setLastRefresh] = React.useState<Date | null>(null)
+  // Set on a 401 from the (password-gated) API — the viewer must render
+  // nothing but the password prompt while this is true.
+  const [unauthorized, setUnauthorized] = React.useState(false)
 
   const refetch = React.useCallback(async () => {
     try {
       const res = await fetch(withBasePath("/api/trials"))
+      if (res.status === 401) {
+        setUnauthorized(true)
+        return
+      }
       if (!res.ok) return
+      setUnauthorized(false)
       const json = (await res.json()) as { trials: TrialEntry[] }
       setTrials(json.trials)
       setLastRefresh(new Date())
@@ -35,7 +54,7 @@ function useTrials() {
     }
   }, [])
 
-  return { trials, loading, lastRefresh, refetch } as const
+  return { trials, loading, lastRefresh, unauthorized, refetch } as const
 }
 
 function useTrialData() {
@@ -88,11 +107,92 @@ function useTrialData() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Password gate — shown instead of the viewer until POST /api/trials/auth
+// succeeds. GET /api/trials itself enforces this server-side, so this is
+// the UI for that, not the actual protection.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function PasswordGate({ onSuccess }: { onSuccess: () => void }) {
+  const [password, setPassword] = React.useState("")
+  const [error, setError] = React.useState<string | null>(null)
+  const [submitting, setSubmitting] = React.useState(false)
+
+  return (
+    <div className="flex h-screen w-screen items-center justify-center bg-background p-6">
+      <Card className="w-full max-w-sm">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            setSubmitting(true)
+            setError(null)
+            void (async () => {
+              try {
+                const res = await fetch(withBasePath("/api/trials/auth"), {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ password }),
+                })
+                if (res.ok) {
+                  onSuccess()
+                } else {
+                  setError("Falsches Passwort.")
+                }
+              } catch {
+                setError("Verbindungsfehler. Bitte erneut versuchen.")
+              } finally {
+                setSubmitting(false)
+              }
+            })()
+          }}
+        >
+          <CardHeader>
+            <CardTitle>Trial Viewer</CardTitle>
+            <CardDescription>
+              Bitte Passwort eingeben, um die Probandendaten einzusehen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <Label htmlFor="trials-password">Passwort</Label>
+            <Input
+              id="trials-password"
+              type="password"
+              autoFocus
+              autoComplete="off"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setError(null)
+              }}
+            />
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          </CardContent>
+          <CardFooter>
+            <Button
+              type="submit"
+              disabled={submitting || !password}
+              className="w-full"
+            >
+              {submitting ? "Prüfe…" : "Anmelden"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Page
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export default function TrialsPage() {
-  const { trials, loading, lastRefresh, refetch: refetchTrials } = useTrials()
+  const {
+    trials,
+    loading,
+    lastRefresh,
+    unauthorized,
+    refetch: refetchTrials,
+  } = useTrials()
   const {
     data,
     loading: dataLoading,
@@ -134,6 +234,21 @@ export default function TrialsPage() {
     // This is a render-time state correction (synchronous, no effect needed).
     setSelectedId(null)
     clearData()
+  }
+
+  // Nothing below this point ever renders — no sidebar, no data, not even an
+  // empty-state — until the password is verified server-side. GET
+  // /api/trials itself refuses to return data without it; this is just the
+  // UI for that gate, not a substitute for it.
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+  if (unauthorized) {
+    return <PasswordGate onSuccess={() => void refetchTrials()} />
   }
 
   return (

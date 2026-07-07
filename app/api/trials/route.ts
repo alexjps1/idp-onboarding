@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { readdir, readFile, stat } from "node:fs/promises"
 import path from "node:path"
 
+import { isAuthorized } from "@/lib/trials-auth"
+
 export const runtime = "nodejs"
 // Prevent Next from caching the response so the viewer always gets fresh data.
 export const dynamic = "force-dynamic"
@@ -23,6 +25,10 @@ async function exists(p: string): Promise<boolean> {
  * GET /api/trials?id=X     → return the full JSON for participant X
  */
 export async function GET(request: Request) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   const url = new URL(request.url)
   const id = url.searchParams.get("id")
 
