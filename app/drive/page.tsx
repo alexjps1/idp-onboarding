@@ -200,12 +200,14 @@ export default function DrivePage() {
   // instantly instead of waiting out a fresh WebRTC handshake. Relies on mic
   // permission already having been granted on the entry page.
   React.useEffect(() => {
-    if (driveActive) tutor.prewarm()
+    // Prewarm regardless of driveStarted: the tutor can be opened (and tried
+    // out) before the drive starts, so the connection must be ready then too.
+    if (withTutor) tutor.prewarm()
     // Depend on tutor.prewarm (stable for the hook's lifetime), not the whole
     // tutor object — that's a fresh object literal every render and would
     // re-fire this effect (and re-call prewarm) on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [driveActive, tutor.prewarm])
+  }, [withTutor, tutor.prewarm])
 
   function closeAssistant() {
     tutor.stop()
@@ -276,9 +278,9 @@ export default function DrivePage() {
               <button
                 type="button"
                 onClick={() => setEndConfirmOpen(true)}
-                className="flex items-center gap-2 rounded-full bg-[#d13438] px-7 py-2.5 text-[16px] font-semibold text-white shadow-sm transition-colors hover:bg-[#b52b2f]"
+                className="flex items-center gap-2 rounded-full border border-[#d13438]/40 bg-white px-5 py-2 text-[14px] font-medium text-[#d13438] transition-colors hover:bg-[#d13438]/5"
               >
-                <Square className="size-5 fill-current" />
+                <Square className="size-4 fill-current" />
                 Fahrt beenden
               </button>
             )}
@@ -309,9 +311,10 @@ export default function DrivePage() {
               )
             })}
 
-            {/* Tutor — gradient, wired to the voice tutor (only once the drive
-                has started); grays out with an X while open */}
-            {driveActive ? (
+            {/* Tutor — gradient, wired to the voice tutor; available before the
+                drive starts too, so it can be tried out. Grays out with an X
+                while open. */}
+            {withTutor ? (
               <button
                 type="button"
                 aria-label={assistantOpen ? "Tutor schließen" : "Tutor"}
@@ -338,6 +341,28 @@ export default function DrivePage() {
 
           {/* Media player */}
           <main className="relative flex flex-grow items-center justify-center overflow-hidden bg-gradient-to-br from-[#eef1f5] to-[#e3e7ec] p-8">
+            {/* Before the drive starts: explain the tutor button (on/off). */}
+            {!driveStarted ? (
+              <div className="absolute bottom-6 left-6 z-40 max-w-lg rounded-2xl border border-[#e2e2e2] bg-white/95 px-7 py-6 shadow-md">
+                <div className="flex items-start gap-4">
+                  <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(146deg,#a953da_7%,#39c9f6_93%)] text-white">
+                    <Sparkles className="size-7" />
+                  </span>
+                  <div>
+                    <p className="text-2xl font-semibold text-black">
+                      Sprachassistent
+                    </p>
+                    <p className="mt-1.5 text-xl leading-relaxed text-black/70">
+                      Tippen Sie links auf „Tutor“, um den Assistenten zu
+                      starten. Mit einem erneuten Tippen auf den Screen beenden
+                      Sie ihn wieder. Probieren Sie es gern schon jetzt aus – die
+                      Fahrt starten Sie anschließend oben rechts.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             <div className="flex w-full max-w-5xl flex-col items-center gap-8 rounded-[40px] bg-white/50 p-8 backdrop-blur-sm">
               <div className="flex w-full items-center gap-8">
                 {/* Now-playing controls */}
