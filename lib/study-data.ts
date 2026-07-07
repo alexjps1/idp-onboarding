@@ -61,29 +61,38 @@ export type VoiceConversation = {
  */
 export type ProactiveTriggerState = "waiting" | "detected" | "suppressed" | "fired"
 
-/** One entry per proactive trigger tracked over the drive (see ProactiveTriggerState). */
-export type ProactiveTriggerStates = {
-  intro: ProactiveTriggerState
-  adasOn: ProactiveTriggerState
-  zoneNudge1: ProactiveTriggerState
-  zoneNudge2: ProactiveTriggerState
-  zoneNudge3: ProactiveTriggerState
-  zoneNudge4: ProactiveTriggerState
-  zoneNudge5: ProactiveTriggerState
-  zoneNudge6: ProactiveTriggerState
-  systemLimit: ProactiveTriggerState
+/** A trigger's current state plus when it got there (null while still "waiting"). */
+export type ProactiveTriggerEntry = {
+  state: ProactiveTriggerState
+  /** ISO timestamp of when this state was reached; null while still "waiting". */
+  at: string | null
 }
 
+/** One entry per proactive trigger tracked over the drive (see ProactiveTriggerState). */
+export type ProactiveTriggerStates = {
+  intro: ProactiveTriggerEntry
+  adasOn: ProactiveTriggerEntry
+  zoneNudge1: ProactiveTriggerEntry
+  zoneNudge2: ProactiveTriggerEntry
+  zoneNudge3: ProactiveTriggerEntry
+  zoneNudge4: ProactiveTriggerEntry
+  zoneNudge5: ProactiveTriggerEntry
+  zoneNudge6: ProactiveTriggerEntry
+  systemLimit: ProactiveTriggerEntry
+}
+
+const WAITING_ENTRY: ProactiveTriggerEntry = { state: "waiting", at: null }
+
 export const INITIAL_TRIGGER_STATES: ProactiveTriggerStates = {
-  intro: "waiting",
-  adasOn: "waiting",
-  zoneNudge1: "waiting",
-  zoneNudge2: "waiting",
-  zoneNudge3: "waiting",
-  zoneNudge4: "waiting",
-  zoneNudge5: "waiting",
-  zoneNudge6: "waiting",
-  systemLimit: "waiting",
+  intro: WAITING_ENTRY,
+  adasOn: WAITING_ENTRY,
+  zoneNudge1: WAITING_ENTRY,
+  zoneNudge2: WAITING_ENTRY,
+  zoneNudge3: WAITING_ENTRY,
+  zoneNudge4: WAITING_ENTRY,
+  zoneNudge5: WAITING_ENTRY,
+  zoneNudge6: WAITING_ENTRY,
+  systemLimit: WAITING_ENTRY,
 }
 
 /** A module section after the guide adapted it to the participant's knowledge. */

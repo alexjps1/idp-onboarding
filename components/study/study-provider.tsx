@@ -234,7 +234,10 @@ function createStudyStore() {
       triggerState: ProactiveTriggerState
     ) =>
       set({
-        triggerStates: { ...getSnapshot().triggerStates, [id]: triggerState },
+        triggerStates: {
+          ...getSnapshot().triggerStates,
+          [id]: { state: triggerState, at: new Date().toISOString() },
+        },
       }),
     reset: () =>
       set({
