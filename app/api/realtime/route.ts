@@ -122,9 +122,20 @@ export async function POST(req: Request) {
           },
           {
             type: "function",
+            name: "get_adas_state",
+            description:
+              "Ruft den aktuellen Live-Status der Fahrerassistenzsysteme ab: ob sie gerade aktiv sind und, falls nicht, ob sie überhaupt verfügbar wären. Rufe dieses Tool auf, bevor du eine Aussage über den aktuellen Aktivierungs- oder Verfügbarkeitsstatus machst (z. B. wenn die Person danach fragt oder du proaktiv darauf eingehst), damit deine Antwort den tatsächlichen Live-Zustand nennt statt zu raten.",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: [],
+            },
+          },
+          {
+            type: "function",
             name: "end_session",
             description:
-              "Beendet das Sprachgespräch und schließt den Assistenten. Nur aufrufen, wenn die fahrende Person das Gespräch ausdrücklich beenden möchte – erst nach einem kurzen gesprochenen Abschied.",
+              "Beendet das Sprachgespräch und schließt den Assistenten sofort. Aufrufen, wenn die fahrende Person erkennbar nicht weitersprechen möchte (siehe die Auflistung unter 'Gespräch beenden' in den Anweisungen – das umfasst auch Verabschiedungen, die Aufforderung still zu sein, und ein alleinstehendes 'Danke'/'Passt'). Immer UNMITTELBAR aufrufen, ohne vorher etwas zu sagen (keine Verabschiedung).",
             parameters: {
               type: "object",
               properties: {},

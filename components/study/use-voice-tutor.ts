@@ -119,7 +119,10 @@ type RealtimeEvent = {
  * session itself: the mic track streams up, the tutor's voice streams back
  * into a hidden <audio> element, and JSON events on the "oai-events" data
  * channel drive the status/transcript display. Turn-taking (VAD) and
- * barge-in are handled server-side, so the session stays open until stop().
+ * barge-in are handled server-side, so the session stays open until stop() —
+ * except the mic is muted client-side whenever the tutor itself is talking
+ * (see the status-driven effect near the bottom of this hook), so its own
+ * voice can never be picked up and misread as the driver interrupting.
  */
 export function useVoiceTutor(
   options: {
@@ -162,10 +165,18 @@ export function useVoiceTutor(
   const streamRef = React.useRef<MediaStream | null>(null)
   const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const audioCtxRef = React.useRef<AudioContext | null>(null)
-  // Set when the tutor calls end_session; the session is torn down once the
-  // spoken goodbye has finished playing (or a fallback timer fires).
+  // Turn-taking chimes — created once and reused for the hook's whole
+  // lifetime, independent of the WebRTC connection/session lifecycle.
+  const userTurnAudioRef = React.useRef<HTMLAudioElement | null>(null)
+  const tutorTurnAudioRef = React.useRef<HTMLAudioElement | null>(null)
+  React.useEffect(() => {
+    userTurnAudioRef.current = new Audio(withBasePath("/audio/user_turn.mp3"))
+    tutorTurnAudioRef.current = new Audio(withBasePath("/audio/tutor_turn.mp3"))
+  }, [])
+  // Set when the tutor calls end_session — the session is torn down
+  // immediately (see the tool-call handler below); the model is instructed
+  // to say nothing beforehand, so there's no goodbye audio to wait out.
   const endRequestedRef = React.useRef(false)
-  const endTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   // "warm" while pre-warming/pre-warmed, "live" once a real conversation has
   // started — lets start() tell a still-connecting pre-warm apart from an
   // already-active conversation.
@@ -177,10 +188,6 @@ export function useVoiceTutor(
   )
 
   const teardown = React.useCallback(() => {
-    if (endTimerRef.current) {
-      clearTimeout(endTimerRef.current)
-      endTimerRef.current = null
-    }
     if (retryTimerRef.current) {
       clearTimeout(retryTimerRef.current)
       retryTimerRef.current = null
@@ -219,8 +226,8 @@ export function useVoiceTutor(
   }, [teardown, patch])
 
   // Finalise a tutor-initiated end: tear down and notify the parent so the
-  // assistant overlay closes. Guarded so it runs once even if both the
-  // audio-finished event and the fallback timer fire.
+  // assistant overlay closes. Guarded by endRequestedRef so a stray repeat
+  // call is a no-op.
   const finishEnd = React.useCallback(() => {
     if (!endRequestedRef.current) return
     teardown()
@@ -271,19 +278,27 @@ export function useVoiceTutor(
           }
           break
         case "response.done":
-          patch({ status: "listening" })
+          // Deliberately not a status transition: this fires once the model
+          // is done *generating*, but the audio it just produced can still
+          // be streaming/playing on the client for a while after — using it
+          // for "listening" let the driver's turn (and the unmute/chime
+          // effects tied to that status) start before the tutor had
+          // actually finished being heard. output_audio_buffer.stopped
+          // below is the real "done talking" signal.
           break
         case "output_audio_buffer.stopped":
-          // The spoken goodbye has finished playing — safe to close now.
-          if (endRequestedRef.current) finishEnd()
+          // The tutor's speech has genuinely finished playing — only now
+          // does it become the driver's turn. (end_session never reaches
+          // here: it closes immediately, before any audio would play.)
+          patch({ status: "listening" })
           break
         case "response.function_call_arguments.done": {
           const { name, arguments: argsStr, call_id } = event
           if (name === "end_session") {
-            // The driver asked to end the conversation. Acknowledge the call,
-            // let the goodbye spoken in this same response play out, then tear
-            // down on output_audio_buffer.stopped. The timer is a safety net in
-            // case that event never arrives (e.g. a goodbye-less response).
+            // The driver asked to end the conversation. Per
+            // REALTIME_INSTRUCTIONS the model says nothing and calls this
+            // immediately, so close right away instead of waiting for a
+            // goodbye that shouldn't exist — no audio to wait out.
             endRequestedRef.current = true
             dcRef.current?.send(
               JSON.stringify({
@@ -291,7 +306,42 @@ export function useVoiceTutor(
                 item: { type: "function_call_output", call_id, output: "ok" },
               })
             )
-            endTimerRef.current = setTimeout(finishEnd, 8000)
+            finishEnd()
+            break
+          }
+          if (name === "get_adas_state") {
+            // Resolved asynchronously against the same live SILAB state the
+            // proactive triggers poll (see use-adas-monitor.ts/
+            // use-zone-triggers.ts) — the model gets the actual current
+            // values, not a guess, so it can tell the driver a concrete fact
+            // ("Sie erkennen das daran, dass …") instead of "look at the
+            // display yourself".
+            void (async () => {
+              let output: string
+              try {
+                const res = await fetch(withBasePath("/api/simstate"), {
+                  cache: "no-store",
+                })
+                const data = (await res.json()) as {
+                  adas?: { active?: boolean; available?: boolean }
+                }
+                output = JSON.stringify({
+                  active: data.adas?.active ?? false,
+                  available: data.adas?.available ?? false,
+                })
+              } catch {
+                output = JSON.stringify({
+                  error: "Fahrzeugstatus aktuell nicht abrufbar.",
+                })
+              }
+              dcRef.current?.send(
+                JSON.stringify({
+                  type: "conversation.item.create",
+                  item: { type: "function_call_output", call_id, output },
+                })
+              )
+              dcRef.current?.send(JSON.stringify({ type: "response.create" }))
+            })()
             break
           }
           if (name === "show_gif") {
@@ -624,6 +674,46 @@ export function useVoiceTutor(
     },
     [patch]
   )
+
+  // Mute the mic while the tutor is talking, and only it — never while the
+  // driver might be. This is the actual fix for self-interruption: the
+  // tutor's own voice, played through car speakers and picked up again by
+  // the mic, is genuine speech, so no VAD sensitivity/eagerness setting can
+  // reliably tell it apart from the driver interrupting (browser echo
+  // cancellation alone isn't reliable in a cabin with external speakers and
+  // reverb). Muting the track means the API only ever sees silence during
+  // the tutor's own turn, so it structurally cannot mistake its own audio
+  // for a barge-in. "error" also unmutes as a safety net so a mid-response
+  // error can't leave the mic stuck muted; other statuses (idle/connecting/
+  // ready/speaking) are left alone — they're already correctly set by
+  // runConnect()/activate() (e.g. "ready" must stay muted during pre-warm).
+  React.useEffect(() => {
+    const track = streamRef.current?.getAudioTracks()[0]
+    if (!track) return
+    if (state.status === "responding") {
+      track.enabled = false
+    } else if (state.status === "listening" || state.status === "error") {
+      track.enabled = true
+    }
+  }, [state.status])
+
+  // Turn-taking chimes: a short audible cue for who's expected to talk next,
+  // so the driver doesn't need to glance at the display to tell. Fires on
+  // every turn switch, proactive opens included (proactive sessions enter
+  // "responding" directly, same as a reactive one after speech ends).
+  React.useEffect(() => {
+    if (state.status === "responding") {
+      const audio = tutorTurnAudioRef.current
+      if (!audio) return
+      audio.currentTime = 0
+      void audio.play().catch(() => {})
+    } else if (state.status === "listening") {
+      const audio = userTurnAudioRef.current
+      if (!audio) return
+      audio.currentTime = 0
+      void audio.play().catch(() => {})
+    }
+  }, [state.status])
 
   // Tear down on unmount — no re-arm: leaving /drive means there is no next
   // interaction to prepare for.
