@@ -46,7 +46,10 @@ import { useZoneTriggers, type ZoneOutcome } from "@/components/study/use-zone-t
 import { useSimulationStart } from "@/components/study/use-simulation-start"
 
 /** Delay before the tutor's one-time self-introduction, in milliseconds. */
-const INTRO_DELAY_MS = 5000
+const INTRO_DELAY_MS = 15000
+
+/** Delay before the "Fahrt starten" confirm button becomes clickable, in milliseconds. */
+const START_CONFIRM_DELAY_MS = 5000
 
 /** Maps a nudge-zone index (0-based, "Stelle 1"–"Stelle 6") to its triggerStates key. */
 const ZONE_NUDGE_IDS = [
@@ -84,6 +87,11 @@ export default function DrivePage() {
   // The drive doesn't run until the participant taps "Fahrt starten": only then
   // do the tutor, its greeting and the proactive triggers become active.
   const [driveStarted, setDriveStarted] = React.useState(false)
+  // "Fahrt starten" opens a confirm dialog for the Studienleitung first (this
+  // step also cues them to start the SILAB simulation) — its confirm button
+  // stays disabled for START_CONFIRM_DELAY_MS.
+  const [startConfirmOpen, setStartConfirmOpen] = React.useState(false)
+  const [startConfirmEnabled, setStartConfirmEnabled] = React.useState(false)
   const [textDraft, setTextDraft] = React.useState("")
   const [textInputVisible, setTextInputVisible] = React.useState(false)
   const {
@@ -219,6 +227,23 @@ export default function DrivePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withTutor, tutor.prewarm])
 
+  // The confirm button in the "Fahrt starten" dialog stays disabled until
+  // START_CONFIRM_DELAY_MS after the dialog opens.
+  React.useEffect(() => {
+    if (!startConfirmOpen) return
+    const id = setTimeout(
+      () => setStartConfirmEnabled(true),
+      START_CONFIRM_DELAY_MS
+    )
+    return () => clearTimeout(id)
+  }, [startConfirmOpen])
+
+  function confirmStartDrive() {
+    markDriveStarted()
+    setDriveStarted(true)
+    setStartConfirmOpen(false)
+  }
+
   function closeAssistant() {
     tutor.stop()
     setAssistantOpen(false)
@@ -287,8 +312,8 @@ export default function DrivePage() {
               <button
                 type="button"
                 onClick={() => {
-                  markDriveStarted()
-                  setDriveStarted(true)
+                  setStartConfirmEnabled(false)
+                  setStartConfirmOpen(true)
                 }}
                 className="flex items-center gap-2 rounded-full bg-black px-7 py-2.5 text-[16px] font-semibold text-white shadow-sm transition-colors hover:bg-black/80"
               >
@@ -719,6 +744,58 @@ export default function DrivePage() {
                 Fahrt beenden
                 <ArrowRight className="size-4" />
               </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Confirm before leaving the Eingewöhnungsumgebung — cues the
+          Studienleitung to start SILAB only once this is confirmed. */}
+      {startConfirmOpen ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-8 backdrop-blur-sm"
+          onClick={() => setStartConfirmOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="start-confirm-title"
+            className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-black/5 text-black">
+                <TriangleAlert className="size-6" />
+              </span>
+              <h2
+                id="start-confirm-title"
+                className="text-2xl font-semibold text-black"
+              >
+                Fahrt starten?
+              </h2>
+            </div>
+            <p className="mt-3 text-base text-black/60">
+              Dieser Schritt darf nur von der Studienleitung durchgeführt
+              werden. Für Studienleitung: Bitte die SILAB Simulation nur erst
+              starten, nachdem der Button unten gedrückt wird.
+            </p>
+            <div className="mt-8 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setStartConfirmOpen(false)}
+                className="rounded-full border border-[#d8d8d8] bg-white px-6 py-2.5 text-[15px] text-[#5f5f61] transition-colors hover:bg-black/5"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                disabled={!startConfirmEnabled}
+                onClick={confirmStartDrive}
+                className="flex items-center gap-2 rounded-full bg-black px-6 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Play className="size-4 fill-current" />
+                Fahrt starten
+              </button>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import {
   TRIALS_AUTH_COOKIE,
-  TRIALS_AUTH_TOKEN,
+  getAuthToken,
   isCorrectPassword,
 } from "@/lib/trials-auth"
 
@@ -14,6 +14,14 @@ export const runtime = "nodejs"
  * from client JS) and secure (HTTPS only, which this app always runs under).
  */
 export async function POST(request: Request) {
+  const token = getAuthToken()
+  if (token === null) {
+    return NextResponse.json(
+      { ok: false, error: "TRIALS_PASSWORD not configured on the server." },
+      { status: 501 }
+    )
+  }
+
   const body = (await request.json().catch(() => null)) as {
     password?: string
   } | null
@@ -26,7 +34,7 @@ export async function POST(request: Request) {
   }
 
   const res = NextResponse.json({ ok: true })
-  res.cookies.set(TRIALS_AUTH_COOKIE, TRIALS_AUTH_TOKEN, {
+  res.cookies.set(TRIALS_AUTH_COOKIE, token, {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
