@@ -24,7 +24,7 @@ const FLOW_OPTIONS = [
     route: "/ohnetutor",
     label: "Nur Onboarding",
     description: "Selbsteinschätzung und Onboarding-Guide, ohne Fahrt.",
-    disabled: true,
+    disabled: false,
   },
   {
     route: "/nurfahrt",
