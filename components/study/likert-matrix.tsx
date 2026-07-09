@@ -81,7 +81,7 @@ export function LikertMatrix({
             <p className="text-2xl font-semibold text-foreground">
               {system.name}
             </p>
-            <p className="text-[22px] leading-snug text-muted-foreground">
+            <p className="text-lg leading-snug text-muted-foreground">
               {system.description}
             </p>
           </div>

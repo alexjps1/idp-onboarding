@@ -165,7 +165,7 @@ export default function GuidePage() {
             <h1 className="text-4xl font-semibold tracking-tight text-foreground">
               Bitte warten
             </h1>
-            <p className="text-xl leading-relaxed text-muted-foreground">
+            <p className="text-2xl leading-relaxed text-muted-foreground">
               Personalisierte Inhalte werden für Sie vorbereitet&nbsp;…
             </p>
           </div>

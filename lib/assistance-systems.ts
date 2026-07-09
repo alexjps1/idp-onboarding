@@ -11,23 +11,28 @@ export type AssistanceSystem = {
 export const ASSISTANCE_SYSTEMS: AssistanceSystem[] = [
   {
     name: "Verkehrszeichenassistent",
-    description: "Passt Geschwindigkeit an Verkehrszeichen an.",
+    description:
+      "Erkennt Verkehrszeichen und zeigt die Informationen im Fahrzeug an. Kann die Geschwindigkeit entsprechend automatisch anpassen.",
   },
   {
     name: "Abstandsregeltempomat",
-    description: "Hält voreingestellten Abstand zum Vorderfahrzeug.",
+    description:
+      "Hält automatisch einen voreingestellten Abstand zum vorausfahrenden Fahrzeug durch Beschleunigen und Abbremsen.",
   },
   {
     name: "Ampelerkennung",
-    description: "Reagiert auf Ampeln oder informiert den Fahrer.",
+    description:
+      "Erkennt Ampeln und zeigt den Status im Fahrzeug an. Kann auf das Ampelsignal reagieren oder die Fahrperson entsprechend informieren.",
   },
   {
     name: "Spurführungsassistent",
-    description: "Hält Fahrzeug in der Spur.",
+    description:
+      "Erkennt die Fahrspurmarkierungen und hält das Fahrzeug aktiv in der Spur, ohne die Fahrspur zu verlassen.",
   },
   {
     name: "Notbremsassistent",
-    description: "Bremst bei drohender Kollision automatisch.",
+    description:
+      "Erkennt Kollisionsgefahren und warnt davor. Bremst bei drohender Kollision automatisch zur Reduktion der Aufprallgeschwindigkeit.",
   },
 ]
 

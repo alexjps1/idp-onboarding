@@ -149,7 +149,7 @@ export default function QuizPage() {
                   disabled={!answering}
                   onClick={() => setSelected(i)}
                   className={cn(
-                    "flex items-center gap-4 rounded-xl border-2 px-5 py-4 text-left text-xl transition-colors",
+                    "flex items-center gap-4 rounded-xl border-2 px-5 py-4 text-left text-[22px] transition-colors",
                     showCorrect
                       ? "border-emerald-500 bg-emerald-500/10 text-foreground"
                       : showWrong
