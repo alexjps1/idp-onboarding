@@ -46,8 +46,8 @@ export default function CompletePage() {
       <main className="relative flex flex-1 flex-col items-center justify-center px-margin-tablet text-center">
         {/* Success orb */}
         <div className="relative mb-12">
-          <div className="orb-glow flex size-32 items-center justify-center rounded-full border-2 border-primary/20 bg-card">
-            <CheckCircle2 className="size-16 text-primary" strokeWidth={1.5} />
+          <div className="orb-glow flex size-24 items-center justify-center rounded-full border-2 border-primary/20 bg-card">
+            <CheckCircle2 className="size-12 text-primary" strokeWidth={1.5} />
           </div>
           <div className="absolute inset-0 scale-150 rounded-full border border-primary/10 opacity-20" />
         </div>
@@ -73,7 +73,7 @@ export default function CompletePage() {
             </div>
           ) : null}
 
-          <p className="mx-auto max-w-xl text-lg leading-relaxed text-muted-foreground">
+          <p className="mx-auto max-w-xl text-2xl leading-relaxed text-muted-foreground">
             Vielen Dank für deine Teilnahme. Bitte wende dich nun an die
             Studienleitung.
           </p>

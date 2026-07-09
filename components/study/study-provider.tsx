@@ -26,9 +26,9 @@ type StudyState = {
   mode: StudyMode | null
   /**
    * ISO timestamp of when the participant began the study — set when they press
-   * "Anpassung starten" on the welcome screen, falling back to the moment the
-   * run's participant id was assigned (e.g. the drive-only flow, which has no
-   * welcome screen).
+   * the welcome-screen button ("Anpassung starten", or "Zur Fahrt" in the
+   * drive-only flow; see StudyProvider.markStarted). Every mode passes through
+   * the welcome screen, so this is always stamped there.
    */
   startedAt: string | null
   /**
@@ -200,11 +200,7 @@ function createStudyStore() {
       return () => listeners.delete(listener)
     },
     setParticipantId: (participantId: string | null) =>
-      set(
-        participantId && !getSnapshot().startedAt
-          ? { participantId, startedAt: new Date().toISOString() }
-          : { participantId }
-      ),
+      set({ participantId }),
     setMode: (mode: StudyMode | null) => set({ mode }),
     markStarted: () => set({ startedAt: new Date().toISOString() }),
     markOnboardingEnded: () =>

@@ -38,7 +38,7 @@ export function VehicleWelcome({
           Willkommen im Fahrzeug!
         </h1>
 
-        <div className="space-y-5 text-xl leading-relaxed text-muted-foreground">
+        <div className="space-y-5 text-2xl leading-relaxed text-muted-foreground">
           {paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}

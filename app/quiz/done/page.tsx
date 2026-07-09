@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowRight, Check, PartyPopper } from "lucide-react"
 
@@ -9,11 +10,11 @@ import { StudyShell } from "@/components/study/study-shell"
 import { StudyFooter } from "@/components/study/study-footer"
 
 /**
- * Congratulation screen shown once the quiz has been fully answered. Pressing
- * the button stamps the onboarding-end timestamp (see
- * StudyProvider.markOnboardingEnded) and hands off to the next step — the
- * "Willkommen im Fahrzeug" drive lead-in when a drive follows, or the final
- * screen in the onboarding-only condition.
+ * Congratulation screen shown once the quiz has been fully answered. Showing
+ * the screen stamps the onboarding-end timestamp (see
+ * StudyProvider.markOnboardingEnded); pressing the button hands off to the next
+ * step — the "Willkommen im Fahrzeug" drive lead-in when a drive follows, or the
+ * final screen in the onboarding-only condition.
  */
 export default function QuizDonePage() {
   const router = useRouter()
@@ -25,8 +26,13 @@ export default function QuizDonePage() {
     ? "Sie haben nun alle Fragen richtig beantwortet! Testen Sie nun das teilautomatisierte Fahren für mehr Sicherheit und Komfort. Viel Spaß!"
     : "Sie haben alle Fragen richtig beantwortet."
 
-  function handleContinue() {
+  // The onboarding is complete the moment this screen appears, so stamp the
+  // end time on mount rather than waiting for the continue button.
+  useEffect(() => {
     markOnboardingEnded()
+  }, [markOnboardingEnded])
+
+  function handleContinue() {
     if (next) router.push(next.path)
   }
 
@@ -49,7 +55,7 @@ export default function QuizDonePage() {
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Herzlichen Glückwunsch!
           </h1>
-          <p className="text-xl leading-relaxed text-muted-foreground">
+          <p className="text-2xl leading-relaxed text-muted-foreground">
             {paragraph}
           </p>
         </div>

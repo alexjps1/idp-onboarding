@@ -91,6 +91,14 @@ const INITIAL: VoiceTutorState = {
 // never user-visible.
 const PREWARM_RETRY_DELAYS_MS = [2000, 5000, 15000]
 
+// How long end_session waits for the driver's closing utterance to be
+// transcribed before tearing down anyway. The transcription of the user's
+// final turn is produced asynchronously and usually lands just *after* the
+// model's end_session call, so teardown has to hold briefly or that last
+// message is lost. A safety-net timeout only — teardown happens the instant
+// the transcription arrives (or fails), so this bound is rarely reached.
+const END_TRANSCRIPTION_GRACE_MS = 2000
+
 // Server events arriving on the data channel. Only the fields we read.
 type RealtimeEvent = {
   type: string
@@ -173,10 +181,22 @@ export function useVoiceTutor(
     userTurnAudioRef.current = new Audio(withBasePath("/audio/user_turn.mp3"))
     tutorTurnAudioRef.current = new Audio(withBasePath("/audio/tutor_turn.mp3"))
   }, [])
-  // Set when the tutor calls end_session — the session is torn down
-  // immediately (see the tool-call handler below); the model is instructed
-  // to say nothing beforehand, so there's no goodbye audio to wait out.
+  // Set when the tutor calls end_session — teardown is deferred just long
+  // enough to record the driver's closing utterance (see the tool-call
+  // handler below); the model is instructed to say nothing beforehand, so
+  // there's no goodbye audio to wait out.
   const endRequestedRef = React.useRef(false)
+  // True while the driver's current utterance is still awaiting its
+  // transcription — set when speech starts, cleared once the transcript
+  // arrives (or fails). Lets end_session tell "a final message is still
+  // coming" apart from "nothing left to record" so it only waits when there's
+  // something to wait for.
+  const pendingUserTranscriptRef = React.useRef(false)
+  // Safety-net timer for the end_session grace window (see the tool-call
+  // handler); finishes the end if the closing transcription never arrives.
+  const endGraceTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
   // "warm" while pre-warming/pre-warmed, "live" once a real conversation has
   // started — lets start() tell a still-connecting pre-warm apart from an
   // already-active conversation.
@@ -192,7 +212,12 @@ export function useVoiceTutor(
       clearTimeout(retryTimerRef.current)
       retryTimerRef.current = null
     }
+    if (endGraceTimerRef.current) {
+      clearTimeout(endGraceTimerRef.current)
+      endGraceTimerRef.current = null
+    }
     endRequestedRef.current = false
+    pendingUserTranscriptRef.current = false
     connectModeRef.current = null
     dcRef.current?.close()
     dcRef.current = null
@@ -241,10 +266,13 @@ export function useVoiceTutor(
       if (!pcRef.current) return // session already torn down
       switch (event.type) {
         case "input_audio_buffer.speech_started":
-          // New turn: clear the previous exchange from the display.
+          // New turn: clear the previous exchange from the display. A
+          // transcript for this utterance is now on its way.
+          pendingUserTranscriptRef.current = true
           patch({ status: "speaking", transcript: "", answer: "" })
           break
         case "conversation.item.input_audio_transcription.completed":
+          pendingUserTranscriptRef.current = false
           patch({ transcript: event.transcript ?? "" })
           if (event.transcript) {
             onMessageRef.current?.({
@@ -253,6 +281,15 @@ export function useVoiceTutor(
               at: new Date().toISOString(),
             })
           }
+          // If end_session already fired, teardown was held back for exactly
+          // this transcript — now that it's recorded, finish the end.
+          if (endRequestedRef.current) finishEnd()
+          break
+        case "conversation.item.input_audio_transcription.failed":
+          // No transcript is coming for this turn; stop end_session waiting on
+          // one and let it tear down now instead of at the grace timeout.
+          pendingUserTranscriptRef.current = false
+          if (endRequestedRef.current) finishEnd()
           break
         case "response.created":
           patch({ status: "responding" })
@@ -296,9 +333,14 @@ export function useVoiceTutor(
           const { name, arguments: argsStr, call_id } = event
           if (name === "end_session") {
             // The driver asked to end the conversation. Per
-            // REALTIME_INSTRUCTIONS the model says nothing and calls this
-            // immediately, so close right away instead of waiting for a
-            // goodbye that shouldn't exist — no audio to wait out.
+            // REALTIME_INSTRUCTIONS the model says nothing, so there's no
+            // goodbye audio to wait out. But the driver's *closing* utterance
+            // — the one that triggered this — is still being transcribed
+            // asynchronously and usually arrives just after this event; tear
+            // down now and that last message is lost (handleEvent bails once
+            // pcRef is null). So hold teardown until the transcript lands (the
+            // completed/failed handlers above finish the end), bounded by a
+            // safety-net timeout in case it never does.
             endRequestedRef.current = true
             dcRef.current?.send(
               JSON.stringify({
@@ -306,7 +348,14 @@ export function useVoiceTutor(
                 item: { type: "function_call_output", call_id, output: "ok" },
               })
             )
-            finishEnd()
+            if (pendingUserTranscriptRef.current) {
+              endGraceTimerRef.current = setTimeout(() => {
+                endGraceTimerRef.current = null
+                finishEnd()
+              }, END_TRANSCRIPTION_GRACE_MS)
+            } else {
+              finishEnd()
+            }
             break
           }
           if (name === "get_adas_state") {
