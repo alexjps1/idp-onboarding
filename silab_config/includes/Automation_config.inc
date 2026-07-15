@@ -26,7 +26,7 @@ DPUAutomation_Framework_LfE ~Automation_Framework_LfE
 	# Hedgehogs (available) können dynamisch zur Laufzeit die Verfügbarkeit regeln. Soll dies genutzt werden
 	# muss der folgende Konfigwert auf 0 stehen. Soll in der gesamten Strecke dasselbe verfügbar sein kann der Wert auf 1 gestellt
 	# werden und dann wird der nachfolgende Konfigwert durchgehend verwendet.
-	cfg_hh_available_ignore = 1; # 0: HH bestimmen Verfügbarkeit (HH müssen in Strecke sein sonst ist nichts verfügbar), 1: nachfolgender Wert bestimmt Verfügbarkeit
+	cfg_hh_available_ignore = 0; # 0: HH bestimmen Verfügbarkeit (HH müssen in Strecke sein sonst ist nichts verfügbar), 1: nachfolgender Wert bestimmt Verfügbarkeit
 	cfg_available = 3; # Für die gesamte Strecke: 0:keine Automation, 1: ACC, 2: LKS, 3: ACC+LKS
 
 	## Ein/Ausschaltlogik konfigurieren
@@ -116,7 +116,7 @@ DPUInterface Automation_OperatorInterface
 		# Über einen Rechtsklick im Silabbaum auf den Werten können Sie im Kontextmenü einen Schalter oder ein Eingabefeld öffnen
 		# An Aus
 		ActivateLong,					# Funktioniert wie ein Button jede Flanke von 0 auf 1 in diesem Wert switched den Zustand
-		# ActivateLatandLong,			# Deactivated: the SilabServer JPU drives lat+long activation via sim_long_lat_io (see Server_config.inc). Leaving this active creates a second driver on the same framework input and the JPU's impulse never engages.
+		ActivateLatandLong,				# Funktioniert wie ein Button jede Flanke von 0 auf 1 in diesem Wert switched den Zustand
 		ActivateLat,					# Funktioniert wie ein Button jede Flanke von 0 auf 1 in diesem Wert switched den Zustand
 
 		# Parameter und Manöver
